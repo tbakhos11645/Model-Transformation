@@ -1,0 +1,48 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<jaamsim:SimulationModel
+    xmi:version="2.0"
+    xmlns:xmi="http://www.omg.org/XMI"
+    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xmlns:jaamsim="http://www.example.org/jaamsim">
+  <entities
+      xsi:type="jaamsim:SimEntity"/>
+  <entities
+      xsi:type="jaamsim:EntityGenerator"
+      nextComponent="//@entities.2"
+      interArrivalTime="5.0"
+      entitiesPerArrival="1"
+      maxNumber="10"
+      prototype="//@entities.0"/>
+  <entities
+      xsi:type="jaamsim:EntityConveyor"
+      nextComponent="//@entities.3"
+      travelTime="6.0"/>
+  <entities
+      xsi:type="jaamsim:Branch"
+      nextComponentList="//@entities.4 //@entities.5"
+      choice="this.NumberProcessed &lt;= 5 ? 1 : 2"/>
+  <entities
+      xsi:type="jaamsim:Server"
+      nextComponent="//@entities.6"
+      serviceTime="8.0"
+      waitQueue="//@components.0"/>
+  <entities
+      xsi:type="jaamsim:Server"
+      nextComponent="//@entities.7"
+      serviceTime="3.0"
+      waitQueue="//@components.1"/>
+  <entities
+      xsi:type="jaamsim:EntityConveyor"
+      nextComponent="//@entities.8"
+      travelTime="6.0"/>
+  <entities
+      xsi:type="jaamsim:EntityConveyor"
+      nextComponent="//@entities.8"
+      travelTime="3.0"/>
+  <entities
+      xsi:type="jaamsim:EntitySink"/>
+  <components
+      xsi:type="jaamsim:Queue"/>
+  <components
+      xsi:type="jaamsim:Queue"/>
+</jaamsim:SimulationModel>

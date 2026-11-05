@@ -1,0 +1,612 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<genmodel:GenModel xmi:version="2.0" xmlns:xmi="http://www.omg.org/XMI" xmlns:ecore="http://www.eclipse.org/emf/2002/Ecore"
+    xmlns:genmodel="http://www.eclipse.org/emf/2002/GenModel" modelDirectory="com.yourorg.models/src" modelPluginID="Models"
+    modelName="Jaamsim" rootExtendsClass="org.eclipse.emf.ecore.impl.MinimalEObjectImpl$Container"
+    importerID="org.eclipse.emf.importer.ecore" complianceLevel="21.0" copyrightFields="false"
+    operationReflection="true" importOrganizing="true">
+  <foreignModel>Jaamsim.ecore</foreignModel>
+  <genPackages prefix="Jaamsim" disposableProviderFactory="true" ecorePackage="Jaamsim.ecore#/">
+    <genEnums typeSafeEnumCompatible="false" ecoreEnum="Jaamsim.ecore#//UnitType">
+      <genEnumLiterals ecoreEnumLiteral="Jaamsim.ecore#//UnitType/TIME"/>
+      <genEnumLiterals ecoreEnumLiteral="Jaamsim.ecore#//UnitType/DISTANCE"/>
+      <genEnumLiterals ecoreEnumLiteral="Jaamsim.ecore#//UnitType/SPEED"/>
+      <genEnumLiterals ecoreEnumLiteral="Jaamsim.ecore#//UnitType/ACCELERATION"/>
+      <genEnumLiterals ecoreEnumLiteral="Jaamsim.ecore#//UnitType/MASS"/>
+      <genEnumLiterals ecoreEnumLiteral="Jaamsim.ecore#//UnitType/VOLUME"/>
+      <genEnumLiterals ecoreEnumLiteral="Jaamsim.ecore#//UnitType/OTHER"/>
+      <genEnumLiterals ecoreEnumLiteral="Jaamsim.ecore#//UnitType/AREA"/>
+      <genEnumLiterals ecoreEnumLiteral="Jaamsim.ecore#//UnitType/ANGLE"/>
+      <genEnumLiterals ecoreEnumLiteral="Jaamsim.ecore#//UnitType/ENERGY"/>
+      <genEnumLiterals ecoreEnumLiteral="Jaamsim.ecore#//UnitType/POWER"/>
+      <genEnumLiterals ecoreEnumLiteral="Jaamsim.ecore#//UnitType/FORCE"/>
+      <genEnumLiterals ecoreEnumLiteral="Jaamsim.ecore#//UnitType/FLOW"/>
+      <genEnumLiterals ecoreEnumLiteral="Jaamsim.ecore#//UnitType/DIMENSIONLESS"/>
+    </genEnums>
+    <genEnums typeSafeEnumCompatible="false" ecoreEnum="Jaamsim.ecore#//SimEntityState">
+      <genEnumLiterals ecoreEnumLiteral="Jaamsim.ecore#//SimEntityState/IDLE"/>
+      <genEnumLiterals ecoreEnumLiteral="Jaamsim.ecore#//SimEntityState/WAITING"/>
+      <genEnumLiterals ecoreEnumLiteral="Jaamsim.ecore#//SimEntityState/PROCESSING"/>
+      <genEnumLiterals ecoreEnumLiteral="Jaamsim.ecore#//SimEntityState/FINISHED"/>
+      <genEnumLiterals ecoreEnumLiteral="Jaamsim.ecore#//SimEntityState/OTHER"/>
+    </genEnums>
+    <genEnums typeSafeEnumCompatible="false" ecoreEnum="Jaamsim.ecore#//DistributionKind">
+      <genEnumLiterals ecoreEnumLiteral="Jaamsim.ecore#//DistributionKind/UNIFORM"/>
+      <genEnumLiterals ecoreEnumLiteral="Jaamsim.ecore#//DistributionKind/TRIANGULAR"/>
+      <genEnumLiterals ecoreEnumLiteral="Jaamsim.ecore#//DistributionKind/NORMAL"/>
+      <genEnumLiterals ecoreEnumLiteral="Jaamsim.ecore#//DistributionKind/EXPONENTIAL"/>
+      <genEnumLiterals ecoreEnumLiteral="Jaamsim.ecore#//DistributionKind/ERLANG"/>
+      <genEnumLiterals ecoreEnumLiteral="Jaamsim.ecore#//DistributionKind/GAMMA"/>
+      <genEnumLiterals ecoreEnumLiteral="Jaamsim.ecore#//DistributionKind/BETA"/>
+      <genEnumLiterals ecoreEnumLiteral="Jaamsim.ecore#//DistributionKind/WEIBULL"/>
+      <genEnumLiterals ecoreEnumLiteral="Jaamsim.ecore#//DistributionKind/LOGNORMAL"/>
+      <genEnumLiterals ecoreEnumLiteral="Jaamsim.ecore#//DistributionKind/LOGLOGISTIC"/>
+      <genEnumLiterals ecoreEnumLiteral="Jaamsim.ecore#//DistributionKind/DISCRETE"/>
+      <genEnumLiterals ecoreEnumLiteral="Jaamsim.ecore#//DistributionKind/CONTINUOUS"/>
+      <genEnumLiterals ecoreEnumLiteral="Jaamsim.ecore#//DistributionKind/POISSON"/>
+      <genEnumLiterals ecoreEnumLiteral="Jaamsim.ecore#//DistributionKind/BINOMIAL"/>
+      <genEnumLiterals ecoreEnumLiteral="Jaamsim.ecore#//DistributionKind/NEGATIVE_BINOMIAL"/>
+      <genEnumLiterals ecoreEnumLiteral="Jaamsim.ecore#//DistributionKind/GEOMETRIC"/>
+      <genEnumLiterals ecoreEnumLiteral="Jaamsim.ecore#//DistributionKind/STUDENT_T"/>
+      <genEnumLiterals ecoreEnumLiteral="Jaamsim.ecore#//DistributionKind/CHI_SQUARED"/>
+      <genEnumLiterals ecoreEnumLiteral="Jaamsim.ecore#//DistributionKind/F_DISTRIBUTION"/>
+      <genEnumLiterals ecoreEnumLiteral="Jaamsim.ecore#//DistributionKind/PEARSON3"/>
+      <genEnumLiterals ecoreEnumLiteral="Jaamsim.ecore#//DistributionKind/GUMBEL"/>
+      <genEnumLiterals ecoreEnumLiteral="Jaamsim.ecore#//DistributionKind/BERNOULLI"/>
+      <genEnumLiterals ecoreEnumLiteral="Jaamsim.ecore#//DistributionKind/CHOICE"/>
+    </genEnums>
+    <genClasses ecoreClass="Jaamsim.ecore#//Point3D">
+      <genFeatures createChild="false" ecoreFeature="ecore:EAttribute Jaamsim.ecore#//Point3D/x"/>
+      <genFeatures createChild="false" ecoreFeature="ecore:EAttribute Jaamsim.ecore#//Point3D/y"/>
+      <genFeatures createChild="false" ecoreFeature="ecore:EAttribute Jaamsim.ecore#//Point3D/z"/>
+    </genClasses>
+    <genClasses ecoreClass="Jaamsim.ecore#//SimulationModel">
+      <genFeatures createChild="false" ecoreFeature="ecore:EAttribute Jaamsim.ecore#//SimulationModel/name"/>
+      <genFeatures createChild="false" ecoreFeature="ecore:EAttribute Jaamsim.ecore#//SimulationModel/description"/>
+      <genFeatures notify="true" createChild="true" ecoreFeature="ecore:EReference Jaamsim.ecore#//SimulationModel/simulation"/>
+      <genFeatures notify="true" createChild="true" ecoreFeature="ecore:EReference Jaamsim.ecore#//SimulationModel/units"/>
+      <genFeatures notify="true" createChild="true" ecoreFeature="ecore:EReference Jaamsim.ecore#//SimulationModel/entities"/>
+      <genFeatures notify="true" createChild="true" ecoreFeature="ecore:EReference Jaamsim.ecore#//SimulationModel/components"/>
+      <genFeatures notify="true" createChild="true" ecoreFeature="ecore:EReference Jaamsim.ecore#//SimulationModel/distributions"/>
+      <genFeatures notify="true" createChild="true" ecoreFeature="ecore:EReference Jaamsim.ecore#//SimulationModel/resources"/>
+      <genFeatures notify="true" createChild="true" ecoreFeature="ecore:EReference Jaamsim.ecore#//SimulationModel/views"/>
+      <genFeatures notify="true" createChild="true" ecoreFeature="ecore:EReference Jaamsim.ecore#//SimulationModel/subModels"/>
+    </genClasses>
+    <genClasses ecoreClass="Jaamsim.ecore#//Simulation">
+      <genFeatures createChild="false" ecoreFeature="ecore:EAttribute Jaamsim.ecore#//Simulation/runDuration"/>
+      <genFeatures createChild="false" ecoreFeature="ecore:EAttribute Jaamsim.ecore#//Simulation/initializationDuration"/>
+      <genFeatures createChild="false" ecoreFeature="ecore:EAttribute Jaamsim.ecore#//Simulation/exitAtStop"/>
+      <genFeatures createChild="false" ecoreFeature="ecore:EAttribute Jaamsim.ecore#//Simulation/globalSubstreamSeed"/>
+    </genClasses>
+    <genClasses ecoreClass="Jaamsim.ecore#//Unit">
+      <genFeatures createChild="false" ecoreFeature="ecore:EAttribute Jaamsim.ecore#//Unit/name"/>
+      <genFeatures createChild="false" ecoreFeature="ecore:EAttribute Jaamsim.ecore#//Unit/type"/>
+      <genFeatures createChild="false" ecoreFeature="ecore:EAttribute Jaamsim.ecore#//Unit/conversionFactorToSI"/>
+    </genClasses>
+    <genClasses ecoreClass="Jaamsim.ecore#//Expression">
+      <genFeatures createChild="false" ecoreFeature="ecore:EAttribute Jaamsim.ecore#//Expression/body"/>
+    </genClasses>
+    <genClasses ecoreClass="Jaamsim.ecore#//Attribute">
+      <genFeatures createChild="false" ecoreFeature="ecore:EAttribute Jaamsim.ecore#//Attribute/name"/>
+      <genFeatures notify="true" createChild="true" ecoreFeature="ecore:EReference Jaamsim.ecore#//Attribute/initValue"/>
+    </genClasses>
+    <genClasses ecoreClass="Jaamsim.ecore#//CustomOutput">
+      <genFeatures createChild="false" ecoreFeature="ecore:EAttribute Jaamsim.ecore#//CustomOutput/name"/>
+      <genFeatures createChild="false" ecoreFeature="ecore:EAttribute Jaamsim.ecore#//CustomOutput/unit"/>
+      <genFeatures notify="true" createChild="true" ecoreFeature="ecore:EReference Jaamsim.ecore#//CustomOutput/exp"/>
+    </genClasses>
+    <genClasses ecoreClass="Jaamsim.ecore#//Entity">
+      <genFeatures createChild="false" ecoreFeature="ecore:EAttribute Jaamsim.ecore#//Entity/name"/>
+      <genFeatures createChild="false" ecoreFeature="ecore:EAttribute Jaamsim.ecore#//Entity/description"/>
+      <genFeatures createChild="false" ecoreFeature="ecore:EAttribute Jaamsim.ecore#//Entity/movable"/>
+      <genFeatures notify="true" createChild="true" ecoreFeature="ecore:EReference Jaamsim.ecore#//Entity/position"/>
+      <genFeatures notify="true" createChild="true" ecoreFeature="ecore:EReference Jaamsim.ecore#//Entity/size"/>
+      <genFeatures notify="true" createChild="true" ecoreFeature="ecore:EReference Jaamsim.ecore#//Entity/orientation"/>
+      <genFeatures notify="true" createChild="true" ecoreFeature="ecore:EReference Jaamsim.ecore#//Entity/attributes"/>
+      <genFeatures notify="true" createChild="true" ecoreFeature="ecore:EReference Jaamsim.ecore#//Entity/customOutputs"/>
+      <genFeatures notify="false" createChild="false" ecoreFeature="ecore:EReference Jaamsim.ecore#//Entity/region"/>
+      <genFeatures notify="false" createChild="false" ecoreFeature="ecore:EReference Jaamsim.ecore#//Entity/displayModel"/>
+    </genClasses>
+    <genClasses ecoreClass="Jaamsim.ecore#//DisplayEntity">
+    </genClasses>
+    <genClasses ecoreClass="Jaamsim.ecore#//Component">
+      <genFeatures notify="false" createChild="false" ecoreFeature="ecore:EReference Jaamsim.ecore#//Component/incoming"/>
+      <genFeatures notify="false" createChild="false" ecoreFeature="ecore:EReference Jaamsim.ecore#//Component/outgoing"/>
+    </genClasses>
+    <genClasses ecoreClass="Jaamsim.ecore#//LinkedComponent">
+      <genFeatures notify="false" createChild="false" ecoreFeature="ecore:EReference Jaamsim.ecore#//LinkedComponent/nextComponent"/>
+    </genClasses>
+    <genClasses ecoreClass="Jaamsim.ecore#//SimEntity">
+      <genFeatures createChild="false" ecoreFeature="ecore:EAttribute Jaamsim.ecore#//SimEntity/initialState"/>
+      <genFeatures createChild="false" ecoreFeature="ecore:EAttribute Jaamsim.ecore#//SimEntity/defaultStates"/>
+    </genClasses>
+    <genClasses ecoreClass="Jaamsim.ecore#//ProcessComponent">
+    </genClasses>
+    <genClasses ecoreClass="Jaamsim.ecore#//EntityGenerator">
+      <genFeatures createChild="false" ecoreFeature="ecore:EAttribute Jaamsim.ecore#//EntityGenerator/firstArrivalTime"/>
+      <genFeatures createChild="false" ecoreFeature="ecore:EAttribute Jaamsim.ecore#//EntityGenerator/interArrivalTime"/>
+      <genFeatures createChild="false" ecoreFeature="ecore:EAttribute Jaamsim.ecore#//EntityGenerator/entitiesPerArrival"/>
+      <genFeatures createChild="false" ecoreFeature="ecore:EAttribute Jaamsim.ecore#//EntityGenerator/maxNumber"/>
+      <genFeatures notify="false" createChild="false" ecoreFeature="ecore:EReference Jaamsim.ecore#//EntityGenerator/prototype"/>
+    </genClasses>
+    <genClasses ecoreClass="Jaamsim.ecore#//Queue">
+      <genFeatures createChild="false" ecoreFeature="ecore:EAttribute Jaamsim.ecore#//Queue/capacity"/>
+      <genFeatures createChild="false" ecoreFeature="ecore:EAttribute Jaamsim.ecore#//Queue/priority"/>
+      <genFeatures createChild="false" ecoreFeature="ecore:EAttribute Jaamsim.ecore#//Queue/match"/>
+      <genFeatures createChild="false" ecoreFeature="ecore:EAttribute Jaamsim.ecore#//Queue/fifo"/>
+      <genFeatures createChild="false" ecoreFeature="ecore:EAttribute Jaamsim.ecore#//Queue/renegeTime"/>
+      <genFeatures createChild="false" ecoreFeature="ecore:EAttribute Jaamsim.ecore#//Queue/renegeCondition"/>
+      <genFeatures createChild="false" ecoreFeature="ecore:EAttribute Jaamsim.ecore#//Queue/maxValidLength"/>
+      <genFeatures notify="false" createChild="false" ecoreFeature="ecore:EReference Jaamsim.ecore#//Queue/renegeDestination"/>
+    </genClasses>
+    <genClasses ecoreClass="Jaamsim.ecore#//EntityConveyor">
+      <genFeatures createChild="false" ecoreFeature="ecore:EAttribute Jaamsim.ecore#//EntityConveyor/travelTime"/>
+    </genClasses>
+    <genClasses ecoreClass="Jaamsim.ecore#//Server">
+      <genFeatures createChild="false" ecoreFeature="ecore:EAttribute Jaamsim.ecore#//Server/serviceTime"/>
+      <genFeatures notify="false" createChild="false" ecoreFeature="ecore:EReference Jaamsim.ecore#//Server/waitQueue"/>
+    </genClasses>
+    <genClasses ecoreClass="Jaamsim.ecore#//EntitySink">
+    </genClasses>
+    <genClasses ecoreClass="Jaamsim.ecore#//Branch">
+      <genFeatures createChild="false" ecoreFeature="ecore:EAttribute Jaamsim.ecore#//Branch/choice"/>
+      <genFeatures notify="false" createChild="false" ecoreFeature="ecore:EReference Jaamsim.ecore#//Branch/nextComponentList"/>
+    </genClasses>
+    <genClasses ecoreClass="Jaamsim.ecore#//BranchCondition">
+      <genFeatures notify="true" createChild="true" ecoreFeature="ecore:EReference Jaamsim.ecore#//BranchCondition/condition"/>
+      <genFeatures notify="false" createChild="false" ecoreFeature="ecore:EReference Jaamsim.ecore#//BranchCondition/target"/>
+    </genClasses>
+    <genClasses ecoreClass="Jaamsim.ecore#//Resource">
+      <genFeatures createChild="false" ecoreFeature="ecore:EAttribute Jaamsim.ecore#//Resource/capacity"/>
+      <genFeatures notify="true" createChild="true" ecoreFeature="ecore:EReference Jaamsim.ecore#//Resource/units"/>
+    </genClasses>
+    <genClasses ecoreClass="Jaamsim.ecore#//ResourceUnit">
+      <genFeatures createChild="false" ecoreFeature="ecore:EAttribute Jaamsim.ecore#//ResourceUnit/available"/>
+      <genFeatures notify="false" createChild="false" ecoreFeature="ecore:EReference Jaamsim.ecore#//ResourceUnit/assignedTo"/>
+    </genClasses>
+    <genClasses ecoreClass="Jaamsim.ecore#//ResourcePool">
+      <genFeatures notify="false" createChild="false" ecoreFeature="ecore:EReference Jaamsim.ecore#//ResourcePool/resources"/>
+    </genClasses>
+    <genClasses ecoreClass="Jaamsim.ecore#//Seize">
+      <genFeatures notify="false" createChild="false" ecoreFeature="ecore:EReference Jaamsim.ecore#//Seize/requiredUnits"/>
+    </genClasses>
+    <genClasses ecoreClass="Jaamsim.ecore#//Release">
+      <genFeatures notify="false" createChild="false" ecoreFeature="ecore:EReference Jaamsim.ecore#//Release/releasedUnits"/>
+    </genClasses>
+    <genClasses ecoreClass="Jaamsim.ecore#//Distribution">
+      <genFeatures createChild="false" ecoreFeature="ecore:EAttribute Jaamsim.ecore#//Distribution/kind"/>
+      <genFeatures notify="true" createChild="true" ecoreFeature="ecore:EReference Jaamsim.ecore#//Distribution/parameters"/>
+    </genClasses>
+    <genClasses ecoreClass="Jaamsim.ecore#//DistributionParameter">
+      <genFeatures createChild="false" ecoreFeature="ecore:EAttribute Jaamsim.ecore#//DistributionParameter/name"/>
+      <genFeatures createChild="false" ecoreFeature="ecore:EAttribute Jaamsim.ecore#//DistributionParameter/value"/>
+      <genFeatures createChild="false" ecoreFeature="ecore:EAttribute Jaamsim.ecore#//DistributionParameter/unit"/>
+    </genClasses>
+    <genClasses ecoreClass="Jaamsim.ecore#//Region">
+    </genClasses>
+    <genClasses ecoreClass="Jaamsim.ecore#//DisplayModel">
+    </genClasses>
+    <genClasses ecoreClass="Jaamsim.ecore#//View">
+      <genFeatures notify="true" createChild="true" ecoreFeature="ecore:EReference Jaamsim.ecore#//View/cameraPosition"/>
+      <genFeatures notify="true" createChild="true" ecoreFeature="ecore:EReference Jaamsim.ecore#//View/cameraTarget"/>
+    </genClasses>
+    <genClasses ecoreClass="Jaamsim.ecore#//SubModel">
+      <genFeatures notify="true" createChild="true" ecoreFeature="ecore:EReference Jaamsim.ecore#//SubModel/components"/>
+    </genClasses>
+    <genClasses ecoreClass="Jaamsim.ecore#//SubModelStart">
+    </genClasses>
+    <genClasses ecoreClass="Jaamsim.ecore#//SubModelEnd">
+    </genClasses>
+    <genClasses ecoreClass="Jaamsim.ecore#//AbstractShape">
+      <genFeatures createChild="false" ecoreFeature="ecore:EAttribute Jaamsim.ecore#//AbstractShape/lineColour"/>
+      <genFeatures createChild="false" ecoreFeature="ecore:EAttribute Jaamsim.ecore#//AbstractShape/lineWidth"/>
+      <genFeatures createChild="false" ecoreFeature="ecore:EAttribute Jaamsim.ecore#//AbstractShape/fillColour"/>
+      <genFeatures createChild="false" ecoreFeature="ecore:EAttribute Jaamsim.ecore#//AbstractShape/filled"/>
+      <genFeatures createChild="false" ecoreFeature="ecore:EAttribute Jaamsim.ecore#//AbstractShape/lineStyle"/>
+    </genClasses>
+    <genClasses ecoreClass="Jaamsim.ecore#//Shape">
+      <genFeatures createChild="false" ecoreFeature="ecore:EAttribute Jaamsim.ecore#//Shape/shapeType"/>
+    </genClasses>
+    <genClasses ecoreClass="Jaamsim.ecore#//Polyline">
+      <genFeatures createChild="false" ecoreFeature="ecore:EAttribute Jaamsim.ecore#//Polyline/points"/>
+      <genFeatures createChild="false" ecoreFeature="ecore:EAttribute Jaamsim.ecore#//Polyline/closed"/>
+    </genClasses>
+    <genClasses ecoreClass="Jaamsim.ecore#//Arrow">
+      <genFeatures createChild="false" ecoreFeature="ecore:EAttribute Jaamsim.ecore#//Arrow/points"/>
+      <genFeatures createChild="false" ecoreFeature="ecore:EAttribute Jaamsim.ecore#//Arrow/lineColour"/>
+      <genFeatures createChild="false" ecoreFeature="ecore:EAttribute Jaamsim.ecore#//Arrow/lineWidth"/>
+    </genClasses>
+    <genClasses ecoreClass="Jaamsim.ecore#//Image">
+      <genFeatures createChild="false" ecoreFeature="ecore:EAttribute Jaamsim.ecore#//Image/imageFile"/>
+      <genFeatures createChild="false" ecoreFeature="ecore:EAttribute Jaamsim.ecore#//Image/transparent"/>
+    </genClasses>
+    <genClasses ecoreClass="Jaamsim.ecore#//TextBasics">
+      <genFeatures createChild="false" ecoreFeature="ecore:EAttribute Jaamsim.ecore#//TextBasics/text"/>
+      <genFeatures createChild="false" ecoreFeature="ecore:EAttribute Jaamsim.ecore#//TextBasics/textColour"/>
+      <genFeatures createChild="false" ecoreFeature="ecore:EAttribute Jaamsim.ecore#//TextBasics/fontName"/>
+      <genFeatures createChild="false" ecoreFeature="ecore:EAttribute Jaamsim.ecore#//TextBasics/textHeight"/>
+    </genClasses>
+    <genClasses ecoreClass="Jaamsim.ecore#//Text">
+    </genClasses>
+    <genClasses ecoreClass="Jaamsim.ecore#//EntityLabel">
+      <genFeatures createChild="false" ecoreFeature="ecore:EAttribute Jaamsim.ecore#//EntityLabel/entity"/>
+      <genFeatures createChild="false" ecoreFeature="ecore:EAttribute Jaamsim.ecore#//EntityLabel/format"/>
+    </genClasses>
+    <genClasses ecoreClass="Jaamsim.ecore#//OverlayEntity">
+    </genClasses>
+    <genClasses ecoreClass="Jaamsim.ecore#//OverlayText">
+      <genFeatures createChild="false" ecoreFeature="ecore:EAttribute Jaamsim.ecore#//OverlayText/text"/>
+      <genFeatures createChild="false" ecoreFeature="ecore:EAttribute Jaamsim.ecore#//OverlayText/textColour"/>
+      <genFeatures createChild="false" ecoreFeature="ecore:EAttribute Jaamsim.ecore#//OverlayText/textHeight"/>
+    </genClasses>
+    <genClasses ecoreClass="Jaamsim.ecore#//OverlayClock">
+      <genFeatures createChild="false" ecoreFeature="ecore:EAttribute Jaamsim.ecore#//OverlayClock/format"/>
+    </genClasses>
+    <genClasses ecoreClass="Jaamsim.ecore#//OverlayImage">
+      <genFeatures createChild="false" ecoreFeature="ecore:EAttribute Jaamsim.ecore#//OverlayImage/imageFile"/>
+    </genClasses>
+    <genClasses ecoreClass="Jaamsim.ecore#//BillboardText">
+    </genClasses>
+    <genClasses ecoreClass="Jaamsim.ecore#//MimicEntity">
+      <genFeatures notify="false" createChild="false" ecoreFeature="ecore:EReference Jaamsim.ecore#//MimicEntity/mimicEntityRef"/>
+    </genClasses>
+    <genClasses ecoreClass="Jaamsim.ecore#//AbstractGraph">
+      <genFeatures createChild="false" ecoreFeature="ecore:EAttribute Jaamsim.ecore#//AbstractGraph/xLabel"/>
+      <genFeatures createChild="false" ecoreFeature="ecore:EAttribute Jaamsim.ecore#//AbstractGraph/yLabel"/>
+      <genFeatures createChild="false" ecoreFeature="ecore:EAttribute Jaamsim.ecore#//AbstractGraph/graphTitle"/>
+      <genFeatures createChild="false" ecoreFeature="ecore:EAttribute Jaamsim.ecore#//AbstractGraph/points"/>
+    </genClasses>
+    <genClasses ecoreClass="Jaamsim.ecore#//Graph">
+    </genClasses>
+    <genClasses ecoreClass="Jaamsim.ecore#//XYGraph">
+    </genClasses>
+    <genClasses ecoreClass="Jaamsim.ecore#//BarGauge">
+      <genFeatures createChild="false" ecoreFeature="ecore:EAttribute Jaamsim.ecore#//BarGauge/expression"/>
+      <genFeatures createChild="false" ecoreFeature="ecore:EAttribute Jaamsim.ecore#//BarGauge/minValue"/>
+      <genFeatures createChild="false" ecoreFeature="ecore:EAttribute Jaamsim.ecore#//BarGauge/maxValue"/>
+    </genClasses>
+    <genClasses ecoreClass="Jaamsim.ecore#//BooleanIndicator">
+      <genFeatures createChild="false" ecoreFeature="ecore:EAttribute Jaamsim.ecore#//BooleanIndicator/state"/>
+      <genFeatures createChild="false" ecoreFeature="ecore:EAttribute Jaamsim.ecore#//BooleanIndicator/trueColour"/>
+      <genFeatures createChild="false" ecoreFeature="ecore:EAttribute Jaamsim.ecore#//BooleanIndicator/falseColour"/>
+    </genClasses>
+    <genClasses ecoreClass="Jaamsim.ecore#//VideoRecorder">
+      <genFeatures createChild="false" ecoreFeature="ecore:EAttribute Jaamsim.ecore#//VideoRecorder/fileName"/>
+      <genFeatures createChild="false" ecoreFeature="ecore:EAttribute Jaamsim.ecore#//VideoRecorder/startTime"/>
+      <genFeatures createChild="false" ecoreFeature="ecore:EAttribute Jaamsim.ecore#//VideoRecorder/endTime"/>
+    </genClasses>
+    <genClasses ecoreClass="Jaamsim.ecore#//InputBox">
+      <genFeatures createChild="false" ecoreFeature="ecore:EAttribute Jaamsim.ecore#//InputBox/inputValue"/>
+    </genClasses>
+    <genClasses ecoreClass="Jaamsim.ecore#//EntityLauncher">
+      <genFeatures createChild="false" ecoreFeature="ecore:EAttribute Jaamsim.ecore#//EntityLauncher/firstArrivalTime"/>
+      <genFeatures createChild="false" ecoreFeature="ecore:EAttribute Jaamsim.ecore#//EntityLauncher/interArrivalTime"/>
+      <genFeatures createChild="false" ecoreFeature="ecore:EAttribute Jaamsim.ecore#//EntityLauncher/maxNumber"/>
+    </genClasses>
+    <genClasses ecoreClass="Jaamsim.ecore#//EntityDelay">
+      <genFeatures createChild="false" ecoreFeature="ecore:EAttribute Jaamsim.ecore#//EntityDelay/duration"/>
+    </genClasses>
+    <genClasses ecoreClass="Jaamsim.ecore#//EntityProcessor">
+      <genFeatures createChild="false" ecoreFeature="ecore:EAttribute Jaamsim.ecore#//EntityProcessor/duration"/>
+      <genFeatures createChild="false" ecoreFeature="ecore:EAttribute Jaamsim.ecore#//EntityProcessor/numberEntities"/>
+    </genClasses>
+    <genClasses ecoreClass="Jaamsim.ecore#//Assign">
+      <genFeatures createChild="false" ecoreFeature="ecore:EAttribute Jaamsim.ecore#//Assign/attribute"/>
+      <genFeatures createChild="false" ecoreFeature="ecore:EAttribute Jaamsim.ecore#//Assign/value"/>
+    </genClasses>
+    <genClasses ecoreClass="Jaamsim.ecore#//Duplicate">
+      <genFeatures createChild="false" ecoreFeature="ecore:EAttribute Jaamsim.ecore#//Duplicate/number"/>
+    </genClasses>
+    <genClasses ecoreClass="Jaamsim.ecore#//Combine">
+      <genFeatures createChild="false" ecoreFeature="ecore:EAttribute Jaamsim.ecore#//Combine/numberToCombine"/>
+      <genFeatures createChild="false" ecoreFeature="ecore:EAttribute Jaamsim.ecore#//Combine/duration"/>
+    </genClasses>
+    <genClasses ecoreClass="Jaamsim.ecore#//Assemble">
+      <genFeatures createChild="false" ecoreFeature="ecore:EAttribute Jaamsim.ecore#//Assemble/numberToAssemble"/>
+      <genFeatures createChild="false" ecoreFeature="ecore:EAttribute Jaamsim.ecore#//Assemble/duration"/>
+    </genClasses>
+    <genClasses ecoreClass="Jaamsim.ecore#//Pack">
+      <genFeatures createChild="false" ecoreFeature="ecore:EAttribute Jaamsim.ecore#//Pack/numberToPack"/>
+    </genClasses>
+    <genClasses ecoreClass="Jaamsim.ecore#//Unpack">
+      <genFeatures createChild="false" ecoreFeature="ecore:EAttribute Jaamsim.ecore#//Unpack/numberToUnpack"/>
+    </genClasses>
+    <genClasses ecoreClass="Jaamsim.ecore#//AddTo">
+      <genFeatures createChild="false" ecoreFeature="ecore:EAttribute Jaamsim.ecore#//AddTo/numberToAdd"/>
+    </genClasses>
+    <genClasses ecoreClass="Jaamsim.ecore#//RemoveFrom">
+      <genFeatures createChild="false" ecoreFeature="ecore:EAttribute Jaamsim.ecore#//RemoveFrom/numberToRemove"/>
+    </genClasses>
+    <genClasses ecoreClass="Jaamsim.ecore#//EntityContainer">
+      <genFeatures createChild="false" ecoreFeature="ecore:EAttribute Jaamsim.ecore#//EntityContainer/capacity"/>
+      <genFeatures createChild="false" ecoreFeature="ecore:EAttribute Jaamsim.ecore#//EntityContainer/numberOfEntities"/>
+    </genClasses>
+    <genClasses ecoreClass="Jaamsim.ecore#//EntityGate">
+      <genFeatures createChild="false" ecoreFeature="ecore:EAttribute Jaamsim.ecore#//EntityGate/open"/>
+      <genFeatures createChild="false" ecoreFeature="ecore:EAttribute Jaamsim.ecore#//EntityGate/condition"/>
+    </genClasses>
+    <genClasses ecoreClass="Jaamsim.ecore#//EntitySignal">
+      <genFeatures notify="false" createChild="false" ecoreFeature="ecore:EReference Jaamsim.ecore#//EntitySignal/signalRef"/>
+    </genClasses>
+    <genClasses ecoreClass="Jaamsim.ecore#//SetGraphics">
+      <genFeatures createChild="false" ecoreFeature="ecore:EAttribute Jaamsim.ecore#//SetGraphics/graphics"/>
+    </genClasses>
+    <genClasses ecoreClass="Jaamsim.ecore#//EntityLogger">
+      <genFeatures createChild="false" ecoreFeature="ecore:EAttribute Jaamsim.ecore#//EntityLogger/fileName"/>
+      <genFeatures createChild="false" ecoreFeature="ecore:EAttribute Jaamsim.ecore#//EntityLogger/format"/>
+      <genFeatures createChild="false" ecoreFeature="ecore:EAttribute Jaamsim.ecore#//EntityLogger/interval"/>
+    </genClasses>
+    <genClasses ecoreClass="Jaamsim.ecore#//Statistics">
+      <genFeatures createChild="false" ecoreFeature="ecore:EAttribute Jaamsim.ecore#//Statistics/attribute"/>
+      <genFeatures createChild="false" ecoreFeature="ecore:EAttribute Jaamsim.ecore#//Statistics/statistic"/>
+    </genClasses>
+    <genClasses ecoreClass="Jaamsim.ecore#//SimShape">
+      <genFeatures createChild="false" ecoreFeature="ecore:EAttribute Jaamsim.ecore#//SimShape/shapeType"/>
+      <genFeatures createChild="false" ecoreFeature="ecore:EAttribute Jaamsim.ecore#//SimShape/lineColour"/>
+      <genFeatures createChild="false" ecoreFeature="ecore:EAttribute Jaamsim.ecore#//SimShape/fillColour"/>
+    </genClasses>
+    <genClasses ecoreClass="Jaamsim.ecore#//AbstractResourceProvider">
+      <genFeatures createChild="false" ecoreFeature="ecore:EAttribute Jaamsim.ecore#//AbstractResourceProvider/capacity"/>
+      <genFeatures createChild="false" ecoreFeature="ecore:EAttribute Jaamsim.ecore#//AbstractResourceProvider/numberOfUnits"/>
+    </genClasses>
+    <genClasses ecoreClass="Jaamsim.ecore#//Group">
+      <genFeatures createChild="false" ecoreFeature="ecore:EAttribute Jaamsim.ecore#//Group/groupDescription"/>
+    </genClasses>
+    <genClasses ecoreClass="Jaamsim.ecore#//ScriptEntity">
+      <genFeatures createChild="false" ecoreFeature="ecore:EAttribute Jaamsim.ecore#//ScriptEntity/time"/>
+      <genFeatures createChild="false" ecoreFeature="ecore:EAttribute Jaamsim.ecore#//ScriptEntity/script"/>
+    </genClasses>
+    <genClasses ecoreClass="Jaamsim.ecore#//OutputMethod">
+      <genFeatures createChild="false" ecoreFeature="ecore:EAttribute Jaamsim.ecore#//OutputMethod/method"/>
+      <genFeatures createChild="false" ecoreFeature="ecore:EAttribute Jaamsim.ecore#//OutputMethod/arguments"/>
+    </genClasses>
+    <genClasses ecoreClass="Jaamsim.ecore#//Controller">
+      <genFeatures createChild="false" ecoreFeature="ecore:EAttribute Jaamsim.ecore#//Controller/interval"/>
+      <genFeatures createChild="false" ecoreFeature="ecore:EAttribute Jaamsim.ecore#//Controller/action"/>
+    </genClasses>
+    <genClasses ecoreClass="Jaamsim.ecore#//InputValue">
+      <genFeatures createChild="false" ecoreFeature="ecore:EAttribute Jaamsim.ecore#//InputValue/value"/>
+      <genFeatures createChild="false" ecoreFeature="ecore:EAttribute Jaamsim.ecore#//InputValue/unitType"/>
+    </genClasses>
+    <genClasses ecoreClass="Jaamsim.ecore#//ToggleButton">
+      <genFeatures createChild="false" ecoreFeature="ecore:EAttribute Jaamsim.ecore#//ToggleButton/state"/>
+      <genFeatures createChild="false" ecoreFeature="ecore:EAttribute Jaamsim.ecore#//ToggleButton/toggleAction"/>
+    </genClasses>
+    <genClasses ecoreClass="Jaamsim.ecore#//ExpressionEntity">
+      <genFeatures createChild="false" ecoreFeature="ecore:EAttribute Jaamsim.ecore#//ExpressionEntity/expression"/>
+      <genFeatures createChild="false" ecoreFeature="ecore:EAttribute Jaamsim.ecore#//ExpressionEntity/unitType"/>
+    </genClasses>
+    <genClasses ecoreClass="Jaamsim.ecore#//ExpressionStatistics">
+      <genFeatures createChild="false" ecoreFeature="ecore:EAttribute Jaamsim.ecore#//ExpressionStatistics/expression"/>
+      <genFeatures createChild="false" ecoreFeature="ecore:EAttribute Jaamsim.ecore#//ExpressionStatistics/statistic"/>
+    </genClasses>
+    <genClasses ecoreClass="Jaamsim.ecore#//ExpressionLogger">
+      <genFeatures createChild="false" ecoreFeature="ecore:EAttribute Jaamsim.ecore#//ExpressionLogger/expressions"/>
+      <genFeatures createChild="false" ecoreFeature="ecore:EAttribute Jaamsim.ecore#//ExpressionLogger/fileName"/>
+      <genFeatures createChild="false" ecoreFeature="ecore:EAttribute Jaamsim.ecore#//ExpressionLogger/interval"/>
+    </genClasses>
+    <genClasses ecoreClass="Jaamsim.ecore#//EntitlementSelector">
+      <genFeatures createChild="false" ecoreFeature="ecore:EAttribute Jaamsim.ecore#//EntitlementSelector/proportions"/>
+      <genFeatures createChild="false" ecoreFeature="ecore:EAttribute Jaamsim.ecore#//EntitlementSelector/index"/>
+    </genClasses>
+    <genClasses ecoreClass="Jaamsim.ecore#//EventSchedule">
+      <genFeatures createChild="false" ecoreFeature="ecore:EAttribute Jaamsim.ecore#//EventSchedule/timeList"/>
+      <genFeatures createChild="false" ecoreFeature="ecore:EAttribute Jaamsim.ecore#//EventSchedule/cycleTime"/>
+    </genClasses>
+    <genClasses ecoreClass="Jaamsim.ecore#//ValueSequence">
+      <genFeatures createChild="false" ecoreFeature="ecore:EAttribute Jaamsim.ecore#//ValueSequence/valueList"/>
+      <genFeatures createChild="false" ecoreFeature="ecore:EAttribute Jaamsim.ecore#//ValueSequence/repeat"/>
+    </genClasses>
+    <genClasses ecoreClass="Jaamsim.ecore#//DowntimeEntity">
+      <genFeatures createChild="false" ecoreFeature="ecore:EAttribute Jaamsim.ecore#//DowntimeEntity/firstDowntime"/>
+      <genFeatures createChild="false" ecoreFeature="ecore:EAttribute Jaamsim.ecore#//DowntimeEntity/interval"/>
+      <genFeatures createChild="false" ecoreFeature="ecore:EAttribute Jaamsim.ecore#//DowntimeEntity/duration"/>
+      <genFeatures createChild="false" ecoreFeature="ecore:EAttribute Jaamsim.ecore#//DowntimeEntity/concurrent"/>
+      <genFeatures createChild="false" ecoreFeature="ecore:EAttribute Jaamsim.ecore#//DowntimeEntity/maintenance"/>
+    </genClasses>
+    <genClasses ecoreClass="Jaamsim.ecore#//EntitySystem">
+      <genFeatures createChild="false" ecoreFeature="ecore:EAttribute Jaamsim.ecore#//EntitySystem/state"/>
+    </genClasses>
+    <genClasses ecoreClass="Jaamsim.ecore#//FileToArray">
+      <genFeatures createChild="false" ecoreFeature="ecore:EAttribute Jaamsim.ecore#//FileToArray/fileName"/>
+      <genFeatures createChild="false" ecoreFeature="ecore:EAttribute Jaamsim.ecore#//FileToArray/columnIndex"/>
+      <genFeatures createChild="false" ecoreFeature="ecore:EAttribute Jaamsim.ecore#//FileToArray/skipLines"/>
+    </genClasses>
+    <genClasses ecoreClass="Jaamsim.ecore#//FileToVector">
+    </genClasses>
+    <genClasses ecoreClass="Jaamsim.ecore#//FileToMatrix">
+    </genClasses>
+    <genClasses ecoreClass="Jaamsim.ecore#//FileToHashMap">
+    </genClasses>
+    <genClasses ecoreClass="Jaamsim.ecore#//AbstractExternalProgram">
+      <genFeatures createChild="false" ecoreFeature="ecore:EAttribute Jaamsim.ecore#//AbstractExternalProgram/program"/>
+      <genFeatures createChild="false" ecoreFeature="ecore:EAttribute Jaamsim.ecore#//AbstractExternalProgram/arguments"/>
+      <genFeatures createChild="false" ecoreFeature="ecore:EAttribute Jaamsim.ecore#//AbstractExternalProgram/workingDirectory"/>
+    </genClasses>
+    <genClasses ecoreClass="Jaamsim.ecore#//ExternalProgram">
+    </genClasses>
+    <genClasses ecoreClass="Jaamsim.ecore#//ExternalProgramServer">
+      <genFeatures createChild="false" ecoreFeature="ecore:EAttribute Jaamsim.ecore#//ExternalProgramServer/port"/>
+    </genClasses>
+    <genClasses ecoreClass="Jaamsim.ecore#//Threshold">
+      <genFeatures createChild="false" ecoreFeature="ecore:EAttribute Jaamsim.ecore#//Threshold/condition"/>
+    </genClasses>
+    <genClasses ecoreClass="Jaamsim.ecore#//ExpressionThreshold">
+      <genFeatures createChild="false" ecoreFeature="ecore:EAttribute Jaamsim.ecore#//ExpressionThreshold/expression"/>
+    </genClasses>
+    <genClasses ecoreClass="Jaamsim.ecore#//TimeSeriesThreshold">
+      <genFeatures notify="false" createChild="false" ecoreFeature="ecore:EReference Jaamsim.ecore#//TimeSeriesThreshold/timeSeriesRef"/>
+    </genClasses>
+    <genClasses ecoreClass="Jaamsim.ecore#//SignalThreshold">
+      <genFeatures notify="false" createChild="false" ecoreFeature="ecore:EReference Jaamsim.ecore#//SignalThreshold/signalRef"/>
+    </genClasses>
+    <genClasses ecoreClass="Jaamsim.ecore#//SampleConstant">
+      <genFeatures createChild="false" ecoreFeature="ecore:EAttribute Jaamsim.ecore#//SampleConstant/value"/>
+    </genClasses>
+    <genClasses ecoreClass="Jaamsim.ecore#//SampleExpression">
+      <genFeatures createChild="false" ecoreFeature="ecore:EAttribute Jaamsim.ecore#//SampleExpression/expression"/>
+    </genClasses>
+    <genClasses ecoreClass="Jaamsim.ecore#//TimeSeries">
+      <genFeatures createChild="false" ecoreFeature="ecore:EAttribute Jaamsim.ecore#//TimeSeries/timeList"/>
+      <genFeatures createChild="false" ecoreFeature="ecore:EAttribute Jaamsim.ecore#//TimeSeries/valueList"/>
+      <genFeatures createChild="false" ecoreFeature="ecore:EAttribute Jaamsim.ecore#//TimeSeries/cycleTime"/>
+      <genFeatures createChild="false" ecoreFeature="ecore:EAttribute Jaamsim.ecore#//TimeSeries/interpolation"/>
+    </genClasses>
+    <genClasses ecoreClass="Jaamsim.ecore#//CalculationEntity">
+      <genFeatures createChild="false" ecoreFeature="ecore:EAttribute Jaamsim.ecore#//CalculationEntity/unitType"/>
+    </genClasses>
+    <genClasses ecoreClass="Jaamsim.ecore#//DoubleCalculation">
+      <genFeatures createChild="false" ecoreFeature="ecore:EAttribute Jaamsim.ecore#//DoubleCalculation/input"/>
+    </genClasses>
+    <genClasses ecoreClass="Jaamsim.ecore#//Differentiator">
+    </genClasses>
+    <genClasses ecoreClass="Jaamsim.ecore#//Integrator">
+      <genFeatures createChild="false" ecoreFeature="ecore:EAttribute Jaamsim.ecore#//Integrator/initialValue"/>
+    </genClasses>
+    <genClasses ecoreClass="Jaamsim.ecore#//Lag">
+      <genFeatures createChild="false" ecoreFeature="ecore:EAttribute Jaamsim.ecore#//Lag/timeConstant"/>
+    </genClasses>
+    <genClasses ecoreClass="Jaamsim.ecore#//MovingAverage">
+      <genFeatures createChild="false" ecoreFeature="ecore:EAttribute Jaamsim.ecore#//MovingAverage/windowLength"/>
+    </genClasses>
+    <genClasses ecoreClass="Jaamsim.ecore#//PIDController">
+      <genFeatures createChild="false" ecoreFeature="ecore:EAttribute Jaamsim.ecore#//PIDController/setPoint"/>
+      <genFeatures createChild="false" ecoreFeature="ecore:EAttribute Jaamsim.ecore#//PIDController/proportionalGain"/>
+      <genFeatures createChild="false" ecoreFeature="ecore:EAttribute Jaamsim.ecore#//PIDController/integralGain"/>
+      <genFeatures createChild="false" ecoreFeature="ecore:EAttribute Jaamsim.ecore#//PIDController/derivativeGain"/>
+    </genClasses>
+    <genClasses ecoreClass="Jaamsim.ecore#//UnitDelay">
+      <genFeatures createChild="false" ecoreFeature="ecore:EAttribute Jaamsim.ecore#//UnitDelay/initialValue"/>
+    </genClasses>
+    <genClasses ecoreClass="Jaamsim.ecore#//Polynomial">
+      <genFeatures createChild="false" ecoreFeature="ecore:EAttribute Jaamsim.ecore#//Polynomial/coefficients"/>
+    </genClasses>
+    <genClasses ecoreClass="Jaamsim.ecore#//WeightedSum">
+      <genFeatures createChild="false" ecoreFeature="ecore:EAttribute Jaamsim.ecore#//WeightedSum/input"/>
+      <genFeatures createChild="false" ecoreFeature="ecore:EAttribute Jaamsim.ecore#//WeightedSum/weights"/>
+    </genClasses>
+    <genClasses ecoreClass="Jaamsim.ecore#//WaveGenerator">
+      <genFeatures createChild="false" ecoreFeature="ecore:EAttribute Jaamsim.ecore#//WaveGenerator/amplitude"/>
+      <genFeatures createChild="false" ecoreFeature="ecore:EAttribute Jaamsim.ecore#//WaveGenerator/frequency"/>
+      <genFeatures createChild="false" ecoreFeature="ecore:EAttribute Jaamsim.ecore#//WaveGenerator/phase"/>
+    </genClasses>
+    <genClasses ecoreClass="Jaamsim.ecore#//SineWave">
+    </genClasses>
+    <genClasses ecoreClass="Jaamsim.ecore#//SquareWave">
+    </genClasses>
+    <genClasses ecoreClass="Jaamsim.ecore#//UniformDistribution">
+      <genFeatures createChild="false" ecoreFeature="ecore:EAttribute Jaamsim.ecore#//UniformDistribution/minValue"/>
+      <genFeatures createChild="false" ecoreFeature="ecore:EAttribute Jaamsim.ecore#//UniformDistribution/maxValue"/>
+    </genClasses>
+    <genClasses ecoreClass="Jaamsim.ecore#//TriangularDistribution">
+      <genFeatures createChild="false" ecoreFeature="ecore:EAttribute Jaamsim.ecore#//TriangularDistribution/minValue"/>
+      <genFeatures createChild="false" ecoreFeature="ecore:EAttribute Jaamsim.ecore#//TriangularDistribution/mode"/>
+      <genFeatures createChild="false" ecoreFeature="ecore:EAttribute Jaamsim.ecore#//TriangularDistribution/maxValue"/>
+    </genClasses>
+    <genClasses ecoreClass="Jaamsim.ecore#//NormalDistribution">
+      <genFeatures createChild="false" ecoreFeature="ecore:EAttribute Jaamsim.ecore#//NormalDistribution/mean"/>
+      <genFeatures createChild="false" ecoreFeature="ecore:EAttribute Jaamsim.ecore#//NormalDistribution/standardDeviation"/>
+    </genClasses>
+    <genClasses ecoreClass="Jaamsim.ecore#//ExponentialDistribution">
+      <genFeatures createChild="false" ecoreFeature="ecore:EAttribute Jaamsim.ecore#//ExponentialDistribution/mean"/>
+    </genClasses>
+    <genClasses ecoreClass="Jaamsim.ecore#//ErlangDistribution">
+      <genFeatures createChild="false" ecoreFeature="ecore:EAttribute Jaamsim.ecore#//ErlangDistribution/mean"/>
+      <genFeatures createChild="false" ecoreFeature="ecore:EAttribute Jaamsim.ecore#//ErlangDistribution/shape"/>
+    </genClasses>
+    <genClasses ecoreClass="Jaamsim.ecore#//GammaDistribution">
+      <genFeatures createChild="false" ecoreFeature="ecore:EAttribute Jaamsim.ecore#//GammaDistribution/mean"/>
+      <genFeatures createChild="false" ecoreFeature="ecore:EAttribute Jaamsim.ecore#//GammaDistribution/shape"/>
+    </genClasses>
+    <genClasses ecoreClass="Jaamsim.ecore#//BetaDistribution">
+      <genFeatures createChild="false" ecoreFeature="ecore:EAttribute Jaamsim.ecore#//BetaDistribution/alpha"/>
+      <genFeatures createChild="false" ecoreFeature="ecore:EAttribute Jaamsim.ecore#//BetaDistribution/beta"/>
+    </genClasses>
+    <genClasses ecoreClass="Jaamsim.ecore#//WeibullDistribution">
+      <genFeatures createChild="false" ecoreFeature="ecore:EAttribute Jaamsim.ecore#//WeibullDistribution/shape"/>
+      <genFeatures createChild="false" ecoreFeature="ecore:EAttribute Jaamsim.ecore#//WeibullDistribution/scale"/>
+    </genClasses>
+    <genClasses ecoreClass="Jaamsim.ecore#//LogNormalDistribution">
+      <genFeatures createChild="false" ecoreFeature="ecore:EAttribute Jaamsim.ecore#//LogNormalDistribution/mean"/>
+      <genFeatures createChild="false" ecoreFeature="ecore:EAttribute Jaamsim.ecore#//LogNormalDistribution/standardDeviation"/>
+    </genClasses>
+    <genClasses ecoreClass="Jaamsim.ecore#//LogLogisticDistribution">
+      <genFeatures createChild="false" ecoreFeature="ecore:EAttribute Jaamsim.ecore#//LogLogisticDistribution/mean"/>
+      <genFeatures createChild="false" ecoreFeature="ecore:EAttribute Jaamsim.ecore#//LogLogisticDistribution/scale"/>
+    </genClasses>
+    <genClasses ecoreClass="Jaamsim.ecore#//DiscreteDistribution">
+      <genFeatures createChild="false" ecoreFeature="ecore:EAttribute Jaamsim.ecore#//DiscreteDistribution/valueList"/>
+      <genFeatures createChild="false" ecoreFeature="ecore:EAttribute Jaamsim.ecore#//DiscreteDistribution/probabilityList"/>
+    </genClasses>
+    <genClasses ecoreClass="Jaamsim.ecore#//ContinuousDistribution">
+      <genFeatures createChild="false" ecoreFeature="ecore:EAttribute Jaamsim.ecore#//ContinuousDistribution/valueList"/>
+      <genFeatures createChild="false" ecoreFeature="ecore:EAttribute Jaamsim.ecore#//ContinuousDistribution/cumulativeProbabilityList"/>
+    </genClasses>
+    <genClasses ecoreClass="Jaamsim.ecore#//PoissonDistribution">
+      <genFeatures createChild="false" ecoreFeature="ecore:EAttribute Jaamsim.ecore#//PoissonDistribution/mean"/>
+    </genClasses>
+    <genClasses ecoreClass="Jaamsim.ecore#//BinomialDistribution">
+      <genFeatures createChild="false" ecoreFeature="ecore:EAttribute Jaamsim.ecore#//BinomialDistribution/probability"/>
+      <genFeatures createChild="false" ecoreFeature="ecore:EAttribute Jaamsim.ecore#//BinomialDistribution/numberOfTrials"/>
+    </genClasses>
+    <genClasses ecoreClass="Jaamsim.ecore#//NegativeBinomialDistribution">
+      <genFeatures createChild="false" ecoreFeature="ecore:EAttribute Jaamsim.ecore#//NegativeBinomialDistribution/probability"/>
+      <genFeatures createChild="false" ecoreFeature="ecore:EAttribute Jaamsim.ecore#//NegativeBinomialDistribution/numberOfSuccesses"/>
+    </genClasses>
+    <genClasses ecoreClass="Jaamsim.ecore#//GeometricDistribution">
+      <genFeatures createChild="false" ecoreFeature="ecore:EAttribute Jaamsim.ecore#//GeometricDistribution/probability"/>
+    </genClasses>
+    <genClasses ecoreClass="Jaamsim.ecore#//StudentTDistribution">
+      <genFeatures createChild="false" ecoreFeature="ecore:EAttribute Jaamsim.ecore#//StudentTDistribution/degreesOfFreedom"/>
+    </genClasses>
+    <genClasses ecoreClass="Jaamsim.ecore#//ChiSquaredDistribution">
+      <genFeatures createChild="false" ecoreFeature="ecore:EAttribute Jaamsim.ecore#//ChiSquaredDistribution/degreesOfFreedom"/>
+    </genClasses>
+    <genClasses ecoreClass="Jaamsim.ecore#//FDistribution">
+      <genFeatures createChild="false" ecoreFeature="ecore:EAttribute Jaamsim.ecore#//FDistribution/numeratorDOF"/>
+      <genFeatures createChild="false" ecoreFeature="ecore:EAttribute Jaamsim.ecore#//FDistribution/denominatorDOF"/>
+    </genClasses>
+    <genClasses ecoreClass="Jaamsim.ecore#//Pearson3Distribution">
+      <genFeatures createChild="false" ecoreFeature="ecore:EAttribute Jaamsim.ecore#//Pearson3Distribution/mean"/>
+      <genFeatures createChild="false" ecoreFeature="ecore:EAttribute Jaamsim.ecore#//Pearson3Distribution/standardDeviation"/>
+      <genFeatures createChild="false" ecoreFeature="ecore:EAttribute Jaamsim.ecore#//Pearson3Distribution/skewness"/>
+    </genClasses>
+    <genClasses ecoreClass="Jaamsim.ecore#//GumbelDistribution">
+      <genFeatures createChild="false" ecoreFeature="ecore:EAttribute Jaamsim.ecore#//GumbelDistribution/location"/>
+      <genFeatures createChild="false" ecoreFeature="ecore:EAttribute Jaamsim.ecore#//GumbelDistribution/scale"/>
+    </genClasses>
+    <genClasses ecoreClass="Jaamsim.ecore#//BernoulliDistribution">
+      <genFeatures createChild="false" ecoreFeature="ecore:EAttribute Jaamsim.ecore#//BernoulliDistribution/probability"/>
+    </genClasses>
+    <genClasses ecoreClass="Jaamsim.ecore#//ChoiceDistribution">
+      <genFeatures createChild="false" ecoreFeature="ecore:EAttribute Jaamsim.ecore#//ChoiceDistribution/valueList"/>
+      <genFeatures createChild="false" ecoreFeature="ecore:EAttribute Jaamsim.ecore#//ChoiceDistribution/probabilityList"/>
+    </genClasses>
+    <genClasses ecoreClass="Jaamsim.ecore#//FluidContainer">
+      <genFeatures createChild="false" ecoreFeature="ecore:EAttribute Jaamsim.ecore#//FluidContainer/capacity"/>
+      <genFeatures createChild="false" ecoreFeature="ecore:EAttribute Jaamsim.ecore#//FluidContainer/volume"/>
+      <genFeatures createChild="false" ecoreFeature="ecore:EAttribute Jaamsim.ecore#//FluidContainer/level"/>
+    </genClasses>
+    <genClasses ecoreClass="Jaamsim.ecore#//FluidPipe">
+      <genFeatures createChild="false" ecoreFeature="ecore:EAttribute Jaamsim.ecore#//FluidPipe/flowRate"/>
+      <genFeatures createChild="false" ecoreFeature="ecore:EAttribute Jaamsim.ecore#//FluidPipe/resistance"/>
+      <genFeatures createChild="false" ecoreFeature="ecore:EAttribute Jaamsim.ecore#//FluidPipe/length"/>
+    </genClasses>
+    <genClasses ecoreClass="Jaamsim.ecore#//FluidPump">
+      <genFeatures createChild="false" ecoreFeature="ecore:EAttribute Jaamsim.ecore#//FluidPump/flowRate"/>
+      <genFeatures createChild="false" ecoreFeature="ecore:EAttribute Jaamsim.ecore#//FluidPump/pressure"/>
+    </genClasses>
+    <genClasses ecoreClass="Jaamsim.ecore#//FluidValve">
+      <genFeatures createChild="false" ecoreFeature="ecore:EAttribute Jaamsim.ecore#//FluidValve/open"/>
+      <genFeatures createChild="false" ecoreFeature="ecore:EAttribute Jaamsim.ecore#//FluidValve/flowCoefficient"/>
+    </genClasses>
+    <genClasses ecoreClass="Jaamsim.ecore#//FluidTank">
+    </genClasses>
+    <genClasses ecoreClass="Jaamsim.ecore#//FluidSource">
+      <genFeatures createChild="false" ecoreFeature="ecore:EAttribute Jaamsim.ecore#//FluidSource/flowRate"/>
+      <genFeatures createChild="false" ecoreFeature="ecore:EAttribute Jaamsim.ecore#//FluidSource/fluid"/>
+    </genClasses>
+    <genClasses ecoreClass="Jaamsim.ecore#//FluidSink">
+      <genFeatures createChild="false" ecoreFeature="ecore:EAttribute Jaamsim.ecore#//FluidSink/flowRate"/>
+    </genClasses>
+  </genPackages>
+</genmodel:GenModel>

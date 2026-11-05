@@ -1,0 +1,15 @@
+Manifest-Version: 1.0
+Bundle-ManifestVersion: 2
+Bundle-Name: M2t
+Bundle-SymbolicName: com.your.m2t
+Bundle-Version: 1.0.0.qualifier
+Export-Package: com.your.m2t;status=API
+Require-Bundle: Models;bundle-version="1.0.0",
+ org.eclipse.emf.ecore.xmi;bundle-version="2.39.0",
+ org.eclipse.emf.ecore;bundle-version="2.41.0",
+ org.eclipse.xtend.lib;bundle-version="2.41.0",
+ org.eclipse.emf.common;bundle-version="2.44.0",
+ org.eclipse.xtext.xbase.lib; bundle-version="2.41.0"
+Bundle-Vendor: YOUR
+Automatic-Module-Name: com.your.m2t
+Bundle-RequiredExecutionEnvironment: JavaSE-17

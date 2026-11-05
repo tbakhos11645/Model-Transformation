@@ -1,0 +1,30 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<bpmn:Definitions
+    xmi:version="2.0"
+    xmlns:xmi="http://www.omg.org/XMI"
+    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xmlns:bpmn="http://www.omg.org/spec/BPMN/20100524/MODEL-XMI">
+  <rootElements
+      xsi:type="bpmn:Process">
+    <flowElements
+        xsi:type="bpmn:StartEvent"
+        outgoing="//@rootElements.0/@flowElements.3"
+        MaxNumber="8"/>
+    <flowElements
+        xsi:type="bpmn:EndEvent"
+        incoming="//@rootElements.0/@flowElements.4"/>
+    <flowElements
+        xsi:type="bpmn:Task"
+        outgoing="//@rootElements.0/@flowElements.4"
+        incoming="//@rootElements.0/@flowElements.3"
+        Time="10"/>
+    <flowElements
+        xsi:type="bpmn:SequenceFlow"
+        targetRef="//@rootElements.0/@flowElements.2"
+        sourceRef="//@rootElements.0/@flowElements.0"/>
+    <flowElements
+        xsi:type="bpmn:SequenceFlow"
+        targetRef="//@rootElements.0/@flowElements.1"
+        sourceRef="//@rootElements.0/@flowElements.2"/>
+  </rootElements>
+</bpmn:Definitions>

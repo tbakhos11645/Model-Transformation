@@ -1,0 +1,19 @@
+Manifest-Version: 1.0
+Bundle-ManifestVersion: 2
+Bundle-Name: Main
+Bundle-SymbolicName: com.yourorg.main; singleton:=true
+Bundle-Version: 1.0.0.qualifier
+Require-Bundle: Models;bundle-version="1.0.0",
+ com.yourorg.atl;bundle-version="1.0.0",
+ com.your.m2t;bundle-version="1.0.0",
+ org.eclipse.emf.ecore;bundle-version="2.41.0",
+ org.eclipse.emf.common;bundle-version="2.44.0",
+ org.eclipse.emf.ecore.xmi;bundle-version="2.39.0",
+ org.eclipse.m2m.atl.core;bundle-version="4.12.0",
+ org.eclipse.m2m.atl.emftvm;bundle-version="4.12.0",
+ org.eclipse.m2m.atl.engine.emfvm;bundle-version="4.12.0",
+ org.eclipse.core.runtime;bundle-version="3.34.100",
+ org.eclipse.equinox.app;bundle-version="1.7.500"
+Bundle-Vendor: YOURORG
+Automatic-Module-Name: com.yourorg.main
+Bundle-RequiredExecutionEnvironment: JavaSE-17

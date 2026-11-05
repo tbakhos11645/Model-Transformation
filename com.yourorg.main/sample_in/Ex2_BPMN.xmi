@@ -1,0 +1,61 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<bpmn:Definitions
+    xmi:version="2.0"
+    xmlns:xmi="http://www.omg.org/XMI"
+    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xmlns:bpmn="http://www.omg.org/spec/BPMN/20100524/MODEL-XMI">
+  <rootElements
+      xsi:type="bpmn:Process">
+    <flowElements
+        xsi:type="bpmn:StartEvent"
+        outgoing="//@rootElements.0/@flowElements.6"
+        MaxNumber="10"/>
+    <flowElements
+        xsi:type="bpmn:Task"
+        outgoing="//@rootElements.0/@flowElements.7"
+        incoming="//@rootElements.0/@flowElements.6"
+        Time="3"/>
+    <flowElements
+        xsi:type="bpmn:ExclusiveGateway"
+        outgoing="//@rootElements.0/@flowElements.8 //@rootElements.0/@flowElements.9"
+        incoming="//@rootElements.0/@flowElements.7"
+        Choice="this.NumberProcessed &lt;= 5 ? 1 : 2"/>
+    <flowElements
+        xsi:type="bpmn:Task"
+        outgoing="//@rootElements.0/@flowElements.10"
+        incoming="//@rootElements.0/@flowElements.8"
+        Time="5"/>
+    <flowElements
+        xsi:type="bpmn:Task"
+        outgoing="//@rootElements.0/@flowElements.11"
+        incoming="//@rootElements.0/@flowElements.9"
+        Time="8"/>
+    <flowElements
+        xsi:type="bpmn:EndEvent"
+        incoming="//@rootElements.0/@flowElements.10 //@rootElements.0/@flowElements.11"/>
+    <flowElements
+        xsi:type="bpmn:SequenceFlow"
+        targetRef="//@rootElements.0/@flowElements.1"
+        sourceRef="//@rootElements.0/@flowElements.0"/>
+    <flowElements
+        xsi:type="bpmn:SequenceFlow"
+        targetRef="//@rootElements.0/@flowElements.2"
+        sourceRef="//@rootElements.0/@flowElements.1"/>
+    <flowElements
+        xsi:type="bpmn:SequenceFlow"
+        targetRef="//@rootElements.0/@flowElements.3"
+        sourceRef="//@rootElements.0/@flowElements.2"/>
+    <flowElements
+        xsi:type="bpmn:SequenceFlow"
+        targetRef="//@rootElements.0/@flowElements.4"
+        sourceRef="//@rootElements.0/@flowElements.2"/>
+    <flowElements
+        xsi:type="bpmn:SequenceFlow"
+        targetRef="//@rootElements.0/@flowElements.5"
+        sourceRef="//@rootElements.0/@flowElements.3"/>
+    <flowElements
+        xsi:type="bpmn:SequenceFlow"
+        targetRef="//@rootElements.0/@flowElements.5"
+        sourceRef="//@rootElements.0/@flowElements.4"/>
+  </rootElements>
+</bpmn:Definitions>

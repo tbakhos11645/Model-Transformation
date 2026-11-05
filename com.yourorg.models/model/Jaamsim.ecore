@@ -1,0 +1,606 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<ecore:EPackage xmi:version="2.0" xmlns:xmi="http://www.omg.org/XMI" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xmlns:ecore="http://www.eclipse.org/emf/2002/Ecore" name="jaamsim" nsURI="http://www.example.org/jaamsim" nsPrefix="jaamsim">
+  <eClassifiers xsi:type="ecore:EEnum" name="UnitType">
+    <eLiterals name="TIME" value="0"/>
+    <eLiterals name="DISTANCE" value="1"/>
+    <eLiterals name="SPEED" value="2"/>
+    <eLiterals name="ACCELERATION" value="3"/>
+    <eLiterals name="MASS" value="4"/>
+    <eLiterals name="VOLUME" value="5"/>
+    <eLiterals name="OTHER" value="6"/>
+    <eLiterals name="AREA" value="7"/>
+    <eLiterals name="ANGLE" value="8"/>
+    <eLiterals name="ENERGY" value="9"/>
+    <eLiterals name="POWER" value="10"/>
+    <eLiterals name="FORCE" value="11"/>
+    <eLiterals name="FLOW" value="12"/>
+    <eLiterals name="DIMENSIONLESS" value="13"/>
+  </eClassifiers>
+  <eClassifiers xsi:type="ecore:EEnum" name="SimEntityState">
+    <eLiterals name="IDLE" value="0"/>
+    <eLiterals name="WAITING" value="1"/>
+    <eLiterals name="PROCESSING" value="2"/>
+    <eLiterals name="FINISHED" value="3"/>
+    <eLiterals name="OTHER" value="4"/>
+  </eClassifiers>
+  <eClassifiers xsi:type="ecore:EEnum" name="DistributionKind">
+    <eLiterals name="UNIFORM" value="0"/>
+    <eLiterals name="TRIANGULAR" value="1"/>
+    <eLiterals name="NORMAL" value="2"/>
+    <eLiterals name="EXPONENTIAL" value="3"/>
+    <eLiterals name="ERLANG" value="4"/>
+    <eLiterals name="GAMMA" value="5"/>
+    <eLiterals name="BETA" value="6"/>
+    <eLiterals name="WEIBULL" value="7"/>
+    <eLiterals name="LOGNORMAL" value="8"/>
+    <eLiterals name="LOGLOGISTIC" value="9"/>
+    <eLiterals name="DISCRETE" value="10"/>
+    <eLiterals name="CONTINUOUS" value="11"/>
+    <eLiterals name="POISSON" value="12"/>
+    <eLiterals name="BINOMIAL" value="13"/>
+    <eLiterals name="NEGATIVE_BINOMIAL" value="14"/>
+    <eLiterals name="GEOMETRIC" value="15"/>
+    <eLiterals name="STUDENT_T" value="16"/>
+    <eLiterals name="CHI_SQUARED" value="17"/>
+    <eLiterals name="F_DISTRIBUTION" value="18"/>
+    <eLiterals name="PEARSON3" value="19"/>
+    <eLiterals name="GUMBEL" value="20"/>
+    <eLiterals name="BERNOULLI" value="21"/>
+    <eLiterals name="CHOICE" value="22"/>
+  </eClassifiers>
+  <eClassifiers xsi:type="ecore:EClass" name="Point3D">
+    <eStructuralFeatures xsi:type="ecore:EAttribute" name="x" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EDouble"/>
+    <eStructuralFeatures xsi:type="ecore:EAttribute" name="y" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EDouble"/>
+    <eStructuralFeatures xsi:type="ecore:EAttribute" name="z" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EDouble"/>
+  </eClassifiers>
+  <eClassifiers xsi:type="ecore:EClass" name="SimulationModel">
+    <eStructuralFeatures xsi:type="ecore:EAttribute" name="name" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EString"/>
+    <eStructuralFeatures xsi:type="ecore:EAttribute" name="description" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EString"/>
+    <eStructuralFeatures xsi:type="ecore:EReference" name="simulation" upperBound="1" containment="true" eType="#//Simulation"/>
+    <eStructuralFeatures xsi:type="ecore:EReference" name="units" upperBound="-1" containment="true" eType="#//Unit"/>
+    <eStructuralFeatures xsi:type="ecore:EReference" name="entities" upperBound="-1" containment="true" eType="#//Entity"/>
+    <eStructuralFeatures xsi:type="ecore:EReference" name="components" upperBound="-1" containment="true" eType="#//Component"/>
+    <eStructuralFeatures xsi:type="ecore:EReference" name="distributions" upperBound="-1" containment="true" eType="#//Distribution"/>
+    <eStructuralFeatures xsi:type="ecore:EReference" name="resources" upperBound="-1" containment="true" eType="#//Resource"/>
+    <eStructuralFeatures xsi:type="ecore:EReference" name="views" upperBound="-1" containment="true" eType="#//View"/>
+    <eStructuralFeatures xsi:type="ecore:EReference" name="subModels" upperBound="-1" containment="true" eType="#//SubModel"/>
+  </eClassifiers>
+  <eClassifiers xsi:type="ecore:EClass" name="Simulation">
+    <eStructuralFeatures xsi:type="ecore:EAttribute" name="runDuration" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EDouble"/>
+    <eStructuralFeatures xsi:type="ecore:EAttribute" name="initializationDuration" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EDouble"/>
+    <eStructuralFeatures xsi:type="ecore:EAttribute" name="exitAtStop" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EBoolean"/>
+    <eStructuralFeatures xsi:type="ecore:EAttribute" name="globalSubstreamSeed" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EInt"/>
+  </eClassifiers>
+  <eClassifiers xsi:type="ecore:EClass" name="Unit">
+    <eStructuralFeatures xsi:type="ecore:EAttribute" name="name" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EString"/>
+    <eStructuralFeatures xsi:type="ecore:EAttribute" name="type" eType="#//UnitType"/>
+    <eStructuralFeatures xsi:type="ecore:EAttribute" name="conversionFactorToSI" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EDouble"/>
+  </eClassifiers>
+  <eClassifiers xsi:type="ecore:EClass" name="Expression">
+    <eStructuralFeatures xsi:type="ecore:EAttribute" name="body" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EString"/>
+  </eClassifiers>
+  <eClassifiers xsi:type="ecore:EClass" name="Attribute">
+    <eStructuralFeatures xsi:type="ecore:EAttribute" name="name" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EString"/>
+    <eStructuralFeatures xsi:type="ecore:EReference" name="initValue" upperBound="1" containment="true" eType="#//Expression"/>
+  </eClassifiers>
+  <eClassifiers xsi:type="ecore:EClass" name="CustomOutput">
+    <eStructuralFeatures xsi:type="ecore:EAttribute" name="name" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EString"/>
+    <eStructuralFeatures xsi:type="ecore:EAttribute" name="unit" eType="#//UnitType"/>
+    <eStructuralFeatures xsi:type="ecore:EReference" name="exp" upperBound="1" containment="true" eType="#//Expression"/>
+  </eClassifiers>
+  <eClassifiers xsi:type="ecore:EClass" name="Entity">
+    <eStructuralFeatures xsi:type="ecore:EAttribute" name="name" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EString"/>
+    <eStructuralFeatures xsi:type="ecore:EAttribute" name="description" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EString"/>
+    <eStructuralFeatures xsi:type="ecore:EAttribute" name="movable" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EBoolean"/>
+    <eStructuralFeatures xsi:type="ecore:EReference" name="position" upperBound="1" containment="true" eType="#//Point3D"/>
+    <eStructuralFeatures xsi:type="ecore:EReference" name="size" upperBound="1" containment="true" eType="#//Point3D"/>
+    <eStructuralFeatures xsi:type="ecore:EReference" name="orientation" upperBound="1" containment="true" eType="#//Point3D"/>
+    <eStructuralFeatures xsi:type="ecore:EReference" name="attributes" upperBound="-1" containment="true" eType="#//Attribute"/>
+    <eStructuralFeatures xsi:type="ecore:EReference" name="customOutputs" upperBound="-1" containment="true" eType="#//CustomOutput"/>
+    <eStructuralFeatures xsi:type="ecore:EReference" name="region" upperBound="1" eType="#//Region"/>
+    <eStructuralFeatures xsi:type="ecore:EReference" name="displayModel" upperBound="1" eType="#//DisplayModel"/>
+  </eClassifiers>
+  <eClassifiers xsi:type="ecore:EClass" name="DisplayEntity" eSuperTypes="#//Entity">
+  </eClassifiers>
+  <eClassifiers xsi:type="ecore:EClass" name="Component" eSuperTypes="#//DisplayEntity" abstract="true">
+    <eStructuralFeatures xsi:type="ecore:EReference" name="incoming" upperBound="-1" eType="#//Component"/>
+    <eStructuralFeatures xsi:type="ecore:EReference" name="outgoing" upperBound="-1" eType="#//Component"/>
+  </eClassifiers>
+  <eClassifiers xsi:type="ecore:EClass" name="LinkedComponent" eSuperTypes="#//Component" abstract="true">
+    <eStructuralFeatures xsi:type="ecore:EReference" name="nextComponent" upperBound="1" eType="#//Component"/>
+  </eClassifiers>
+  <eClassifiers xsi:type="ecore:EClass" name="SimEntity" eSuperTypes="#//DisplayEntity">
+    <eStructuralFeatures xsi:type="ecore:EAttribute" name="initialState" eType="#//SimEntityState"/>
+    <eStructuralFeatures xsi:type="ecore:EAttribute" name="defaultStates" eType="#//SimEntityState"/>
+  </eClassifiers>
+  <eClassifiers xsi:type="ecore:EClass" name="ProcessComponent" eSuperTypes="#//LinkedComponent" abstract="true">
+  </eClassifiers>
+  <eClassifiers xsi:type="ecore:EClass" name="EntityGenerator" eSuperTypes="#//ProcessComponent">
+    <eStructuralFeatures xsi:type="ecore:EAttribute" name="firstArrivalTime" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EDouble"/>
+    <eStructuralFeatures xsi:type="ecore:EAttribute" name="interArrivalTime" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EDouble"/>
+    <eStructuralFeatures xsi:type="ecore:EAttribute" name="entitiesPerArrival" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EInt"/>
+    <eStructuralFeatures xsi:type="ecore:EAttribute" name="maxNumber" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EInt"/>
+    <eStructuralFeatures xsi:type="ecore:EReference" name="prototype" upperBound="1" eType="#//SimEntity"/>
+  </eClassifiers>
+  <eClassifiers xsi:type="ecore:EClass" name="Queue" eSuperTypes="#//ProcessComponent">
+    <eStructuralFeatures xsi:type="ecore:EAttribute" name="capacity" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EInt"/>
+    <eStructuralFeatures xsi:type="ecore:EAttribute" name="priority" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EString"/>
+    <eStructuralFeatures xsi:type="ecore:EAttribute" name="match" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EString"/>
+    <eStructuralFeatures xsi:type="ecore:EAttribute" name="fifo" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EBoolean"/>
+    <eStructuralFeatures xsi:type="ecore:EAttribute" name="renegeTime" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EDouble"/>
+    <eStructuralFeatures xsi:type="ecore:EAttribute" name="renegeCondition" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EString"/>
+    <eStructuralFeatures xsi:type="ecore:EAttribute" name="maxValidLength" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EInt"/>
+    <eStructuralFeatures xsi:type="ecore:EReference" name="renegeDestination" upperBound="1" eType="#//ProcessComponent"/>
+  </eClassifiers>
+  <eClassifiers xsi:type="ecore:EClass" name="EntityConveyor" eSuperTypes="#//ProcessComponent">
+    <eStructuralFeatures xsi:type="ecore:EAttribute" name="travelTime" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EDouble"/>
+  </eClassifiers>
+  <eClassifiers xsi:type="ecore:EClass" name="Server" eSuperTypes="#//ProcessComponent">
+    <eStructuralFeatures xsi:type="ecore:EAttribute" name="serviceTime" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EDouble"/>
+    <eStructuralFeatures xsi:type="ecore:EReference" name="waitQueue" upperBound="1" eType="#//Queue"/>
+  </eClassifiers>
+  <eClassifiers xsi:type="ecore:EClass" name="EntitySink" eSuperTypes="#//ProcessComponent">
+  </eClassifiers>
+  <eClassifiers xsi:type="ecore:EClass" name="Branch" eSuperTypes="#//ProcessComponent">
+    <eStructuralFeatures xsi:type="ecore:EAttribute" name="choice" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EString"/>
+    <eStructuralFeatures xsi:type="ecore:EReference" name="nextComponentList" upperBound="-1" eType="#//ProcessComponent"/>
+  </eClassifiers>
+  <eClassifiers xsi:type="ecore:EClass" name="BranchCondition">
+    <eStructuralFeatures xsi:type="ecore:EReference" name="condition" upperBound="1" containment="true" eType="#//Expression"/>
+    <eStructuralFeatures xsi:type="ecore:EReference" name="target" upperBound="1" eType="#//ProcessComponent"/>
+  </eClassifiers>
+  <eClassifiers xsi:type="ecore:EClass" name="Resource" eSuperTypes="#//DisplayEntity">
+    <eStructuralFeatures xsi:type="ecore:EAttribute" name="capacity" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EInt"/>
+    <eStructuralFeatures xsi:type="ecore:EReference" name="units" upperBound="-1" containment="true" eType="#//ResourceUnit"/>
+  </eClassifiers>
+  <eClassifiers xsi:type="ecore:EClass" name="ResourceUnit" eSuperTypes="#//DisplayEntity">
+    <eStructuralFeatures xsi:type="ecore:EAttribute" name="available" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EBoolean"/>
+    <eStructuralFeatures xsi:type="ecore:EReference" name="assignedTo" upperBound="1" eType="#//SimEntity"/>
+  </eClassifiers>
+  <eClassifiers xsi:type="ecore:EClass" name="ResourcePool" eSuperTypes="#//DisplayEntity">
+    <eStructuralFeatures xsi:type="ecore:EReference" name="resources" upperBound="-1" eType="#//ResourceUnit"/>
+  </eClassifiers>
+  <eClassifiers xsi:type="ecore:EClass" name="Seize" eSuperTypes="#//ProcessComponent">
+    <eStructuralFeatures xsi:type="ecore:EReference" name="requiredUnits" upperBound="-1" eType="#//ResourceUnit"/>
+  </eClassifiers>
+  <eClassifiers xsi:type="ecore:EClass" name="Release" eSuperTypes="#//ProcessComponent">
+    <eStructuralFeatures xsi:type="ecore:EReference" name="releasedUnits" upperBound="-1" eType="#//ResourceUnit"/>
+  </eClassifiers>
+  <eClassifiers xsi:type="ecore:EClass" name="Distribution" eSuperTypes="#//Entity">
+    <eStructuralFeatures xsi:type="ecore:EAttribute" name="kind" eType="#//DistributionKind"/>
+    <eStructuralFeatures xsi:type="ecore:EReference" name="parameters" upperBound="-1" containment="true" eType="#//DistributionParameter"/>
+  </eClassifiers>
+  <eClassifiers xsi:type="ecore:EClass" name="DistributionParameter">
+    <eStructuralFeatures xsi:type="ecore:EAttribute" name="name" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EString"/>
+    <eStructuralFeatures xsi:type="ecore:EAttribute" name="value" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EDouble"/>
+    <eStructuralFeatures xsi:type="ecore:EAttribute" name="unit" eType="#//UnitType"/>
+  </eClassifiers>
+  <eClassifiers xsi:type="ecore:EClass" name="Region" eSuperTypes="#//Entity">
+  </eClassifiers>
+  <eClassifiers xsi:type="ecore:EClass" name="DisplayModel" eSuperTypes="#//Entity">
+  </eClassifiers>
+  <eClassifiers xsi:type="ecore:EClass" name="View" eSuperTypes="#//Entity">
+    <eStructuralFeatures xsi:type="ecore:EReference" name="cameraPosition" upperBound="1" containment="true" eType="#//Point3D"/>
+    <eStructuralFeatures xsi:type="ecore:EReference" name="cameraTarget" upperBound="1" containment="true" eType="#//Point3D"/>
+  </eClassifiers>
+  <eClassifiers xsi:type="ecore:EClass" name="SubModel" eSuperTypes="#//DisplayEntity">
+    <eStructuralFeatures xsi:type="ecore:EReference" name="components" upperBound="-1" containment="true" eType="#//ProcessComponent"/>
+  </eClassifiers>
+  <eClassifiers xsi:type="ecore:EClass" name="SubModelStart" eSuperTypes="#//ProcessComponent">
+  </eClassifiers>
+  <eClassifiers xsi:type="ecore:EClass" name="SubModelEnd" eSuperTypes="#//ProcessComponent">
+  </eClassifiers>
+  <eClassifiers xsi:type="ecore:EClass" name="AbstractShape" eSuperTypes="#//DisplayEntity" abstract="true">
+    <eStructuralFeatures xsi:type="ecore:EAttribute" name="lineColour" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EString"/>
+    <eStructuralFeatures xsi:type="ecore:EAttribute" name="lineWidth" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EInt"/>
+    <eStructuralFeatures xsi:type="ecore:EAttribute" name="fillColour" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EString"/>
+    <eStructuralFeatures xsi:type="ecore:EAttribute" name="filled" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EBoolean"/>
+    <eStructuralFeatures xsi:type="ecore:EAttribute" name="lineStyle" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EString"/>
+  </eClassifiers>
+  <eClassifiers xsi:type="ecore:EClass" name="Shape" eSuperTypes="#//AbstractShape">
+    <eStructuralFeatures xsi:type="ecore:EAttribute" name="shapeType" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EString"/>
+  </eClassifiers>
+  <eClassifiers xsi:type="ecore:EClass" name="Polyline" eSuperTypes="#//AbstractShape">
+    <eStructuralFeatures xsi:type="ecore:EAttribute" name="points" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EString"/>
+    <eStructuralFeatures xsi:type="ecore:EAttribute" name="closed" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EBoolean"/>
+  </eClassifiers>
+  <eClassifiers xsi:type="ecore:EClass" name="Arrow" eSuperTypes="#//DisplayEntity">
+    <eStructuralFeatures xsi:type="ecore:EAttribute" name="points" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EString"/>
+    <eStructuralFeatures xsi:type="ecore:EAttribute" name="lineColour" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EString"/>
+    <eStructuralFeatures xsi:type="ecore:EAttribute" name="lineWidth" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EInt"/>
+  </eClassifiers>
+  <eClassifiers xsi:type="ecore:EClass" name="Image" eSuperTypes="#//AbstractShape">
+    <eStructuralFeatures xsi:type="ecore:EAttribute" name="imageFile" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EString"/>
+    <eStructuralFeatures xsi:type="ecore:EAttribute" name="transparent" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EBoolean"/>
+  </eClassifiers>
+  <eClassifiers xsi:type="ecore:EClass" name="TextBasics" eSuperTypes="#//AbstractShape" abstract="true">
+    <eStructuralFeatures xsi:type="ecore:EAttribute" name="text" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EString"/>
+    <eStructuralFeatures xsi:type="ecore:EAttribute" name="textColour" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EString"/>
+    <eStructuralFeatures xsi:type="ecore:EAttribute" name="fontName" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EString"/>
+    <eStructuralFeatures xsi:type="ecore:EAttribute" name="textHeight" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EDouble"/>
+  </eClassifiers>
+  <eClassifiers xsi:type="ecore:EClass" name="Text" eSuperTypes="#//TextBasics">
+  </eClassifiers>
+  <eClassifiers xsi:type="ecore:EClass" name="EntityLabel" eSuperTypes="#//TextBasics">
+    <eStructuralFeatures xsi:type="ecore:EAttribute" name="entity" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EString"/>
+    <eStructuralFeatures xsi:type="ecore:EAttribute" name="format" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EString"/>
+  </eClassifiers>
+  <eClassifiers xsi:type="ecore:EClass" name="OverlayEntity" eSuperTypes="#//DisplayEntity" abstract="true">
+  </eClassifiers>
+  <eClassifiers xsi:type="ecore:EClass" name="OverlayText" eSuperTypes="#//OverlayEntity">
+    <eStructuralFeatures xsi:type="ecore:EAttribute" name="text" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EString"/>
+    <eStructuralFeatures xsi:type="ecore:EAttribute" name="textColour" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EString"/>
+    <eStructuralFeatures xsi:type="ecore:EAttribute" name="textHeight" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EDouble"/>
+  </eClassifiers>
+  <eClassifiers xsi:type="ecore:EClass" name="OverlayClock" eSuperTypes="#//OverlayText">
+    <eStructuralFeatures xsi:type="ecore:EAttribute" name="format" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EString"/>
+  </eClassifiers>
+  <eClassifiers xsi:type="ecore:EClass" name="OverlayImage" eSuperTypes="#//OverlayEntity">
+    <eStructuralFeatures xsi:type="ecore:EAttribute" name="imageFile" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EString"/>
+  </eClassifiers>
+  <eClassifiers xsi:type="ecore:EClass" name="BillboardText" eSuperTypes="#//Text">
+  </eClassifiers>
+  <eClassifiers xsi:type="ecore:EClass" name="MimicEntity" eSuperTypes="#//DisplayEntity">
+    <eStructuralFeatures xsi:type="ecore:EReference" name="mimicEntityRef" upperBound="1" eType="#//DisplayEntity"/>
+  </eClassifiers>
+  <eClassifiers xsi:type="ecore:EClass" name="AbstractGraph" eSuperTypes="#//DisplayEntity" abstract="true">
+    <eStructuralFeatures xsi:type="ecore:EAttribute" name="xLabel" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EString"/>
+    <eStructuralFeatures xsi:type="ecore:EAttribute" name="yLabel" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EString"/>
+    <eStructuralFeatures xsi:type="ecore:EAttribute" name="graphTitle" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EString"/>
+    <eStructuralFeatures xsi:type="ecore:EAttribute" name="points" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EString"/>
+  </eClassifiers>
+  <eClassifiers xsi:type="ecore:EClass" name="Graph" eSuperTypes="#//AbstractGraph">
+  </eClassifiers>
+  <eClassifiers xsi:type="ecore:EClass" name="XYGraph" eSuperTypes="#//AbstractGraph">
+  </eClassifiers>
+  <eClassifiers xsi:type="ecore:EClass" name="BarGauge" eSuperTypes="#//DisplayEntity">
+    <eStructuralFeatures xsi:type="ecore:EAttribute" name="expression" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EString"/>
+    <eStructuralFeatures xsi:type="ecore:EAttribute" name="minValue" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EDouble"/>
+    <eStructuralFeatures xsi:type="ecore:EAttribute" name="maxValue" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EDouble"/>
+  </eClassifiers>
+  <eClassifiers xsi:type="ecore:EClass" name="BooleanIndicator" eSuperTypes="#//DisplayEntity">
+    <eStructuralFeatures xsi:type="ecore:EAttribute" name="state" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EBoolean"/>
+    <eStructuralFeatures xsi:type="ecore:EAttribute" name="trueColour" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EString"/>
+    <eStructuralFeatures xsi:type="ecore:EAttribute" name="falseColour" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EString"/>
+  </eClassifiers>
+  <eClassifiers xsi:type="ecore:EClass" name="VideoRecorder" eSuperTypes="#//DisplayEntity">
+    <eStructuralFeatures xsi:type="ecore:EAttribute" name="fileName" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EString"/>
+    <eStructuralFeatures xsi:type="ecore:EAttribute" name="startTime" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EDouble"/>
+    <eStructuralFeatures xsi:type="ecore:EAttribute" name="endTime" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EDouble"/>
+  </eClassifiers>
+  <eClassifiers xsi:type="ecore:EClass" name="InputBox" eSuperTypes="#//TextBasics">
+    <eStructuralFeatures xsi:type="ecore:EAttribute" name="inputValue" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EString"/>
+  </eClassifiers>
+  <eClassifiers xsi:type="ecore:EClass" name="EntityLauncher" eSuperTypes="#//ProcessComponent">
+    <eStructuralFeatures xsi:type="ecore:EAttribute" name="firstArrivalTime" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EDouble"/>
+    <eStructuralFeatures xsi:type="ecore:EAttribute" name="interArrivalTime" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EDouble"/>
+    <eStructuralFeatures xsi:type="ecore:EAttribute" name="maxNumber" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EInt"/>
+  </eClassifiers>
+  <eClassifiers xsi:type="ecore:EClass" name="EntityDelay" eSuperTypes="#//ProcessComponent">
+    <eStructuralFeatures xsi:type="ecore:EAttribute" name="duration" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EDouble"/>
+  </eClassifiers>
+  <eClassifiers xsi:type="ecore:EClass" name="EntityProcessor" eSuperTypes="#//ProcessComponent">
+    <eStructuralFeatures xsi:type="ecore:EAttribute" name="duration" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EDouble"/>
+    <eStructuralFeatures xsi:type="ecore:EAttribute" name="numberEntities" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EInt"/>
+  </eClassifiers>
+  <eClassifiers xsi:type="ecore:EClass" name="Assign" eSuperTypes="#//ProcessComponent">
+    <eStructuralFeatures xsi:type="ecore:EAttribute" name="attribute" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EString"/>
+    <eStructuralFeatures xsi:type="ecore:EAttribute" name="value" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EString"/>
+  </eClassifiers>
+  <eClassifiers xsi:type="ecore:EClass" name="Duplicate" eSuperTypes="#//ProcessComponent">
+    <eStructuralFeatures xsi:type="ecore:EAttribute" name="number" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EInt"/>
+  </eClassifiers>
+  <eClassifiers xsi:type="ecore:EClass" name="Combine" eSuperTypes="#//ProcessComponent">
+    <eStructuralFeatures xsi:type="ecore:EAttribute" name="numberToCombine" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EInt"/>
+    <eStructuralFeatures xsi:type="ecore:EAttribute" name="duration" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EDouble"/>
+  </eClassifiers>
+  <eClassifiers xsi:type="ecore:EClass" name="Assemble" eSuperTypes="#//ProcessComponent">
+    <eStructuralFeatures xsi:type="ecore:EAttribute" name="numberToAssemble" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EInt"/>
+    <eStructuralFeatures xsi:type="ecore:EAttribute" name="duration" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EDouble"/>
+  </eClassifiers>
+  <eClassifiers xsi:type="ecore:EClass" name="Pack" eSuperTypes="#//ProcessComponent">
+    <eStructuralFeatures xsi:type="ecore:EAttribute" name="numberToPack" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EInt"/>
+  </eClassifiers>
+  <eClassifiers xsi:type="ecore:EClass" name="Unpack" eSuperTypes="#//ProcessComponent">
+    <eStructuralFeatures xsi:type="ecore:EAttribute" name="numberToUnpack" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EInt"/>
+  </eClassifiers>
+  <eClassifiers xsi:type="ecore:EClass" name="AddTo" eSuperTypes="#//ProcessComponent">
+    <eStructuralFeatures xsi:type="ecore:EAttribute" name="numberToAdd" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EInt"/>
+  </eClassifiers>
+  <eClassifiers xsi:type="ecore:EClass" name="RemoveFrom" eSuperTypes="#//ProcessComponent">
+    <eStructuralFeatures xsi:type="ecore:EAttribute" name="numberToRemove" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EInt"/>
+  </eClassifiers>
+  <eClassifiers xsi:type="ecore:EClass" name="EntityContainer" eSuperTypes="#//SimEntity">
+    <eStructuralFeatures xsi:type="ecore:EAttribute" name="capacity" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EInt"/>
+    <eStructuralFeatures xsi:type="ecore:EAttribute" name="numberOfEntities" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EInt"/>
+  </eClassifiers>
+  <eClassifiers xsi:type="ecore:EClass" name="EntityGate" eSuperTypes="#//ProcessComponent">
+    <eStructuralFeatures xsi:type="ecore:EAttribute" name="open" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EBoolean"/>
+    <eStructuralFeatures xsi:type="ecore:EAttribute" name="condition" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EString"/>
+  </eClassifiers>
+  <eClassifiers xsi:type="ecore:EClass" name="EntitySignal" eSuperTypes="#//ProcessComponent">
+    <eStructuralFeatures xsi:type="ecore:EReference" name="signalRef" upperBound="1" eType="#//EntitySignal"/>
+  </eClassifiers>
+  <eClassifiers xsi:type="ecore:EClass" name="SetGraphics" eSuperTypes="#//ProcessComponent">
+    <eStructuralFeatures xsi:type="ecore:EAttribute" name="graphics" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EString"/>
+  </eClassifiers>
+  <eClassifiers xsi:type="ecore:EClass" name="EntityLogger" eSuperTypes="#//ProcessComponent">
+    <eStructuralFeatures xsi:type="ecore:EAttribute" name="fileName" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EString"/>
+    <eStructuralFeatures xsi:type="ecore:EAttribute" name="format" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EString"/>
+    <eStructuralFeatures xsi:type="ecore:EAttribute" name="interval" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EDouble"/>
+  </eClassifiers>
+  <eClassifiers xsi:type="ecore:EClass" name="Statistics" eSuperTypes="#//ProcessComponent">
+    <eStructuralFeatures xsi:type="ecore:EAttribute" name="attribute" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EString"/>
+    <eStructuralFeatures xsi:type="ecore:EAttribute" name="statistic" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EString"/>
+  </eClassifiers>
+  <eClassifiers xsi:type="ecore:EClass" name="SimShape" eSuperTypes="#//SimEntity">
+    <eStructuralFeatures xsi:type="ecore:EAttribute" name="shapeType" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EString"/>
+    <eStructuralFeatures xsi:type="ecore:EAttribute" name="lineColour" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EString"/>
+    <eStructuralFeatures xsi:type="ecore:EAttribute" name="fillColour" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EString"/>
+  </eClassifiers>
+  <eClassifiers xsi:type="ecore:EClass" name="AbstractResourceProvider" eSuperTypes="#//DisplayEntity" abstract="true">
+    <eStructuralFeatures xsi:type="ecore:EAttribute" name="capacity" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EInt"/>
+    <eStructuralFeatures xsi:type="ecore:EAttribute" name="numberOfUnits" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EInt"/>
+  </eClassifiers>
+  <eClassifiers xsi:type="ecore:EClass" name="Group" eSuperTypes="#//Entity">
+    <eStructuralFeatures xsi:type="ecore:EAttribute" name="groupDescription" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EString"/>
+  </eClassifiers>
+  <eClassifiers xsi:type="ecore:EClass" name="ScriptEntity" eSuperTypes="#//Entity">
+    <eStructuralFeatures xsi:type="ecore:EAttribute" name="time" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EDouble"/>
+    <eStructuralFeatures xsi:type="ecore:EAttribute" name="script" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EString"/>
+  </eClassifiers>
+  <eClassifiers xsi:type="ecore:EClass" name="OutputMethod" eSuperTypes="#//Entity">
+    <eStructuralFeatures xsi:type="ecore:EAttribute" name="method" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EString"/>
+    <eStructuralFeatures xsi:type="ecore:EAttribute" name="arguments" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EString"/>
+  </eClassifiers>
+  <eClassifiers xsi:type="ecore:EClass" name="Controller" eSuperTypes="#//DisplayEntity">
+    <eStructuralFeatures xsi:type="ecore:EAttribute" name="interval" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EDouble"/>
+    <eStructuralFeatures xsi:type="ecore:EAttribute" name="action" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EString"/>
+  </eClassifiers>
+  <eClassifiers xsi:type="ecore:EClass" name="InputValue" eSuperTypes="#//TextBasics">
+    <eStructuralFeatures xsi:type="ecore:EAttribute" name="value" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EDouble"/>
+    <eStructuralFeatures xsi:type="ecore:EAttribute" name="unitType" eType="#//UnitType"/>
+  </eClassifiers>
+  <eClassifiers xsi:type="ecore:EClass" name="ToggleButton" eSuperTypes="#//DisplayEntity">
+    <eStructuralFeatures xsi:type="ecore:EAttribute" name="state" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EBoolean"/>
+    <eStructuralFeatures xsi:type="ecore:EAttribute" name="toggleAction" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EString"/>
+  </eClassifiers>
+  <eClassifiers xsi:type="ecore:EClass" name="ExpressionEntity" eSuperTypes="#//DisplayEntity">
+    <eStructuralFeatures xsi:type="ecore:EAttribute" name="expression" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EString"/>
+    <eStructuralFeatures xsi:type="ecore:EAttribute" name="unitType" eType="#//UnitType"/>
+  </eClassifiers>
+  <eClassifiers xsi:type="ecore:EClass" name="ExpressionStatistics" eSuperTypes="#//DisplayEntity">
+    <eStructuralFeatures xsi:type="ecore:EAttribute" name="expression" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EString"/>
+    <eStructuralFeatures xsi:type="ecore:EAttribute" name="statistic" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EString"/>
+  </eClassifiers>
+  <eClassifiers xsi:type="ecore:EClass" name="ExpressionLogger" eSuperTypes="#//DisplayEntity">
+    <eStructuralFeatures xsi:type="ecore:EAttribute" name="expressions" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EString"/>
+    <eStructuralFeatures xsi:type="ecore:EAttribute" name="fileName" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EString"/>
+    <eStructuralFeatures xsi:type="ecore:EAttribute" name="interval" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EDouble"/>
+  </eClassifiers>
+  <eClassifiers xsi:type="ecore:EClass" name="EntitlementSelector" eSuperTypes="#//DisplayEntity">
+    <eStructuralFeatures xsi:type="ecore:EAttribute" name="proportions" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EString"/>
+    <eStructuralFeatures xsi:type="ecore:EAttribute" name="index" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EInt"/>
+  </eClassifiers>
+  <eClassifiers xsi:type="ecore:EClass" name="EventSchedule" eSuperTypes="#//DisplayEntity">
+    <eStructuralFeatures xsi:type="ecore:EAttribute" name="timeList" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EString"/>
+    <eStructuralFeatures xsi:type="ecore:EAttribute" name="cycleTime" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EDouble"/>
+  </eClassifiers>
+  <eClassifiers xsi:type="ecore:EClass" name="ValueSequence" eSuperTypes="#//DisplayEntity">
+    <eStructuralFeatures xsi:type="ecore:EAttribute" name="valueList" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EString"/>
+    <eStructuralFeatures xsi:type="ecore:EAttribute" name="repeat" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EBoolean"/>
+  </eClassifiers>
+  <eClassifiers xsi:type="ecore:EClass" name="DowntimeEntity" eSuperTypes="#//DisplayEntity">
+    <eStructuralFeatures xsi:type="ecore:EAttribute" name="firstDowntime" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EDouble"/>
+    <eStructuralFeatures xsi:type="ecore:EAttribute" name="interval" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EDouble"/>
+    <eStructuralFeatures xsi:type="ecore:EAttribute" name="duration" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EDouble"/>
+    <eStructuralFeatures xsi:type="ecore:EAttribute" name="concurrent" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EBoolean"/>
+    <eStructuralFeatures xsi:type="ecore:EAttribute" name="maintenance" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EString"/>
+  </eClassifiers>
+  <eClassifiers xsi:type="ecore:EClass" name="EntitySystem" eSuperTypes="#//DisplayEntity">
+    <eStructuralFeatures xsi:type="ecore:EAttribute" name="state" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EString"/>
+  </eClassifiers>
+  <eClassifiers xsi:type="ecore:EClass" name="FileToArray" eSuperTypes="#//ProcessComponent" abstract="true">
+    <eStructuralFeatures xsi:type="ecore:EAttribute" name="fileName" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EString"/>
+    <eStructuralFeatures xsi:type="ecore:EAttribute" name="columnIndex" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EInt"/>
+    <eStructuralFeatures xsi:type="ecore:EAttribute" name="skipLines" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EInt"/>
+  </eClassifiers>
+  <eClassifiers xsi:type="ecore:EClass" name="FileToVector" eSuperTypes="#//FileToArray">
+  </eClassifiers>
+  <eClassifiers xsi:type="ecore:EClass" name="FileToMatrix" eSuperTypes="#//FileToArray">
+  </eClassifiers>
+  <eClassifiers xsi:type="ecore:EClass" name="FileToHashMap" eSuperTypes="#//FileToArray">
+  </eClassifiers>
+  <eClassifiers xsi:type="ecore:EClass" name="AbstractExternalProgram" eSuperTypes="#//ProcessComponent" abstract="true">
+    <eStructuralFeatures xsi:type="ecore:EAttribute" name="program" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EString"/>
+    <eStructuralFeatures xsi:type="ecore:EAttribute" name="arguments" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EString"/>
+    <eStructuralFeatures xsi:type="ecore:EAttribute" name="workingDirectory" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EString"/>
+  </eClassifiers>
+  <eClassifiers xsi:type="ecore:EClass" name="ExternalProgram" eSuperTypes="#//AbstractExternalProgram">
+  </eClassifiers>
+  <eClassifiers xsi:type="ecore:EClass" name="ExternalProgramServer" eSuperTypes="#//AbstractExternalProgram">
+    <eStructuralFeatures xsi:type="ecore:EAttribute" name="port" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EInt"/>
+  </eClassifiers>
+  <eClassifiers xsi:type="ecore:EClass" name="Threshold" eSuperTypes="#//DisplayEntity" abstract="true">
+    <eStructuralFeatures xsi:type="ecore:EAttribute" name="condition" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EString"/>
+  </eClassifiers>
+  <eClassifiers xsi:type="ecore:EClass" name="ExpressionThreshold" eSuperTypes="#//Threshold">
+    <eStructuralFeatures xsi:type="ecore:EAttribute" name="expression" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EString"/>
+  </eClassifiers>
+  <eClassifiers xsi:type="ecore:EClass" name="TimeSeriesThreshold" eSuperTypes="#//Threshold">
+    <eStructuralFeatures xsi:type="ecore:EReference" name="timeSeriesRef" upperBound="1" eType="#//TimeSeries"/>
+  </eClassifiers>
+  <eClassifiers xsi:type="ecore:EClass" name="SignalThreshold" eSuperTypes="#//Threshold">
+    <eStructuralFeatures xsi:type="ecore:EReference" name="signalRef" upperBound="1" eType="#//EntitySignal"/>
+  </eClassifiers>
+  <eClassifiers xsi:type="ecore:EClass" name="SampleConstant" eSuperTypes="#//Entity">
+    <eStructuralFeatures xsi:type="ecore:EAttribute" name="value" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EDouble"/>
+  </eClassifiers>
+  <eClassifiers xsi:type="ecore:EClass" name="SampleExpression" eSuperTypes="#//Entity">
+    <eStructuralFeatures xsi:type="ecore:EAttribute" name="expression" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EString"/>
+  </eClassifiers>
+  <eClassifiers xsi:type="ecore:EClass" name="TimeSeries" eSuperTypes="#//DisplayEntity">
+    <eStructuralFeatures xsi:type="ecore:EAttribute" name="timeList" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EString"/>
+    <eStructuralFeatures xsi:type="ecore:EAttribute" name="valueList" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EString"/>
+    <eStructuralFeatures xsi:type="ecore:EAttribute" name="cycleTime" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EDouble"/>
+    <eStructuralFeatures xsi:type="ecore:EAttribute" name="interpolation" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EString"/>
+  </eClassifiers>
+  <eClassifiers xsi:type="ecore:EClass" name="CalculationEntity" eSuperTypes="#//DisplayEntity" abstract="true">
+    <eStructuralFeatures xsi:type="ecore:EAttribute" name="unitType" eType="#//UnitType"/>
+  </eClassifiers>
+  <eClassifiers xsi:type="ecore:EClass" name="DoubleCalculation" eSuperTypes="#//CalculationEntity" abstract="true">
+    <eStructuralFeatures xsi:type="ecore:EAttribute" name="input" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EString"/>
+  </eClassifiers>
+  <eClassifiers xsi:type="ecore:EClass" name="Differentiator" eSuperTypes="#//DoubleCalculation">
+  </eClassifiers>
+  <eClassifiers xsi:type="ecore:EClass" name="Integrator" eSuperTypes="#//DoubleCalculation">
+    <eStructuralFeatures xsi:type="ecore:EAttribute" name="initialValue" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EDouble"/>
+  </eClassifiers>
+  <eClassifiers xsi:type="ecore:EClass" name="Lag" eSuperTypes="#//DoubleCalculation">
+    <eStructuralFeatures xsi:type="ecore:EAttribute" name="timeConstant" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EDouble"/>
+  </eClassifiers>
+  <eClassifiers xsi:type="ecore:EClass" name="MovingAverage" eSuperTypes="#//DoubleCalculation">
+    <eStructuralFeatures xsi:type="ecore:EAttribute" name="windowLength" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EDouble"/>
+  </eClassifiers>
+  <eClassifiers xsi:type="ecore:EClass" name="PIDController" eSuperTypes="#//DoubleCalculation">
+    <eStructuralFeatures xsi:type="ecore:EAttribute" name="setPoint" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EDouble"/>
+    <eStructuralFeatures xsi:type="ecore:EAttribute" name="proportionalGain" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EDouble"/>
+    <eStructuralFeatures xsi:type="ecore:EAttribute" name="integralGain" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EDouble"/>
+    <eStructuralFeatures xsi:type="ecore:EAttribute" name="derivativeGain" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EDouble"/>
+  </eClassifiers>
+  <eClassifiers xsi:type="ecore:EClass" name="UnitDelay" eSuperTypes="#//DoubleCalculation">
+    <eStructuralFeatures xsi:type="ecore:EAttribute" name="initialValue" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EDouble"/>
+  </eClassifiers>
+  <eClassifiers xsi:type="ecore:EClass" name="Polynomial" eSuperTypes="#//DisplayEntity">
+    <eStructuralFeatures xsi:type="ecore:EAttribute" name="coefficients" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EString"/>
+  </eClassifiers>
+  <eClassifiers xsi:type="ecore:EClass" name="WeightedSum" eSuperTypes="#//DisplayEntity">
+    <eStructuralFeatures xsi:type="ecore:EAttribute" name="input" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EString"/>
+    <eStructuralFeatures xsi:type="ecore:EAttribute" name="weights" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EString"/>
+  </eClassifiers>
+  <eClassifiers xsi:type="ecore:EClass" name="WaveGenerator" eSuperTypes="#//DisplayEntity" abstract="true">
+    <eStructuralFeatures xsi:type="ecore:EAttribute" name="amplitude" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EDouble"/>
+    <eStructuralFeatures xsi:type="ecore:EAttribute" name="frequency" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EDouble"/>
+    <eStructuralFeatures xsi:type="ecore:EAttribute" name="phase" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EDouble"/>
+  </eClassifiers>
+  <eClassifiers xsi:type="ecore:EClass" name="SineWave" eSuperTypes="#//WaveGenerator">
+  </eClassifiers>
+  <eClassifiers xsi:type="ecore:EClass" name="SquareWave" eSuperTypes="#//WaveGenerator">
+  </eClassifiers>
+  <eClassifiers xsi:type="ecore:EClass" name="UniformDistribution" eSuperTypes="#//DisplayEntity">
+    <eStructuralFeatures xsi:type="ecore:EAttribute" name="minValue" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EDouble"/>
+    <eStructuralFeatures xsi:type="ecore:EAttribute" name="maxValue" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EDouble"/>
+  </eClassifiers>
+  <eClassifiers xsi:type="ecore:EClass" name="TriangularDistribution" eSuperTypes="#//DisplayEntity">
+    <eStructuralFeatures xsi:type="ecore:EAttribute" name="minValue" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EDouble"/>
+    <eStructuralFeatures xsi:type="ecore:EAttribute" name="mode" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EDouble"/>
+    <eStructuralFeatures xsi:type="ecore:EAttribute" name="maxValue" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EDouble"/>
+  </eClassifiers>
+  <eClassifiers xsi:type="ecore:EClass" name="NormalDistribution" eSuperTypes="#//DisplayEntity">
+    <eStructuralFeatures xsi:type="ecore:EAttribute" name="mean" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EDouble"/>
+    <eStructuralFeatures xsi:type="ecore:EAttribute" name="standardDeviation" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EDouble"/>
+  </eClassifiers>
+  <eClassifiers xsi:type="ecore:EClass" name="ExponentialDistribution" eSuperTypes="#//DisplayEntity">
+    <eStructuralFeatures xsi:type="ecore:EAttribute" name="mean" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EDouble"/>
+  </eClassifiers>
+  <eClassifiers xsi:type="ecore:EClass" name="ErlangDistribution" eSuperTypes="#//DisplayEntity">
+    <eStructuralFeatures xsi:type="ecore:EAttribute" name="mean" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EDouble"/>
+    <eStructuralFeatures xsi:type="ecore:EAttribute" name="shape" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EDouble"/>
+  </eClassifiers>
+  <eClassifiers xsi:type="ecore:EClass" name="GammaDistribution" eSuperTypes="#//DisplayEntity">
+    <eStructuralFeatures xsi:type="ecore:EAttribute" name="mean" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EDouble"/>
+    <eStructuralFeatures xsi:type="ecore:EAttribute" name="shape" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EDouble"/>
+  </eClassifiers>
+  <eClassifiers xsi:type="ecore:EClass" name="BetaDistribution" eSuperTypes="#//DisplayEntity">
+    <eStructuralFeatures xsi:type="ecore:EAttribute" name="alpha" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EDouble"/>
+    <eStructuralFeatures xsi:type="ecore:EAttribute" name="beta" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EDouble"/>
+  </eClassifiers>
+  <eClassifiers xsi:type="ecore:EClass" name="WeibullDistribution" eSuperTypes="#//DisplayEntity">
+    <eStructuralFeatures xsi:type="ecore:EAttribute" name="shape" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EDouble"/>
+    <eStructuralFeatures xsi:type="ecore:EAttribute" name="scale" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EDouble"/>
+  </eClassifiers>
+  <eClassifiers xsi:type="ecore:EClass" name="LogNormalDistribution" eSuperTypes="#//DisplayEntity">
+    <eStructuralFeatures xsi:type="ecore:EAttribute" name="mean" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EDouble"/>
+    <eStructuralFeatures xsi:type="ecore:EAttribute" name="standardDeviation" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EDouble"/>
+  </eClassifiers>
+  <eClassifiers xsi:type="ecore:EClass" name="LogLogisticDistribution" eSuperTypes="#//DisplayEntity">
+    <eStructuralFeatures xsi:type="ecore:EAttribute" name="mean" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EDouble"/>
+    <eStructuralFeatures xsi:type="ecore:EAttribute" name="scale" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EDouble"/>
+  </eClassifiers>
+  <eClassifiers xsi:type="ecore:EClass" name="DiscreteDistribution" eSuperTypes="#//DisplayEntity">
+    <eStructuralFeatures xsi:type="ecore:EAttribute" name="valueList" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EDouble"/>
+    <eStructuralFeatures xsi:type="ecore:EAttribute" name="probabilityList" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EDouble"/>
+  </eClassifiers>
+  <eClassifiers xsi:type="ecore:EClass" name="ContinuousDistribution" eSuperTypes="#//DisplayEntity">
+    <eStructuralFeatures xsi:type="ecore:EAttribute" name="valueList" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EDouble"/>
+    <eStructuralFeatures xsi:type="ecore:EAttribute" name="cumulativeProbabilityList" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EDouble"/>
+  </eClassifiers>
+  <eClassifiers xsi:type="ecore:EClass" name="PoissonDistribution" eSuperTypes="#//DisplayEntity">
+    <eStructuralFeatures xsi:type="ecore:EAttribute" name="mean" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EDouble"/>
+  </eClassifiers>
+  <eClassifiers xsi:type="ecore:EClass" name="BinomialDistribution" eSuperTypes="#//DisplayEntity">
+    <eStructuralFeatures xsi:type="ecore:EAttribute" name="probability" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EDouble"/>
+    <eStructuralFeatures xsi:type="ecore:EAttribute" name="numberOfTrials" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EDouble"/>
+  </eClassifiers>
+  <eClassifiers xsi:type="ecore:EClass" name="NegativeBinomialDistribution" eSuperTypes="#//DisplayEntity">
+    <eStructuralFeatures xsi:type="ecore:EAttribute" name="probability" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EDouble"/>
+    <eStructuralFeatures xsi:type="ecore:EAttribute" name="numberOfSuccesses" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EDouble"/>
+  </eClassifiers>
+  <eClassifiers xsi:type="ecore:EClass" name="GeometricDistribution" eSuperTypes="#//DisplayEntity">
+    <eStructuralFeatures xsi:type="ecore:EAttribute" name="probability" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EDouble"/>
+  </eClassifiers>
+  <eClassifiers xsi:type="ecore:EClass" name="StudentTDistribution" eSuperTypes="#//DisplayEntity">
+    <eStructuralFeatures xsi:type="ecore:EAttribute" name="degreesOfFreedom" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EDouble"/>
+  </eClassifiers>
+  <eClassifiers xsi:type="ecore:EClass" name="ChiSquaredDistribution" eSuperTypes="#//DisplayEntity">
+    <eStructuralFeatures xsi:type="ecore:EAttribute" name="degreesOfFreedom" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EDouble"/>
+  </eClassifiers>
+  <eClassifiers xsi:type="ecore:EClass" name="FDistribution" eSuperTypes="#//DisplayEntity">
+    <eStructuralFeatures xsi:type="ecore:EAttribute" name="numeratorDOF" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EDouble"/>
+    <eStructuralFeatures xsi:type="ecore:EAttribute" name="denominatorDOF" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EDouble"/>
+  </eClassifiers>
+  <eClassifiers xsi:type="ecore:EClass" name="Pearson3Distribution" eSuperTypes="#//DisplayEntity">
+    <eStructuralFeatures xsi:type="ecore:EAttribute" name="mean" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EDouble"/>
+    <eStructuralFeatures xsi:type="ecore:EAttribute" name="standardDeviation" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EDouble"/>
+    <eStructuralFeatures xsi:type="ecore:EAttribute" name="skewness" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EDouble"/>
+  </eClassifiers>
+  <eClassifiers xsi:type="ecore:EClass" name="GumbelDistribution" eSuperTypes="#//DisplayEntity">
+    <eStructuralFeatures xsi:type="ecore:EAttribute" name="location" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EDouble"/>
+    <eStructuralFeatures xsi:type="ecore:EAttribute" name="scale" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EDouble"/>
+  </eClassifiers>
+  <eClassifiers xsi:type="ecore:EClass" name="BernoulliDistribution" eSuperTypes="#//DisplayEntity">
+    <eStructuralFeatures xsi:type="ecore:EAttribute" name="probability" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EDouble"/>
+  </eClassifiers>
+  <eClassifiers xsi:type="ecore:EClass" name="ChoiceDistribution" eSuperTypes="#//DisplayEntity">
+    <eStructuralFeatures xsi:type="ecore:EAttribute" name="valueList" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EDouble"/>
+    <eStructuralFeatures xsi:type="ecore:EAttribute" name="probabilityList" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EDouble"/>
+  </eClassifiers>
+  <eClassifiers xsi:type="ecore:EClass" name="FluidContainer" eSuperTypes="#//DisplayEntity">
+    <eStructuralFeatures xsi:type="ecore:EAttribute" name="capacity" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EDouble"/>
+    <eStructuralFeatures xsi:type="ecore:EAttribute" name="volume" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EDouble"/>
+    <eStructuralFeatures xsi:type="ecore:EAttribute" name="level" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EDouble"/>
+  </eClassifiers>
+  <eClassifiers xsi:type="ecore:EClass" name="FluidPipe" eSuperTypes="#//ProcessComponent">
+    <eStructuralFeatures xsi:type="ecore:EAttribute" name="flowRate" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EDouble"/>
+    <eStructuralFeatures xsi:type="ecore:EAttribute" name="resistance" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EDouble"/>
+    <eStructuralFeatures xsi:type="ecore:EAttribute" name="length" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EDouble"/>
+  </eClassifiers>
+  <eClassifiers xsi:type="ecore:EClass" name="FluidPump" eSuperTypes="#//ProcessComponent">
+    <eStructuralFeatures xsi:type="ecore:EAttribute" name="flowRate" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EDouble"/>
+    <eStructuralFeatures xsi:type="ecore:EAttribute" name="pressure" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EDouble"/>
+  </eClassifiers>
+  <eClassifiers xsi:type="ecore:EClass" name="FluidValve" eSuperTypes="#//ProcessComponent">
+    <eStructuralFeatures xsi:type="ecore:EAttribute" name="open" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EBoolean"/>
+    <eStructuralFeatures xsi:type="ecore:EAttribute" name="flowCoefficient" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EDouble"/>
+  </eClassifiers>
+  <eClassifiers xsi:type="ecore:EClass" name="FluidTank" eSuperTypes="#//FluidContainer">
+  </eClassifiers>
+  <eClassifiers xsi:type="ecore:EClass" name="FluidSource" eSuperTypes="#//ProcessComponent">
+    <eStructuralFeatures xsi:type="ecore:EAttribute" name="flowRate" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EDouble"/>
+    <eStructuralFeatures xsi:type="ecore:EAttribute" name="fluid" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EString"/>
+  </eClassifiers>
+  <eClassifiers xsi:type="ecore:EClass" name="FluidSink" eSuperTypes="#//ProcessComponent">
+    <eStructuralFeatures xsi:type="ecore:EAttribute" name="flowRate" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EDouble"/>
+  </eClassifiers>
+</ecore:EPackage>

@@ -1,0 +1,295 @@
+module Rules;
+create OUT: Jaamsim from IN: BPMN;
+
+-- =========================
+-- Helpers (Reflective, works with DynamicEObjectImpl)
+-- =========================
+
+-- Reflective getter: o.eGet(feature)
+helper def: get(o: OclAny, featureName: String): OclAny =
+	if o.oclIsUndefined() then
+		OclUndefined
+	else
+		o.eGet(o.eClass().eAllStructuralFeatures -> select(f | f.name = featureName) ->
+				first())
+	endif;
+
+-- Safe string conversion
+helper def: safeStr(v: OclAny, fallback: String): String =
+	if v.oclIsUndefined() then
+		fallback
+	else
+		v.toString()
+	endif;
+
+-- Climb up containers until we find the Definitions element (no oclAsType)
+helper def: owningDefinitions(x: OclAny): OclAny =
+	if x.oclIsUndefined() then
+		OclUndefined
+	else
+		if x.eClass().name = 'Definitions' then
+      x
+    else
+      if x.eContainer().oclIsUndefined() then
+				OclUndefined
+			else
+				thisModule.owningDefinitions(x.eContainer())
+			endif
+    endif
+	endif;
+
+-- Return all Processes inside Definitions
+helper context BPMN!Definitions def: processes(): Sequence(OclAny) =
+	thisModule.get(self, 'rootElements') -> select(e | not e.oclIsUndefined() and e.
+			eClass().name = 'Process') -> asSequence();
+
+-- Return all FlowNodes in a process (list the ones you want to support)
+helper def: flowNodes(p: OclAny): Sequence(OclAny) =
+	thisModule.get(p, 'flowElements') -> select(e | not e.oclIsUndefined() and (
+        e.eClass().name = 'StartEvent' or e.eClass().name = 'Task' or e.eClass().name =
+		'EndEvent' or e.eClass().name = 'ExclusiveGateway' or e.eClass().name =
+		'ParallelGateway'
+    )) -> asSequence();
+
+-- Return all SequenceFlows in a process
+helper def: seqFlows(p: OclAny): Sequence(OclAny) =
+	thisModule.get(p, 'flowElements') -> select(e | not e.oclIsUndefined() and e.eClass().
+			name = 'SequenceFlow') -> asSequence();
+
+-- deterministic value in [1..10]
+helper def: pseudo10(i: Integer): Integer =
+	(i.mod(10)) + 1;
+
+-- First outgoing SequenceFlow for a node (reflective)
+helper def: firstOutFlow(fn: OclAny): OclAny =
+	if fn.oclIsUndefined() then
+		OclUndefined
+	else
+		let outs: Sequence(OclAny) =
+			thisModule.get(fn, 'outgoing') -> asSequence()
+		in
+			if outs -> isEmpty() then
+				OclUndefined
+			else
+				outs -> first()
+			endif
+	endif;
+
+-- Map BPMN node to created Jaamsim component
+helper def: toComponent(fn : OclAny) : Jaamsim!ProcessComponent =
+  if fn.oclIsUndefined() then
+    OclUndefined
+  else
+    if fn.eClass().name = 'StartEvent' then
+      thisModule.resolveTemp(fn, 'gen')
+    else
+      if fn.eClass().name = 'Task' then
+        thisModule.resolveTemp(fn, 'srv')
+      else
+        if fn.eClass().name = 'EndEvent' then
+          thisModule.resolveTemp(fn, 'sink')
+        else
+          if fn.eClass().name = 'ExclusiveGateway' then
+            thisModule.resolveTemp(fn, 'br')
+          else
+            OclUndefined
+          endif
+        endif
+      endif
+    endif
+  endif;
+
+
+-- Conveyor created for outgoing flow (no typed BPMN FlowNode)
+helper def: nextConveyor(fn: OclAny): Jaamsim!EntityConveyor =
+	if fn.oclIsUndefined() then
+		OclUndefined
+	else
+		let of: OclAny =
+			thisModule.firstOutFlow(fn)
+		in
+			if of.oclIsUndefined() then
+				OclUndefined
+			else
+				thisModule.resolveTemp(of, 'conv')
+			endif
+	endif;
+
+-- Safe IDs for naming conveyors (avoids OclUndefined in names)
+helper def: safeId(x: OclAny): String =
+	if x.oclIsUndefined() then
+		'U'
+	else
+		thisModule.safeStr(thisModule.get(x, 'id'), 'U')
+	endif;
+
+-- All outgoing flows (reflective)
+helper def: outFlows(fn : OclAny) : Sequence(OclAny) =
+  if fn.oclIsUndefined() then
+    Sequence{}
+  else
+    thisModule.get(fn, 'outgoing')->asSequence()
+  endif;
+
+-- Extract a readable condition for one outgoing SequenceFlow
+-- Priority:
+--  (1) SequenceFlow.conditionExpression.body (if available)
+--  (2) SequenceFlow.name (if available)
+--  (3) 'true' (fallback)
+helper def: condText(sf : OclAny) : String =
+  if sf.oclIsUndefined() then
+    'true'
+  else
+    let ce : OclAny = thisModule.get(sf, 'conditionExpression') in
+      if not ce.oclIsUndefined() then
+        let b : OclAny = thisModule.get(ce, 'body') in
+          if not b.oclIsUndefined() then
+            thisModule.safeStr(b, 'true')
+          else
+            -- if no 'body' feature exists in your loaded BPMN variant, keep something stable
+            thisModule.safeStr(ce, 'true')
+          endif
+      else
+        -- try to use SequenceFlow.name if it exists
+        let n : OclAny = thisModule.get(sf, 'name') in
+          if n.oclIsUndefined() then 'true' else thisModule.safeStr(n, 'true') endif
+      endif
+  endif;
+
+-- Format: if cond1 then 1 else if cond2 then 2 else ... else N
+helper def: branchChoiceExpr(gw : OclAny) : String =
+  let outs : Sequence(OclAny) = thisModule.outFlows(gw) in
+    if outs->isEmpty() then
+      '1'
+    else
+      outs->iterate(sf; acc : String = '' |
+        if acc = '' then
+          'if ' + thisModule.condText(sf) + ' then ' + outs->indexOf(sf).toString()
+        else
+          acc + ' else if ' + thisModule.condText(sf) + ' then ' + outs->indexOf(sf).toString()
+        endif
+      ) + ' else ' + outs->size().toString()
+    endif;
+
+
+rule Definitions2SimulationModel {
+	from
+		d: BPMN!Definitions
+	to
+		sm: Jaamsim!SimulationModel (
+			name <- if d.name.oclIsUndefined() then
+					'SimModel'
+				else
+					d.name
+				endif,
+			entities <- Sequence{se} -- add ALL node components (gen/srv/sink)
+								 -> union(d.processes() -> collect(p |
+										thisModule.flowNodes(p) -> collect(n |
+										thisModule.toComponent(n)) -> select(c | not
+										c.oclIsUndefined())) -> flatten()) -- add ALL
+										-- queues (one per Task)
+							 -> union(d.processes() -> collect(p |
+									thisModule.flowNodes(p) -> select(n | n.eClass().name
+									= 'Task') -> collect(t | thisModule.resolveTemp(t,
+									'q'))) -> flatten()) -- add ALL conveyors
+						 -> union(d.processes() -> collect(p | thisModule.seqFlows(p) ->
+								collect(sf | thisModule.resolveTemp(sf, 'conv'))) ->
+								flatten()) -> asSequence()
+		),
+		se: Jaamsim!SimEntity (
+			name <- 'Entity1'
+		)
+}
+
+rule SequenceFlow2EntityConveyor {
+	from
+		sf: BPMN!SequenceFlow
+	to
+		conv: Jaamsim!EntityConveyor (
+			name <- 'Conveyor_' + thisModule.safeId(sf.sourceRef) + '_to_' + thisModule.
+					safeId(sf.targetRef),
+			nextComponent <- thisModule.toComponent(sf.targetRef),
+			-- indexOf works because sf is one of the elements returned by
+					-- seqFlows(container)
+			travelTime <- thisModule.pseudo10(thisModule.seqFlows(sf.eContainer()) ->
+					indexOf(sf))
+		)
+}
+
+rule StartEvent2EntityGenerator {
+	from
+		s: BPMN!StartEvent
+	to
+		gen: Jaamsim!EntityGenerator (
+			name <- if s.name.oclIsUndefined() then
+					'Start_' + thisModule.safeId(s)
+				else
+					s.name
+				endif,
+			-- resolve SimEntity created in Definitions2SimulationModel
+			prototype <- thisModule.resolveTemp(thisModule.owningDefinitions(s), 'se'),
+			interArrivalTime <- thisModule.pseudo10(thisModule.flowNodes(s.eContainer())
+					-> indexOf(s)),
+			entitiesPerArrival <- 1,
+			maxNumber <- s.MaxNumber,
+			nextComponent <- thisModule.nextConveyor(s)
+		)
+}
+
+-- Task -> Server
+rule Task2Server {
+	from
+		t: BPMN!Task
+	to
+		q: Jaamsim!Queue (
+			-- unique-ish queue name
+			name <- 'Queue_' + thisModule.safeId(t)
+		),
+		srv: Jaamsim!Server (
+			name <- if t.name.oclIsUndefined() then
+					'Task_' + thisModule.safeId(t)
+				else
+					t.name
+				endif,
+			serviceTime <- t.Time,
+			nextComponent <- thisModule.nextConveyor(t),
+			-- each server uses its own queue
+			waitQueue <- q
+		)
+}
+
+-- EndEvent -> EntitySink
+rule EndEvent2EntitySink {
+	from
+		e: BPMN!EndEvent
+	to
+		sink: Jaamsim!EntitySink (
+			name <- if e.name.oclIsUndefined() then
+					'End_' + thisModule.safeId(e)
+				else
+					e.name
+				endif
+		)
+}
+
+
+-- ExclusiveGateway -> Branch
+rule ExclusiveGateway2Branch {
+  from gw : BPMN!ExclusiveGateway
+  to
+    br : Jaamsim!Branch (
+      name <- if thisModule.get(gw,'name').oclIsUndefined()
+              then 'XOR_' + thisModule.safeId(gw)
+              else thisModule.safeStr(thisModule.get(gw,'name'), 'XOR_' + thisModule.safeId(gw))
+              endif,
+
+
+      nextComponentList <- thisModule.outFlows(gw)
+                             ->collect(sf | thisModule.resolveTemp(sf, 'conv'))
+                             ->select(c | not c.oclIsUndefined())
+                             ->asSequence(),
+
+      choice <- gw.Choice
+    )
+}
+

@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="ISO-8859-1"?>
+<jaamsim:SimulationModel xmi:version="2.0" xmlns:xmi="http://www.omg.org/XMI" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:jaamsim="http://www.example.org/jaamsim" name="SimModel">
+  <entities xsi:type="jaamsim:SimEntity" name="Entity1"/>
+  <entities xsi:type="jaamsim:EntityGenerator" name="Start_U" nextComponent="//@entities.5" interArrivalTime="2.0" entitiesPerArrival="1" maxNumber="8" prototype="//@entities.0"/>
+  <entities xsi:type="jaamsim:EntitySink" name="End_U"/>
+  <entities xsi:type="jaamsim:Server" name="Task_U" nextComponent="//@entities.6" serviceTime="10.0" waitQueue="//@entities.4"/>
+  <entities xsi:type="jaamsim:Queue" name="Queue_U"/>
+  <entities xsi:type="jaamsim:EntityConveyor" name="Conveyor_U_to_U" nextComponent="//@entities.3" travelTime="2.0"/>
+  <entities xsi:type="jaamsim:EntityConveyor" name="Conveyor_U_to_U" nextComponent="//@entities.2" travelTime="3.0"/>
+</jaamsim:SimulationModel>
