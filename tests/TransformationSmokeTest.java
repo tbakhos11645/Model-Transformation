@@ -147,6 +147,11 @@ public class TransformationSmokeTest {
             set(task, "name", "Simulation"); // Reserved UI name must get a suffix.
             String cfg = f.run("subtype-" + type);
             check(cfg.contains("Define Server { Simulation_2 }"), "Inherited names/reserved names");
+            check(cfg.contains("Start Position { 0.0 0.0 0.0 m }") && cfg.contains("Queue_Work Position { 6.0 0.0 0.0 m }")
+                && cfg.contains("Simulation_2 Position { 9.0 0.0 0.0 m }") && cfg.contains("End Position { 15.0 0.0 0.0 m }"), "Layout follows execution including queue/server link");
+            check(cfg.contains("Conveyor_toWork Points { { 0.0 0.0 0.0 m } { 3.0 0.0 0.0 m } { 6.0 0.0 0.0 m } }")
+                && cfg.contains("Conveyor_toEnd Points { { 9.0 0.0 0.0 m } { 12.0 0.0 0.0 m } { 15.0 0.0 0.0 m } }"), "Conveyors join actual source and destination positions");
+            check(cfg.contains("Simulation ShowEntityFlow { TRUE }"), "Show logical flow connections");
             check(cfg.contains("ServiceTime { 0.0 s }"), "Zero service time must be emitted");
             check(cfg.contains("InterArrivalTime { 2.0 s }") && cfg.contains("EntitiesPerArrival { 2 }") && cfg.contains("FirstArrivalTime { 4.0 s }"), "Explicit arrival inputs");
             cfgReferences(cfg);

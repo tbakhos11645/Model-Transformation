@@ -66,3 +66,15 @@ For Main or the Eclipse Application launch, the six program arguments are:
 - All generated verification outputs are ignored by Git.
 
 This baseline validates constant arrivals, trigger counts, processing time, unit conversion, queue wiring and both launch paths. It does not add scenario Duration/Warmup/seed handling, XPath/probability routing, distributions, calendars, resources or parallel synchronization. Those remain the next implementation milestones. No commit or push was performed.
+
+## Follow-up: connected display geometry — 2026.11.06-131926-CET
+
+Recorded 6 November 2026 at 13:19:26 Europe/Paris. The original behavioral tests passed, but they did not check the displayed conveyor geometry. The exporter placed objects in file order and did not supply conveyor Points, so visual paths could look detached even when NextComponent references were correct.
+
+The exporter now places components along the execution graph (including Queue to Server via WaitQueue), draws each conveyor from its predecessor to its destination through a layout waypoint, enables Simulation ShowEntityFlow, and adjusts the view to the model bounds. Explicit intermediate-model positions remain supported. The SimEntity prototype is a template and intentionally sits above the process chain.
+
+For this example the route remains Start → Conveyor_ToWork → Queue_Work → Work → Conveyor_ToEnd → End. A Server takes entities from its WaitQueue; the queue therefore does not need a NextComponent setting. Both conveyors have zero travel time, so entities traverse them instantly; service still takes two seconds.
+
+Validation: 285 regression assertions, all 14 native simulations, native conveyor endpoint checks, unchanged arrival/completion times, and an actual Equinox launch with identical CFG output all passed. This verifies native geometry data and behavior, not a visual screenshot review of the JaamSim GUI. Basic placement is not a crossing-free layout for arbitrary branching/cyclic models and does not import BPMN diagram coordinates.
+
+Reopen .build/first-bpsim-test.cfg or .build/first-bpsim-eclipse.cfg in JaamSim to load the regenerated geometry. Previously opened models do not automatically reload files. Pre-regeneration CFGs, including manual layout edits, are preserved in .build/cfg-backup-20261106-131647. The original first-test routing was correct; other reported incorrect connections still require the specific failing CFG and intended edge to diagnose.

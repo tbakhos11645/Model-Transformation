@@ -2,6 +2,7 @@ package com.your.m2t;
 
 import java.io.OutputStream;
 import java.nio.charset.StandardCharsets;
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.LinkedHashMap;
 import java.util.LinkedHashSet;
@@ -13,6 +14,7 @@ import org.eclipse.emf.ecore.EObject;
 import org.eclipse.emf.ecore.EStructuralFeature;
 import org.eclipse.emf.ecore.resource.Resource;
 import org.eclipse.xtext.xbase.lib.CollectionLiterals;
+import org.eclipse.xtext.xbase.lib.DoubleExtensions;
 import org.eclipse.xtext.xbase.lib.Exceptions;
 import org.eclipse.xtext.xbase.lib.Functions.Function1;
 import org.eclipse.xtext.xbase.lib.IterableExtensions;
@@ -63,6 +65,7 @@ public class M2T {
       for (final EObject e_2 : entities) {
         this.validate(e_2);
       }
+      final LinkedHashMap<EObject, List<Double>> positions = this.layout(entities);
       final StringBuilder text = new StringBuilder("RecordEdits\n\n");
       for (final String type : this.types) {
         {
@@ -95,7 +98,7 @@ public class M2T {
         this.line(text, "Simulation", "ExitAtStop", this.bool(this.value(s, "exitAtStop")));
         this.line(text, "Simulation", "GlobalSubstreamSeed", this.value(s, "globalSubstreamSeed"));
       }
-      int index = 0;
+      this.line(text, "Simulation", "ShowEntityFlow", "TRUE");
       for (final EObject e_3 : entities) {
         {
           final String name = this.nameMap.get(e_3);
@@ -159,53 +162,66 @@ public class M2T {
                 break;
             }
           }
-          final Object position = this.value(e_3, "position");
-          if ((position instanceof EObject)) {
-            final EObject p = ((EObject)position);
-            double _coordinate = this.coordinate(p, "x");
-            String _plus_3 = (Double.valueOf(_coordinate) + " ");
-            double _coordinate_1 = this.coordinate(p, "y");
-            String _plus_4 = (_plus_3 + Double.valueOf(_coordinate_1));
-            String _plus_5 = (_plus_4 + " ");
-            double _coordinate_2 = this.coordinate(p, "z");
-            String _plus_6 = (_plus_5 + Double.valueOf(_coordinate_2));
-            String _plus_7 = (_plus_6 + " m");
-            this.line(text, name, "Position", _plus_7);
+          String _name_3 = e_3.eClass().getName();
+          boolean _equals = Objects.equals(_name_3, "EntityConveyor");
+          if (_equals) {
+            final Function1<EObject, Boolean> _function_3 = (EObject it) -> {
+              return Boolean.valueOf(this.successors(it, entities).contains(e_3));
+            };
+            final EObject source = IterableExtensions.<EObject>findFirst(entities, _function_3);
+            Object _value_2 = this.value(e_3, "nextComponent");
+            final EObject target = ((EObject) _value_2);
+            List<Double> _xifexpression = null;
+            if ((source == null)) {
+              _xifexpression = positions.get(e_3);
+            } else {
+              _xifexpression = positions.get(source);
+            }
+            final List<Double> start = _xifexpression;
+            final List<Double> end = positions.get(target);
+            String _xyz = this.xyz(start);
+            String _plus_3 = ("{ " + _xyz);
+            String _plus_4 = (_plus_3 + " } { ");
+            String _xyz_1 = this.xyz(positions.get(e_3));
+            String _plus_5 = (_plus_4 + _xyz_1);
+            String _plus_6 = (_plus_5 + " } { ");
+            String _xyz_2 = this.xyz(end);
+            String _plus_7 = (_plus_6 + _xyz_2);
+            String _plus_8 = (_plus_7 + " }");
+            this.line(text, name, "Points", _plus_8);
           } else {
-            String _plus_8 = (Double.valueOf((index * 2.0)) + " 0 0 m");
-            this.line(text, name, "Position", _plus_8);
+            this.line(text, name, "Position", this.xyz(positions.get(e_3)));
           }
           for (final String feature : Collections.<String>unmodifiableList(CollectionLiterals.<String>newArrayList("size", "orientation"))) {
             {
               final Object point = this.value(e_3, feature);
               if ((point instanceof EObject)) {
-                String _xifexpression = null;
-                boolean _equals = Objects.equals(feature, "size");
-                if (_equals) {
-                  _xifexpression = "Size";
-                } else {
-                  _xifexpression = "Orientation";
-                }
-                double _coordinate_3 = this.coordinate(((EObject)point), "x");
-                String _plus_9 = (Double.valueOf(_coordinate_3) + " ");
-                double _coordinate_4 = this.coordinate(((EObject)point), "y");
-                String _plus_10 = (_plus_9 + Double.valueOf(_coordinate_4));
-                String _plus_11 = (_plus_10 + " ");
-                double _coordinate_5 = this.coordinate(((EObject)point), "z");
-                String _plus_12 = (_plus_11 + Double.valueOf(_coordinate_5));
                 String _xifexpression_1 = null;
                 boolean _equals_1 = Objects.equals(feature, "size");
                 if (_equals_1) {
-                  _xifexpression_1 = " m";
+                  _xifexpression_1 = "Size";
                 } else {
-                  _xifexpression_1 = " deg";
+                  _xifexpression_1 = "Orientation";
                 }
-                String _plus_13 = (_plus_12 + _xifexpression_1);
-                this.line(text, name, _xifexpression, _plus_13);
+                double _coordinate = this.coordinate(((EObject)point), "x");
+                String _plus_9 = (Double.valueOf(_coordinate) + " ");
+                double _coordinate_1 = this.coordinate(((EObject)point), "y");
+                String _plus_10 = (_plus_9 + Double.valueOf(_coordinate_1));
+                String _plus_11 = (_plus_10 + " ");
+                double _coordinate_2 = this.coordinate(((EObject)point), "z");
+                String _plus_12 = (_plus_11 + Double.valueOf(_coordinate_2));
+                String _xifexpression_2 = null;
+                boolean _equals_2 = Objects.equals(feature, "size");
+                if (_equals_2) {
+                  _xifexpression_2 = " m";
+                } else {
+                  _xifexpression_2 = " deg";
+                }
+                String _plus_13 = (_plus_12 + _xifexpression_2);
+                this.line(text, name, _xifexpression_1, _plus_13);
               }
             }
           }
-          index = (index + 1);
         }
       }
       text.append("\nAxis ColladaFile { <res>/shapes/axis_text.dae }\n");
@@ -214,7 +230,66 @@ public class M2T {
       text.append("XYZ-Axis DisplayModel { Axis }\nXYZ-Axis Show { FALSE }\n");
       text.append("Clock ScreenPosition { 15 15 }\nClock DateFormat { \'yyyy-MMM-dd HH:mm:ss.SSS\' }\n");
       text.append("Title ScreenPosition { 15 40 }\nTitle Format { \'BPMN Simulation\' }\n");
-      text.append("View1 ViewCenter { 5 0 0 m }\nView1 ViewPosition { 5 0 20 m }\nView1 ShowWindow { TRUE }\nView1 Lock2D { TRUE }\n");
+      Double _xifexpression = null;
+      boolean _isEmpty = positions.isEmpty();
+      if (_isEmpty) {
+        _xifexpression = Double.valueOf(0.0);
+      } else {
+        final Function1<List<Double>, Double> _function_2 = (List<Double> it) -> {
+          return it.get(0);
+        };
+        _xifexpression = IterableExtensions.<Double>min(IterableExtensions.<List<Double>, Double>map(positions.values(), _function_2));
+      }
+      final Double minX = _xifexpression;
+      Double _xifexpression_1 = null;
+      boolean _isEmpty_1 = positions.isEmpty();
+      if (_isEmpty_1) {
+        _xifexpression_1 = Double.valueOf(0.0);
+      } else {
+        final Function1<List<Double>, Double> _function_3 = (List<Double> it) -> {
+          return it.get(0);
+        };
+        _xifexpression_1 = IterableExtensions.<Double>max(IterableExtensions.<List<Double>, Double>map(positions.values(), _function_3));
+      }
+      final Double maxX = _xifexpression_1;
+      Double _xifexpression_2 = null;
+      boolean _isEmpty_2 = positions.isEmpty();
+      if (_isEmpty_2) {
+        _xifexpression_2 = Double.valueOf(0.0);
+      } else {
+        final Function1<List<Double>, Double> _function_4 = (List<Double> it) -> {
+          return it.get(1);
+        };
+        _xifexpression_2 = IterableExtensions.<Double>min(IterableExtensions.<List<Double>, Double>map(positions.values(), _function_4));
+      }
+      final Double minY = _xifexpression_2;
+      Double _xifexpression_3 = null;
+      boolean _isEmpty_3 = positions.isEmpty();
+      if (_isEmpty_3) {
+        _xifexpression_3 = Double.valueOf(0.0);
+      } else {
+        final Function1<List<Double>, Double> _function_5 = (List<Double> it) -> {
+          return it.get(1);
+        };
+        _xifexpression_3 = IterableExtensions.<Double>max(IterableExtensions.<List<Double>, Double>map(positions.values(), _function_5));
+      }
+      final Double maxY = _xifexpression_3;
+      double _plus_1 = DoubleExtensions.operator_plus(minX, maxX);
+      double _divide = (_plus_1 / 2);
+      String _plus_2 = (Double.valueOf(_divide) + " ");
+      double _plus_3 = DoubleExtensions.operator_plus(minY, maxY);
+      double _divide_1 = (_plus_3 / 2);
+      final String center = (_plus_2 + Double.valueOf(_divide_1));
+      this.line(text, "View1", "ViewCenter", (center + " 0 m"));
+      double _minus = DoubleExtensions.operator_minus(maxX, minX);
+      double _minus_1 = DoubleExtensions.operator_minus(maxY, minY);
+      double _max = Math.max(_minus, _minus_1);
+      double _multiply = (_max * 2);
+      double _max_1 = Math.max(20.0, _multiply);
+      String _plus_4 = ((center + " ") + Double.valueOf(_max_1));
+      String _plus_5 = (_plus_4 + " m");
+      this.line(text, "View1", "ViewPosition", _plus_5);
+      text.append("View1 ShowWindow { TRUE }\nView1 Lock2D { TRUE }\n");
       final OutputStream out = model.getResourceSet().getURIConverter().createOutputStream(outputUri);
       try {
         out.write(text.toString().getBytes(StandardCharsets.UTF_8));
@@ -224,6 +299,135 @@ public class M2T {
     } catch (Throwable _e) {
       throw Exceptions.sneakyThrow(_e);
     }
+  }
+
+  /**
+   * Breadth-first placement follows execution edges, including queue-to-server pulls.
+   * A visited set bounds loops; explicit model positions take precedence.
+   */
+  private LinkedHashMap<EObject, List<Double>> layout(final List<EObject> entities) {
+    LinkedHashMap<EObject, List<Double>> _xblockexpression = null;
+    {
+      final LinkedHashMap<EObject, Integer> depth = new LinkedHashMap<EObject, Integer>();
+      final ArrayList<EObject> pending = new ArrayList<EObject>();
+      final Function1<EObject, Boolean> _function = (EObject it) -> {
+        String _name = it.eClass().getName();
+        return Boolean.valueOf(Objects.equals(_name, "EntityGenerator"));
+      };
+      Iterable<EObject> _filter = IterableExtensions.<EObject>filter(entities, _function);
+      for (final EObject e : _filter) {
+        {
+          depth.put(e, Integer.valueOf(0));
+          pending.add(e);
+        }
+      }
+      int cursor = 0;
+      while ((cursor < pending.size())) {
+        {
+          final EObject e_1 = pending.get(cursor);
+          List<EObject> _successors = this.successors(e_1, entities);
+          for (final EObject next : _successors) {
+            boolean _containsKey = depth.containsKey(next);
+            boolean _not = (!_containsKey);
+            if (_not) {
+              Integer _get = depth.get(e_1);
+              int _plus = ((_get).intValue() + 1);
+              depth.put(next, Integer.valueOf(_plus));
+              pending.add(next);
+            }
+          }
+          cursor++;
+        }
+      }
+      final LinkedHashMap<Integer, Integer> lanes = new LinkedHashMap<Integer, Integer>();
+      final LinkedHashMap<EObject, List<Double>> positions = new LinkedHashMap<EObject, List<Double>>();
+      for (final EObject e_1 : entities) {
+        {
+          Integer _xifexpression = null;
+          boolean _containsKey = depth.containsKey(e_1);
+          if (_containsKey) {
+            _xifexpression = depth.get(e_1);
+          } else {
+            _xifexpression = Integer.valueOf(0);
+          }
+          final Integer d = _xifexpression;
+          Integer _xifexpression_1 = null;
+          boolean _containsKey_1 = lanes.containsKey(d);
+          if (_containsKey_1) {
+            _xifexpression_1 = lanes.get(d);
+          } else {
+            _xifexpression_1 = Integer.valueOf(0);
+          }
+          final Integer lane = _xifexpression_1;
+          String _name = e_1.eClass().getName();
+          boolean _notEquals = (!Objects.equals(_name, "SimEntity"));
+          if (_notEquals) {
+            lanes.put(d, Integer.valueOf(((lane).intValue() + 1)));
+          }
+          final Object p = this.value(e_1, "position");
+          List<Double> _xifexpression_2 = null;
+          if ((p instanceof EObject)) {
+            double _coordinate = this.coordinate(((EObject)p), "x");
+            double _coordinate_1 = this.coordinate(((EObject)p), "y");
+            double _coordinate_2 = this.coordinate(((EObject)p), "z");
+            _xifexpression_2 = Collections.<Double>unmodifiableList(CollectionLiterals.<Double>newArrayList(Double.valueOf(_coordinate), Double.valueOf(_coordinate_1), Double.valueOf(_coordinate_2)));
+          } else {
+            double _xifexpression_3 = (double) 0;
+            String _name_1 = e_1.eClass().getName();
+            boolean _equals = Objects.equals(_name_1, "SimEntity");
+            if (_equals) {
+              _xifexpression_3 = 4.0;
+            } else {
+              _xifexpression_3 = ((-(lane).intValue()) * 3.0);
+            }
+            _xifexpression_2 = Collections.<Double>unmodifiableList(CollectionLiterals.<Double>newArrayList(Double.valueOf(((d).intValue() * 3.0)), Double.valueOf(_xifexpression_3), Double.valueOf(0.0)));
+          }
+          positions.put(e_1, _xifexpression_2);
+        }
+      }
+      _xblockexpression = positions;
+    }
+    return _xblockexpression;
+  }
+
+  private List<EObject> successors(final EObject e, final List<EObject> entities) {
+    ArrayList<EObject> _xblockexpression = null;
+    {
+      final ArrayList<EObject> result = new ArrayList<EObject>();
+      final Object next = this.value(e, "nextComponent");
+      if ((next instanceof EObject)) {
+        result.add(((EObject)next));
+      }
+      String _name = e.eClass().getName();
+      boolean _equals = Objects.equals(_name, "Branch");
+      if (_equals) {
+        Object _value = this.value(e, "nextComponentList");
+        for (final Object target : ((List<?>) _value)) {
+          result.add(((EObject) target));
+        }
+      }
+      String _name_1 = e.eClass().getName();
+      boolean _equals_1 = Objects.equals(_name_1, "Queue");
+      if (_equals_1) {
+        final Function1<EObject, Boolean> _function = (EObject it) -> {
+          return Boolean.valueOf((Objects.equals(it.eClass().getName(), "Server") && (this.value(it, "waitQueue") == e)));
+        };
+        result.addAll(IterableExtensions.<EObject>toList(IterableExtensions.<EObject>filter(entities, _function)));
+      }
+      _xblockexpression = result;
+    }
+    return _xblockexpression;
+  }
+
+  private String xyz(final List<Double> p) {
+    Double _get = p.get(0);
+    String _plus = (_get + " ");
+    Double _get_1 = p.get(1);
+    String _plus_1 = (_plus + _get_1);
+    String _plus_2 = (_plus_1 + " ");
+    Double _get_2 = p.get(2);
+    String _plus_3 = (_plus_2 + _get_2);
+    return (_plus_3 + " m");
   }
 
   private Object value(final EObject e, final String feature) {

@@ -1,13 +1,14 @@
 # Transformation fixes — GitHub patch list
 
-**Patch version:** `2026.11.06-111201-CET`
-**Recorded:** 2026-11-06 at 11:12:01, Europe/Paris (CET, UTC+01:00)
+**Patch version:** `2026.11.06-131926-CET`
+**Recorded:** 2026-11-06 at 13:19:26, Europe/Paris (CET, UTC+01:00)
 **Status:** Local working-tree patch; not committed or published.
 
 ## Change history
 
 | Version | Recorded (Europe/Paris) | Changes |
 | --- | --- | --- |
+| `2026.11.06-131926-CET` | 2026-11-06 13:19:26 CET | Flow-based layout, conveyor paths, visible flow arrows, fitted view and native endpoint regression checks. |
 | `2026.11.06-111201-CET` | 2026-11-06 11:12:01 CET | Permanent first BPSim example, native timeline assertions, actual Equinox application launch and separate test breakdown. |
 | `2026.11.06-095128-CET` | 2026-11-06 09:51:28 CET | Fix Eclipse application extension ID placement in main plugin.xml. |
 | `2026.11.06-092452-CET` | 2026-11-06 09:24:52 CET | Schema-derived BPSim model and initial constant timing/count scenario adapter; see revision breakdown below. |
@@ -180,3 +181,21 @@ Changed com.yourorg.main/plugin.xml: added id=application to the extension eleme
 | PATCH_LIST.md | Update version/history and record every authored change in this revision. |
 
 Validation: 267 regression assertions passed. All 14 native JaamSim cases completed to 60 seconds with zero warnings/errors. The new case additionally passed exact arrival/completion timeline assertions. An actual isolated Eclipse/Equinox launch ran RunnerApplication and generated a CFG identical to the standalone output. Verification artifacts are under .build and are excluded from the patch. No application semantics changed in this revision.
+
+## Revision 2026.11.06-131926-CET — Connected CFG geometry
+
+The exporter previously placed entities in containment order and emitted conveyor Position without Points. Logical NextComponent/WaitQueue links could execute correctly while the display looked disconnected. This revision changes display generation; ATL routing and BPSim timing semantics are unchanged.
+
+| File | Change |
+| --- | --- |
+| com.your.m2t/src/com/your/m2t/M2T.xtend | Place entities by breadth-first execution order, include queue-to-server pull links, bound traversal of cycles, retain explicit positions, separate objects at the same depth, emit conveyor Points from actual predecessor through conveyor position to destination, enable ShowEntityFlow and fit View1 to layout bounds. |
+| tests/TransformationSmokeTest.java | Add 18 assertions across six task types for execution-order placement, conveyor endpoints and visible flow arrows. |
+| tests/FirstBpsimObserver.java | Inspect the native model's loaded conveyor endpoints against actual source/destination positions before simulation. |
+| first bpsim test.md | Add diagnosis, changes, validation and CFG backup location. |
+| PATCH_LIST.md | Update timestamp/history and record this revision. |
+
+Validation: 285 regression assertions and all 14 native JaamSim cases passed. Native first-test conveyor endpoints matched, and arrivals [6,12,18]/completions [8,14,20] remained unchanged. Isolated Equinox launch passed and produced the same CFG as standalone. Both first-test CFGs were regenerated. Existing CFGs, including manual edits, were copied to .build/cfg-backup-20261106-131647 before regeneration.
+
+Eclipse also regenerated tracked M2T.java, trace, xtendbin and class artifacts under com.your.m2t/xtend-gen and bin; these are generated derivatives, not additional authored fixes. Review according to the repository's generated-artifact policy. No commit or push performed.
+
+Limits: this is a basic graph layout, not BPMN DI reproduction or crossing-free routing. Queue/server arrows use JaamSim's flow display; the prototype is intentionally separate from the process chain. No incorrect semantic edge was reproduced in the first BPSim test; a specific failing CFG and expected connection are needed to investigate other reported wiring cases.
