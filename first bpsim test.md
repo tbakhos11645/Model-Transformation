@@ -78,3 +78,18 @@ For this example the route remains Start → Conveyor_ToWork → Queue_Work → 
 Validation: 285 regression assertions, all 14 native simulations, native conveyor endpoint checks, unchanged arrival/completion times, and an actual Equinox launch with identical CFG output all passed. This verifies native geometry data and behavior, not a visual screenshot review of the JaamSim GUI. Basic placement is not a crossing-free layout for arbitrary branching/cyclic models and does not import BPMN diagram coordinates.
 
 Reopen .build/first-bpsim-test.cfg or .build/first-bpsim-eclipse.cfg in JaamSim to load the regenerated geometry. Previously opened models do not automatically reload files. Pre-regeneration CFGs, including manual layout edits, are preserved in .build/cfg-backup-20261106-131647. The original first-test routing was correct; other reported incorrect connections still require the specific failing CFG and intended edge to diagnose.
+
+## Installed JaamSim GUI check — 2026.11.06-134211-CET
+
+Following the reported queue/server/sink issue in first-bpsim-eclipse.cfg and first-bpsim-test.cfg, both regenerated files were inspected and their SHA-256 hashes confirmed identical. The Eclipse CFG was opened in the installed JaamSim 2025-04 desktop application. The view showed the conveyor entering Queue_Work, a right-facing flow arrow from Queue_Work to Work, and the conveyor from Work to End. Running the model reached 100% with the clock at 00:01:00, without an error dialog. No CFG was saved or changed during this check.
+
+Interpretation of the view:
+
+- The grey left-pointing triangle is the Queue icon; its shape does not indicate the direction of entity flow. The blue flow arrow points toward the Server.
+- Work WaitQueue { Queue_Work } makes the Server pull from that Queue. There is no missing Queue NextComponent setting.
+- Work NextComponent { Conveyor_ToEnd } and Conveyor_ToEnd NextComponent { End } connect the Server to the Sink.
+- Both conveyors have TravelTime { 0.0 s }; transfers are instantaneous. The queue also empties immediately when the Server is free, because arrivals are six seconds apart and service takes two seconds. A visibly empty queue is expected for this scenario.
+- Entity1 above the generator is the prototype template, not an unconnected processing step.
+- JaamSim displays the Control Panel and View1 as separate UI windows. This does not indicate a separate or disconnected simulation model.
+
+The geometry fix from the previous revision resolves the reproduced display issue. No additional routing or timing change was necessary. The exact [8,14,20]-second completion times remain supported by the earlier native automated test; this installed-version GUI check confirms completion and display, not an independent per-entity timeline measurement.

@@ -18,7 +18,7 @@ import org.eclipse.m2m.atl.emftvm.Model;
 import org.eclipse.m2m.atl.emftvm.util.DefaultModuleResolver;
 import com.your.m2t.M2T;
 
-/** Usage: Main [input.xmi] [output-prefix] [repository-root] [run-seconds]. */
+/** Usage: Main input.xmi output-prefix repository-root run-seconds [bpsim.xml scenario-id]. */
 public class Main {
     public static URI uri(Path path) { return URI.createFileURI(path.toAbsolutePath().normalize().toString()); }
     public static Path repository(String[] args) {
@@ -54,7 +54,15 @@ public class Main {
         ResourceSet rs = resourceSet(root);
         Resource inRes = rs.getResource(uri(input), true);
         if (args.length == 5) throw new IllegalArgumentException("BPSim file requires a sixth argument: scenario id");
-        if (args.length > 5) BpsimInput.apply(inRes, root.resolve(args[4]), root.resolve("com.yourorg.models/model/BPSim-2.0.xsd"), args[5]);
+        double warmupSeconds = 0;
+        if (args.length > 5) {
+            var settings = BpsimInput.apply(inRes, root.resolve(args[4]), root.resolve("com.yourorg.models/model/BPSim-2.0.xsd"), args[5]);
+            runSeconds = settings.runSeconds(runSeconds);
+            warmupSeconds = settings.warmupSeconds();
+            System.out.println("BPSim scenario " + args[5] + ": total=" + (runSeconds + warmupSeconds)
+                + " s, warmup=" + warmupSeconds + " s, measurement=" + runSeconds + " s"
+                + (settings.durationSeconds() == null ? " (command-line/default duration)" : " (scenario Duration takes precedence)"));
+        }
         BpmnPreflight.validateAndNormalize(inRes);
         Metamodel bpmnMM = EmftvmFactory.eINSTANCE.createMetamodel();
         bpmnMM.setResource(rs.getResource(uri(root.resolve("com.yourorg.models/model/BPMN20.ecore")), true));
@@ -81,6 +89,7 @@ public class Main {
         EPackage pkg = simulationModel.eClass().getEPackage();
         EObject simulation = pkg.getEFactoryInstance().create((org.eclipse.emf.ecore.EClass) pkg.getEClassifier("Simulation"));
         simulation.eSet(simulation.eClass().getEStructuralFeature("runDuration"), runSeconds);
+        simulation.eSet(simulation.eClass().getEStructuralFeature("initializationDuration"), warmupSeconds);
         simulation.eSet(simulation.eClass().getEStructuralFeature("globalSubstreamSeed"), 1);
         simulationModel.eSet(simulationModel.eClass().getEStructuralFeature("simulation"), simulation);
         Files.createDirectories(prefix.getParent());

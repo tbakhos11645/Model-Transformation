@@ -13,6 +13,15 @@ import org.eclipse.emf.ecore.resource.Resource;
 public final class BpsimInput {
  private static final String NS="http://www.bpsim.org/schemas/2.0";
  private BpsimInput() {}
+ /** Total BPSim duration includes warmup; JaamSim RunDuration excludes it. */
+ public record ScenarioSettings(Double durationSeconds, double warmupSeconds) {
+  public double runSeconds(double fallbackTotalSeconds) {
+   double total=durationSeconds==null?fallbackTotalSeconds:durationSeconds;
+   if(!Double.isFinite(total)||total<=0||warmupSeconds>=total)
+    throw new IllegalArgumentException("BPSim Duration must be positive and greater than Warmup");
+   return total-warmupSeconds;
+  }
+ }
  static List<Element> children(Element e) {
   List<Element> out=new ArrayList<>();
   for(Node n=e.getFirstChild();n!=null;n=n.getNextSibling()) if(n instanceof Element) out.add((Element)n);
@@ -41,7 +50,7 @@ public final class BpsimInput {
   if(!Double.isFinite(x)||x<0) throw new IllegalArgumentException("Parameter must be finite and nonnegative");
   return x;
  }
- public static void apply(Resource bpmn,Path xml,Path schema,String scenarioId) throws Exception {
+ public static ScenarioSettings apply(Resource bpmn,Path xml,Path schema,String scenarioId) throws Exception {
   var sf=SchemaFactory.newInstance(XMLConstants.W3C_XML_SCHEMA_NS_URI);
   sf.setProperty(XMLConstants.ACCESS_EXTERNAL_DTD,""); sf.setProperty(XMLConstants.ACCESS_EXTERNAL_SCHEMA,"");
   var factory=DocumentBuilderFactory.newInstance(); factory.setNamespaceAware(true);
@@ -59,14 +68,22 @@ public final class BpsimInput {
   if(selected.hasAttribute("inherits")||selected.hasAttribute("result")) throw new IllegalArgumentException("Inherited/result scenarios are not executable yet");
   allowed(selected,"ScenarioParameters","ElementParameters");
   String base="min";
+  Double duration=null;
+  double warmup=0;
   for(Element s:children(selected)) if(s.getLocalName().equals("ScenarioParameters")) {
-   allowed(s);
+   allowed(s,"Duration","Warmup");
    for(int i=0;i<s.getAttributes().getLength();i++) {
     String a=s.getAttributes().item(i).getNodeName();
     if(!a.equals("baseTimeUnit")&&!a.startsWith("xmlns")) throw new IllegalArgumentException("Scenario setting not executable yet: "+a);
    }
    if(s.hasAttribute("baseTimeUnit")) base=s.getAttribute("baseTimeUnit");
+   for(Element p:children(s)) {
+    double seconds=value(p,base,false);
+    if(p.getLocalName().equals("Duration")) duration=seconds; else warmup=seconds;
+   }
   }
+  ScenarioSettings settings=new ScenarioSettings(duration,warmup);
+  if(duration!=null) settings.runSeconds(duration);
   Map<String,EObject> ids=new HashMap<>();
   bpmn.getAllContents().forEachRemaining(e->{Object id=BpmnPreflight.get(e,"id");if(id instanceof String&&!((String)id).isBlank()){if(ids.put((String)id,e)!=null)throw new IllegalArgumentException("Duplicate BPMN id: "+id);}});
   Map<EObject,Map<String,Object>> updates=new LinkedHashMap<>();
@@ -107,6 +124,7 @@ public final class BpsimInput {
    if(BpmnPreflight.kind(e,"SequenceFlow"))updates.computeIfAbsent(e,k->new LinkedHashMap<>()).put("TravelTime",0.0);
   }
   updates.forEach((e,fields)->fields.forEach((f,v)->e.eSet(e.eClass().getEStructuralFeature(f),v)));
+  return settings;
  }
 }
 

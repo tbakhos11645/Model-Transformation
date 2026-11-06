@@ -208,6 +208,26 @@ public class TransformationSmokeTest {
         check(bpsimCfg.contains("InterArrivalTime { 6.0 s }"),"BPSim default unit is minutes");
         check(bpsimCfg.contains("ServiceTime { 2.0 s }"),"BPSim local unit override");
         check(bpsimCfg.contains("MaxNumber { 3 }"),"BPSim trigger count");
+        String settingsXml=xml.replace("<Scenario id='baseline'>", "<Scenario id='baseline'><ScenarioParameters><Duration><FloatingParameter value='0.5'/></Duration><Warmup><DurationParameter value='PT9S'/></Warmup></ScenarioParameters>");
+        Files.writeString(scenarioFile,settingsXml);
+        Main.main(new String[]{bpsim.r.getURI().toFileString(),".build/scenario-settings",root.toString(),"60",scenarioFile.toString(),"baseline"});
+        String settingsCfg=Files.readString(root.resolve(".build/scenario-settings.cfg"));
+        check(settingsCfg.contains("RunDuration { 21.0 s }") && settingsCfg.contains("InitializationDuration { 9.0 s }"),"Scenario duration overrides CLI, includes warmup, and honors default minutes");
+        var settings=com.yourorg.main.BpsimInput.apply(bpsim.r,scenarioFile,root.resolve("com.yourorg.models/model/BPSim-2.0.xsd"),"baseline");
+        check(settings.runSeconds(60)==21 && settings.warmupSeconds()==9,"Structured scenario settings");
+        Files.writeString(scenarioFile,settingsXml.replace("<Duration><FloatingParameter value='0.5'/></Duration>",""));
+        settings=com.yourorg.main.BpsimInput.apply(bpsim.r,scenarioFile,root.resolve("com.yourorg.models/model/BPSim-2.0.xsd"),"baseline");
+        check(settings.durationSeconds()==null && settings.runSeconds(60)==51,"Missing scenario Duration uses CLI total including warmup");
+        try { settings.runSeconds(9); throw new AssertionError("Accepted warmup equal to fallback total"); }
+        catch(IllegalArgumentException expected){check(expected.getMessage().contains("greater than Warmup"),expected.getMessage());}
+        Files.writeString(scenarioFile,settingsXml.replace("PT9S","PT0S"));
+        settings=com.yourorg.main.BpsimInput.apply(bpsim.r,scenarioFile,root.resolve("com.yourorg.models/model/BPSim-2.0.xsd"),"baseline");
+        check(settings.runSeconds(60)==30 && settings.warmupSeconds()==0,"Explicit zero warmup");
+        for(String invalid : List.of(settingsXml.replace("value='0.5'","value='0'"),settingsXml.replace("PT9S","PT30S"),settingsXml.replace("PT9S","PT31S"),settingsXml.replace("PT9S","-PT1S"))) {
+            Files.writeString(scenarioFile,invalid);
+            try { Main.main(new String[]{bpsim.r.getURI().toFileString(),".build/scenario-settings",root.toString(),"60",scenarioFile.toString(),"baseline"}); throw new AssertionError("Accepted invalid Duration/Warmup"); }
+            catch(IllegalArgumentException expected){check(settingsCfg.equals(Files.readString(root.resolve(".build/scenario-settings.cfg"))),"Invalid settings preserve prior CFG");}
+        }
         Files.writeString(scenarioFile,xml.replace("value='3'","value='0'"));
         try { com.yourorg.main.BpsimInput.apply(bpsim.r,scenarioFile,root.resolve("com.yourorg.models/model/BPSim-2.0.xsd"),"baseline"); throw new AssertionError("Zero count treated as unlimited"); }
         catch(IllegalArgumentException expected) { check(expected.getMessage().contains("zero is not unlimited"),expected.getMessage()); }

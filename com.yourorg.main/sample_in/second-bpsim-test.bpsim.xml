@@ -1,0 +1,32 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<BPSimData xmlns="http://www.bpsim.org/schemas/2.0">
+  <Scenario id="congested">
+    <ScenarioParameters baseTimeUnit="s">
+      <Duration><NumericParameter value="30"/></Duration>
+    </ScenarioParameters>
+    <ElementParameters elementRef="Start">
+      <ControlParameters>
+        <InterTriggerTimer><NumericParameter value="2"/></InterTriggerTimer>
+        <TriggerCount><NumericParameter value="4"/></TriggerCount>
+      </ControlParameters>
+    </ElementParameters>
+    <ElementParameters elementRef="Work">
+      <TimeParameters><ProcessingTime><NumericParameter value="5"/></ProcessingTime></TimeParameters>
+    </ElementParameters>
+  </Scenario>
+  <Scenario id="warmed">
+    <ScenarioParameters baseTimeUnit="s">
+      <Duration><NumericParameter value="30"/></Duration>
+      <Warmup><DurationParameter value="PT9S"/></Warmup>
+    </ScenarioParameters>
+    <ElementParameters elementRef="Start">
+      <ControlParameters>
+        <InterTriggerTimer><NumericParameter value="2"/></InterTriggerTimer>
+        <TriggerCount><NumericParameter value="4"/></TriggerCount>
+      </ControlParameters>
+    </ElementParameters>
+    <ElementParameters elementRef="Work">
+      <TimeParameters><ProcessingTime><NumericParameter value="5"/></ProcessingTime></TimeParameters>
+    </ElementParameters>
+  </Scenario>
+</BPSimData>

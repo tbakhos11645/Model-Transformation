@@ -1,13 +1,15 @@
 # Transformation fixes — GitHub patch list
 
-**Patch version:** `2026.11.06-131926-CET`
-**Recorded:** 2026-11-06 at 13:19:26, Europe/Paris (CET, UTC+01:00)
+**Patch version:** `2026.11.06-141654-CET`
+**Recorded:** 2026-11-06 at 14:16:54, Europe/Paris (CET, UTC+01:00)
 **Status:** Local working-tree patch; not committed or published.
 
 ## Change history
 
 | Version | Recorded (Europe/Paris) | Changes |
 | --- | --- | --- |
+| `2026.11.06-141654-CET` | 2026-11-06 14:16:54 CET | Second BPSim congestion/FIFO test, constant scenario Duration/Warmup execution, native verification through standalone and Eclipse launch paths. |
+| `2026.11.06-134211-CET` | 2026-11-06 13:42:11 CET | Verify corrected queue/server/sink display and full run in installed JaamSim 2025-04; documentation only. |
 | `2026.11.06-131926-CET` | 2026-11-06 13:19:26 CET | Flow-based layout, conveyor paths, visible flow arrows, fitted view and native endpoint regression checks. |
 | `2026.11.06-111201-CET` | 2026-11-06 11:12:01 CET | Permanent first BPSim example, native timeline assertions, actual Equinox application launch and separate test breakdown. |
 | `2026.11.06-095128-CET` | 2026-11-06 09:51:28 CET | Fix Eclipse application extension ID placement in main plugin.xml. |
@@ -199,3 +201,30 @@ Validation: 285 regression assertions and all 14 native JaamSim cases passed. Na
 Eclipse also regenerated tracked M2T.java, trace, xtendbin and class artifacts under com.your.m2t/xtend-gen and bin; these are generated derivatives, not additional authored fixes. Review according to the repository's generated-artifact policy. No commit or push performed.
 
 Limits: this is a basic graph layout, not BPMN DI reproduction or crossing-free routing. Queue/server arrows use JaamSim's flow display; the prototype is intentionally separate from the process chain. No incorrect semantic edge was reproduced in the first BPSim test; a specific failing CFG and expected connection are needed to investigate other reported wiring cases.
+
+## Revision 2026.11.06-134211-CET — Installed JaamSim visual verification
+
+Documentation-only update to PATCH_LIST.md and first bpsim test.md. Opened the corrected .build/first-bpsim-eclipse.cfg in the user's installed JaamSim 2025-04, observed the connected queue/server/sink display and ran to 100% at 60 seconds without an error dialog. The standalone and Eclipse CFG SHA-256 hashes match (6EFD5B80BF3FDF8642B91AB256DB6B96CBD838F27AF0FF3F3EFECFEB9575ADB6). No further exporter, ATL, BPSim or CFG edits were needed. This GUI check supplements the earlier native endpoint/timeline assertions; it does not independently measure individual entity completion times in version 2025-04.
+
+## Revision 2026.11.06-141654-CET — Second BPSim test and scenario timing
+
+| File | Change |
+| --- | --- |
+| com.yourorg.main/sample_in/second-bpsim-test.xmi | Permanent Start → Work → End input for congestion tests. |
+| com.yourorg.main/sample_in/second-bpsim-test.bpsim.xml | Congested and warmed scenarios: four arrivals every two seconds, five-second service, 30-second total, optional nine-second warmup. |
+| com.yourorg.main/Second BPSim Test.launch | Reusable Eclipse launch selecting the congested scenario. |
+| com.yourorg.main/src/com/yourorg/main/BpsimInput.java | Return ScenarioSettings; parse constant Duration/Warmup using existing unit conversion; enforce positive total and warmup smaller than total; map measurement interval as total minus warmup. |
+| com.yourorg.main/src/com/yourorg/main/Main.java | Apply scenario settings to Simulation; scenario Duration overrides CLI fallback total; log selected timing/precedence; update usage documentation. |
+| tests/SecondBpsimObserver.java | Observe actual entity identities, queue arrivals, service starts, completions, waiting times, peak/final queue length, lifetime counts and warmup-filtered sink statistics. |
+| tests/JaamSimSmokeTest.java | Attach first/second observers for standalone and Eclipse filenames; assert 30-second totals for second scenarios. |
+| tests/TransformationSmokeTest.java | Nine added assertions for scenario settings, CLI precedence/fallback, default units, zero warmup, invalid durations/warmups and preservation of prior output on rejection. |
+| scripts/verify.ps1 | Generate both second-test variants, compile the new observer and run 16 native cases when requested. |
+| scripts/verify-eclipse.ps1 | Launch all three permanent cases, compare CFGs with standalone outputs, optionally execute their native behavioral checks using -JaamSimSourceDirectory. |
+| README.md | Explain BPSim invocation, scenario precedence and current execution support; link second-test report. |
+| BPSIM_CHANGES.md | Update implemented settings, remaining limitations and current verification evidence. |
+| second bpsim test.md | New requested breakdown: observed timeline, scenario mapping, file locations, reproducible commands and limitations. |
+| PATCH_LIST.md | Update revision/time/history and record all authored changes. |
+
+Validation: 294 regression assertions passed. All 16 standalone native cases and three Eclipse-output native cases passed. Actual Equinox launches produced identical standalone/Eclipse CFGs for all three permanent cases. Second-test FIFO identities matched; arrivals [2,4,6,8], service starts [2,7,12,17], waits [0,3,6,9], completions [7,12,17,22], peak queue 2 and final queue 0. Both scenarios stopped at 30 seconds. Measured sink count was 4 without warmup and 3 with nine-second warmup; lifetime completions remained 4.
+
+No ATL, Xtend or Ecore changes were required. Native verification used the existing local JaamSim source checkout; no new installed-2025 GUI claim is made. Scenario seed/replications, Start, routing and distributions remain unsupported. Earlier uncommitted first-test documentation was preserved. Eclipse regenerated the tracked com.yourorg.main/bin/com/yourorg/main/Main.class; it is a build derivative, not a separate authored fix. Generated .build outputs are not patch content. No commit or push performed.
