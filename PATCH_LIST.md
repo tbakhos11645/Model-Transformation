@@ -1,5 +1,18 @@
 # Transformation fixes — GitHub patch list
 
+**Patch version:** `2026.11.06-092452-CET`  
+**Recorded:** 2026-11-06 at 09:24:52, Europe/Paris (CET, UTC+01:00)  
+**Status:** Local working-tree patch; not committed or published.
+
+## Change history
+
+| Version | Recorded (Europe/Paris) | Changes |
+| --- | --- | --- |
+| `2026.11.06-092452-CET` | 2026-11-06 09:24:52 CET | Schema-derived BPSim model and initial constant timing/count scenario adapter; see revision breakdown below. |
+| `2026.11.06-091146-CET` | 2026-11-06 09:11:46 CET | Initial versioned patch: task/queue routing, timing, XOR and timer normalization, dynamic EMF export, launcher fixes, validation and regression/native simulation checks. |
+
+For each future update, assign a new version using `YYYY.MM.DD-HHmmss-ZONE` from the current Europe/Paris time (`CET` or `CEST`). Update the version and recorded time above, then prepend a history row describing that update. Preserve earlier rows so changes remain traceable. These timestamps identify patch revisions; Git commit hashes and tags can additionally identify committed releases.
+
 This patch makes the supported BPMN execution subset transform through **BPMN XMI → dynamic JaamSim XMI → JaamSim CFG**. It also rejects unsupported execution semantics before producing output. It does not implement every potential equivalence in the Excel catalog.
 
 ## Files to include
@@ -40,7 +53,8 @@ Eclipse also regenerated the already tracked `com.your.m2t/xtend-gen/com/your/m2
 ## Added BPMN simulation extensions
 
 | EClass | Attribute | Type/default | Meaning |
-| --- | --- | --- | --- |
+| --- | --- | --- |
+| `2026.11.06-092452-CET` | 2026-11-06 09:24:52 CET | Schema-derived BPSim model and initial constant timing/count scenario adapter; see revision breakdown below. | --- |
 | SequenceFlow | TravelTime | EDouble / 0 | Optional transport delay in seconds. |
 | StartEvent | FirstArrivalTime | EDouble / 0 | Initial arrival offset in seconds. |
 | FormalExpression | JaamSimExpression | EString / unset | Explicit expression text, avoiding the EObject-valued body. |
@@ -122,3 +136,21 @@ optional native JaamSim smoke checks with documented supported semantics.
 ```
 
 The working tree changes are ready for review; no commit or push is performed. Include the files above when updating GitHub. Exclude verification outputs, binary build caches and unrelated files you are adding separately.
+
+## Revision 2026.11.06-092452-CET — BPSim integration
+
+Recorded 2026-11-06 09:24:52 Europe/Paris (UTC+01:00). This revision adds an initial executable BPSim subset; full execution of the catalogue remains pending. See BPSIM_CHANGES.md for the separate main-change breakdown and usage example.
+
+| File | Change in this revision |
+| --- | --- |
+| com.yourorg.models/model/BPSim.ecore | New complete schema-derived metamodel, generated with XML metadata from the existing BPSim-2.0.xsd. |
+| tests/GenerateBpsim.java | Reproducible XSD-to-Ecore generator. |
+| com.yourorg.main/src/com/yourorg/main/BpsimInput.java | New secure, XSD-validating scenario adapter; constant timing/count conversion; element reference resolution; explicit unsupported-feature diagnostics. |
+| com.yourorg.main/src/com/yourorg/main/Main.java | Optional fifth/sixth arguments select a separate BPSim XML file and scenario ID before preflight/ATL. |
+| scripts/verify.ps1 | Include XSD libraries, compile and run the metamodel generator before regression tests. |
+| tests/TransformationSmokeTest.java | Add BPSim integration and regression assertions for time units, counts and zero rejection. |
+| BPSIM_CHANGES.md | Separate main-change breakdown, example, instructions and precise execution limitations. |
+| PATCH_LIST.md | New timestamped revision and history entry; previous revision retained. |
+
+BPMN20.ecore custom attributes remain as an in-memory compatibility bridge. No schema or catalogue changes were made. Eclipse may automatically regenerate tracked class files when source files change; those binary build products are not authored patch content. Existing unrelated working-tree changes are outside this revision.
+

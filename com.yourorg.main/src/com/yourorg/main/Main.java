@@ -53,6 +53,8 @@ public class Main {
         if (!Double.isFinite(runSeconds) || runSeconds <= 0) throw new IllegalArgumentException("run-seconds must be positive and finite");
         ResourceSet rs = resourceSet(root);
         Resource inRes = rs.getResource(uri(input), true);
+        if (args.length == 5) throw new IllegalArgumentException("BPSim file requires a sixth argument: scenario id");
+        if (args.length > 5) BpsimInput.apply(inRes, root.resolve(args[4]), root.resolve("com.yourorg.models/model/BPSim-2.0.xsd"), args[5]);
         BpmnPreflight.validateAndNormalize(inRes);
         Metamodel bpmnMM = EmftvmFactory.eINSTANCE.createMetamodel();
         bpmnMM.setResource(rs.getResource(uri(root.resolve("com.yourorg.models/model/BPMN20.ecore")), true));
@@ -87,3 +89,4 @@ public class Main {
         System.out.println("Done.\nJaamSim XMI: " + outRes.getURI() + "\nCFG: " + prefix + ".cfg");
     }
 }
+

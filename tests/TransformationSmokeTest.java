@@ -193,6 +193,19 @@ public class TransformationSmokeTest {
         set(durationTimer, "timeDuration", duration.expression("PT2S")); list(durationStart, "eventDefinitions").add(durationTimer);
         String durationCfg = duration.run("duration");
         check(durationCfg.contains("FirstArrivalTime { 2.0 s }") && durationCfg.contains("MaxNumber { 1 }"), "Duration-only timer should fire once");
+        Fixture bpsim = linear("bpsim", "Task");
+        bpsim.r.save(Collections.emptyMap());
+        Path scenarioFile=root.resolve(".build/scenario.xml");
+        String xml="<BPSimData xmlns='http://www.bpsim.org/schemas/2.0'><Scenario id='baseline'><ElementParameters elementRef='Start'><ControlParameters><InterTriggerTimer><FloatingParameter value='0.1'/></InterTriggerTimer><TriggerCount><NumericParameter value='3'/></TriggerCount></ControlParameters></ElementParameters><ElementParameters elementRef='Work'><TimeParameters><ProcessingTime><FloatingParameter value='2' timeUnit='s'/></ProcessingTime></TimeParameters></ElementParameters></Scenario></BPSimData>";
+        Files.writeString(scenarioFile,xml);
+        Main.main(new String[]{bpsim.r.getURI().toFileString(),".build/bpsim-output",root.toString(),"60",scenarioFile.toString(),"baseline"});
+        String bpsimCfg=Files.readString(root.resolve(".build/bpsim-output.cfg"));
+        check(bpsimCfg.contains("InterArrivalTime { 6.0 s }"),"BPSim default unit is minutes");
+        check(bpsimCfg.contains("ServiceTime { 2.0 s }"),"BPSim local unit override");
+        check(bpsimCfg.contains("MaxNumber { 3 }"),"BPSim trigger count");
+        Files.writeString(scenarioFile,xml.replace("value='3'","value='0'"));
+        try { com.yourorg.main.BpsimInput.apply(bpsim.r,scenarioFile,root.resolve("com.yourorg.models/model/BPSim-2.0.xsd"),"baseline"); throw new AssertionError("Zero count treated as unlimited"); }
+        catch(IllegalArgumentException expected) { check(expected.getMessage().contains("zero is not unlimited"),expected.getMessage()); }
         System.out.println("PASS: " + checks + " assertions; Xtend/Java/EMFTVM compilation, both examples, subtypes, XOR, timers, names and rejection checks");
     }
 }

@@ -8,7 +8,7 @@ $build = Join-Path $repoRoot '.build'
 New-Item -ItemType Directory -Force $build | Out-Null
 $jars = Get-ChildItem -LiteralPath $PluginDirectory -Filter '*.jar' | Where-Object {
     $_.Name -notmatch '\.(source|doc)_' -and
-    $_.Name -match '^(org\.eclipse\.(emf\.|m2m\.atl\.|xtend\.(core|lib)|xtext[._]|jdt\.core|core\.|equinox\.|osgi_|text_)|org\.osgi\.|org\.antlr|org\.apache\.log4j|org\.apache\.logging|org\.ow2\.asm|org\.objectweb\.asm|com\.google\.|jakarta\.inject|javax\.inject|aopalliance|org\.aopalliance|slf4j\.api|slf4j\.simple)'
+    $_.Name -match '^(org\.eclipse\.(xsd[._]|emf\.|m2m\.atl\.|xtend\.(core|lib)|xtext[._]|jdt\.core|core\.|equinox\.|osgi_|text_)|org\.osgi\.|org\.antlr|org\.apache\.log4j|org\.apache\.logging|org\.ow2\.asm|org\.objectweb\.asm|com\.google\.|jakarta\.inject|javax\.inject|aopalliance|org\.aopalliance|slf4j\.api|slf4j\.simple)'
 }
 $jars = $jars | Group-Object { $_.Name -replace '_[^_]+\.jar$', '' } | ForEach-Object { $_.Group | Sort-Object Name -Descending | Select-Object -First 1 }
 if (!$jars) { throw 'Pass -PluginDirectory with Eclipse ATL/EMFTVM/Xtend plugin jars' }
@@ -31,7 +31,9 @@ Invoke-JavaTool 'java' @('-cp', $classpath, 'org.eclipse.xtend.core.compiler.bat
 $sources = @(Get-ChildItem (Join-Path $build 'xtend-gen') -Recurse -Filter '*.java' | ForEach-Object FullName)
 $sources += @(Get-ChildItem (Join-Path $repoRoot 'com.yourorg.main/src') -Recurse -Filter '*.java' | ForEach-Object FullName)
 $sources += Join-Path $repoRoot 'tests/TransformationSmokeTest.java'
+$sources += Join-Path $repoRoot 'tests/GenerateBpsim.java'
 Invoke-JavaTool 'java' (@('-cp', $classpath, 'org.eclipse.jdt.internal.compiler.batch.Main', '-17', '-encoding', 'UTF-8', '-cp', $classpath, '-d', $build) + $sources)
+Invoke-JavaTool 'java' @('-cp', ($build + [IO.Path]::PathSeparator + $classpath), 'GenerateBpsim', $repoRoot)
 Invoke-JavaTool 'java' @('-cp', ($build + [IO.Path]::PathSeparator + $classpath), 'TransformationSmokeTest', $repoRoot)
 if ($JaamSimSourceDirectory) {
     $jaamRoot = (Resolve-Path -LiteralPath $JaamSimSourceDirectory).Path
@@ -46,3 +48,4 @@ if ($JaamSimSourceDirectory) {
     $configs = @('ex1', 'ex2', 'conditional', 'timer', 'duration', 'collision', 'merge', 'subtype-Task', 'subtype-UserTask', 'subtype-ServiceTask', 'subtype-ManualTask', 'subtype-ScriptTask', 'subtype-BusinessRuleTask') | ForEach-Object { Join-Path $build "${_}.cfg" }
     Invoke-JavaTool 'java' (@('-Djava.awt.headless=true', '-cp', $jaamClasspath, 'JaamSimSmokeTest') + $configs)
 }
+
