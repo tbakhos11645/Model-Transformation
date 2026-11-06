@@ -1,13 +1,14 @@
 # Transformation fixes — GitHub patch list
 
-**Patch version:** `2026.11.06-092452-CET`  
-**Recorded:** 2026-11-06 at 09:24:52, Europe/Paris (CET, UTC+01:00)  
+**Patch version:** `2026.11.06-095128-CET`
+**Recorded:** 2026-11-06 at 09:51:28, Europe/Paris (CET, UTC+01:00)
 **Status:** Local working-tree patch; not committed or published.
 
 ## Change history
 
 | Version | Recorded (Europe/Paris) | Changes |
 | --- | --- | --- |
+| `2026.11.06-095128-CET` | 2026-11-06 09:51:28 CET | Fix Eclipse application extension ID placement in main plugin.xml. |
 | `2026.11.06-092452-CET` | 2026-11-06 09:24:52 CET | Schema-derived BPSim model and initial constant timing/count scenario adapter; see revision breakdown below. |
 | `2026.11.06-091146-CET` | 2026-11-06 09:11:46 CET | Initial versioned patch: task/queue routing, timing, XOR and timer normalization, dynamic EMF export, launcher fixes, validation and regression/native simulation checks. |
 
@@ -54,6 +55,7 @@ Eclipse also regenerated the already tracked `com.your.m2t/xtend-gen/com/your/m2
 
 | EClass | Attribute | Type/default | Meaning |
 | --- | --- | --- |
+| `2026.11.06-095128-CET` | 2026-11-06 09:51:28 CET | Fix Eclipse application extension ID placement in main plugin.xml. |
 | `2026.11.06-092452-CET` | 2026-11-06 09:24:52 CET | Schema-derived BPSim model and initial constant timing/count scenario adapter; see revision breakdown below. | --- |
 | SequenceFlow | TravelTime | EDouble / 0 | Optional transport delay in seconds. |
 | StartEvent | FirstArrivalTime | EDouble / 0 | Initial arrival offset in seconds. |
@@ -153,4 +155,9 @@ Recorded 2026-11-06 09:24:52 Europe/Paris (UTC+01:00). This revision adds an ini
 | PATCH_LIST.md | New timestamped revision and history entry; previous revision retained. |
 
 BPMN20.ecore custom attributes remain as an in-memory compatibility bridge. No schema or catalogue changes were made. Eclipse may automatically regenerate tracked class files when source files change; those binary build products are not authored patch content. Existing unrelated working-tree changes are outside this revision.
+
+
+## Revision 2026.11.06-095128-CET — Eclipse application registration
+
+Changed com.yourorg.main/plugin.xml: added id=application to the extension element and removed the unsupported id from its application child. With bundle symbolic name com.yourorg.main, the launch ID is com.yourorg.main.application. Verified XML parsing and declaration structure against Eclipse's applications extension-point documentation. No runtime transformation changes. If Eclipse retains the old marker, refresh the project and run Project > Clean; select com.yourorg.main.application in the Eclipse Application launch configuration.
 
