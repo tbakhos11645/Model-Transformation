@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<BPSimData xmlns="http://www.bpsim.org/schemas/2.0">
+  <Scenario id="baseline" name="Three arrivals, two-second service">
+    <ElementParameters elementRef="Start">
+      <ControlParameters>
+        <InterTriggerTimer><FloatingParameter value="0.1"/></InterTriggerTimer>
+        <TriggerCount><NumericParameter value="3"/></TriggerCount>
+      </ControlParameters>
+    </ElementParameters>
+    <ElementParameters elementRef="Work">
+      <TimeParameters>
+        <ProcessingTime><FloatingParameter value="2" timeUnit="s"/></ProcessingTime>
+      </TimeParameters>
+    </ElementParameters>
+  </Scenario>
+</BPSimData>

@@ -1,13 +1,14 @@
 # Transformation fixes — GitHub patch list
 
-**Patch version:** `2026.11.06-095128-CET`
-**Recorded:** 2026-11-06 at 09:51:28, Europe/Paris (CET, UTC+01:00)
+**Patch version:** `2026.11.06-111201-CET`
+**Recorded:** 2026-11-06 at 11:12:01, Europe/Paris (CET, UTC+01:00)
 **Status:** Local working-tree patch; not committed or published.
 
 ## Change history
 
 | Version | Recorded (Europe/Paris) | Changes |
 | --- | --- | --- |
+| `2026.11.06-111201-CET` | 2026-11-06 11:12:01 CET | Permanent first BPSim example, native timeline assertions, actual Equinox application launch and separate test breakdown. |
 | `2026.11.06-095128-CET` | 2026-11-06 09:51:28 CET | Fix Eclipse application extension ID placement in main plugin.xml. |
 | `2026.11.06-092452-CET` | 2026-11-06 09:24:52 CET | Schema-derived BPSim model and initial constant timing/count scenario adapter; see revision breakdown below. |
 | `2026.11.06-091146-CET` | 2026-11-06 09:11:46 CET | Initial versioned patch: task/queue routing, timing, XOR and timer normalization, dynamic EMF export, launcher fixes, validation and regression/native simulation checks. |
@@ -55,6 +56,7 @@ Eclipse also regenerated the already tracked `com.your.m2t/xtend-gen/com/your/m2
 
 | EClass | Attribute | Type/default | Meaning |
 | --- | --- | --- |
+| `2026.11.06-111201-CET` | 2026-11-06 11:12:01 CET | Permanent first BPSim example, native timeline assertions, actual Equinox application launch and separate test breakdown. |
 | `2026.11.06-095128-CET` | 2026-11-06 09:51:28 CET | Fix Eclipse application extension ID placement in main plugin.xml. |
 | `2026.11.06-092452-CET` | 2026-11-06 09:24:52 CET | Schema-derived BPSim model and initial constant timing/count scenario adapter; see revision breakdown below. | --- |
 | SequenceFlow | TravelTime | EDouble / 0 | Optional transport delay in seconds. |
@@ -161,3 +163,20 @@ BPMN20.ecore custom attributes remain as an in-memory compatibility bridge. No s
 
 Changed com.yourorg.main/plugin.xml: added id=application to the extension element and removed the unsupported id from its application child. With bundle symbolic name com.yourorg.main, the launch ID is com.yourorg.main.application. Verified XML parsing and declaration structure against Eclipse's applications extension-point documentation. No runtime transformation changes. If Eclipse retains the old marker, refresh the project and run Project > Clean; select com.yourorg.main.application in the Eclipse Application launch configuration.
 
+
+
+## Revision 2026.11.06-111201-CET — First BPSim behavioral baseline
+
+| File | Change |
+| --- | --- |
+| com.yourorg.main/sample_in/first-bpsim-test.xmi | Permanent Start → Task → End input with stable BPMN IDs and no legacy timing inputs. |
+| com.yourorg.main/sample_in/first-bpsim-test.bpsim.xml | Permanent baseline scenario: 0.1-minute arrivals, three triggers and two-second service. |
+| com.yourorg.main/First BPSim Test.launch | Reusable Eclipse Application launch using the corrected extension ID and six arguments. |
+| tests/FirstBpsimObserver.java | Observe actual native generator/sink counter transitions and assert arrivals [6,12,18] and completions [8,14,20]. |
+| tests/JaamSimSmokeTest.java | Attach the timeline observer for the permanent first BPSim case and verify its observations. |
+| scripts/verify.ps1 | Transform the permanent example; compile its observer; include its CFG in native tests. |
+| scripts/verify-eclipse.ps1 | Package and launch the application in isolated Equinox; check successful output and equality with standalone CFG. |
+| first bpsim test.md | Requested separate breakdown of work, measured results, reproduction steps and scope. |
+| PATCH_LIST.md | Update version/history and record every authored change in this revision. |
+
+Validation: 267 regression assertions passed. All 14 native JaamSim cases completed to 60 seconds with zero warnings/errors. The new case additionally passed exact arrival/completion timeline assertions. An actual isolated Eclipse/Equinox launch ran RunnerApplication and generated a CFG identical to the standalone output. Verification artifacts are under .build and are excluded from the patch. No application semantics changed in this revision.

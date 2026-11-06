@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<bpmn:Definitions xmi:version="2.0" xmlns:xmi="http://www.omg.org/XMI" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:bpmn="http://www.omg.org/spec/BPMN/20100524/MODEL-XMI" id="FirstBpsimTest" name="First BPSim test" targetNamespace="urn:first-bpsim-test">
+  <rootElements xsi:type="bpmn:Process" id="Process" name="Simple process">
+    <flowElements xsi:type="bpmn:StartEvent" id="Start" name="Start" outgoing="ToWork"/>
+    <flowElements xsi:type="bpmn:Task" id="Work" name="Work" incoming="ToWork" outgoing="ToEnd"/>
+    <flowElements xsi:type="bpmn:EndEvent" id="End" name="End" incoming="ToEnd"/>
+    <flowElements xsi:type="bpmn:SequenceFlow" id="ToWork" name="To work" sourceRef="Start" targetRef="Work"/>
+    <flowElements xsi:type="bpmn:SequenceFlow" id="ToEnd" name="To end" sourceRef="Work" targetRef="End"/>
+  </rootElements>
+</bpmn:Definitions>

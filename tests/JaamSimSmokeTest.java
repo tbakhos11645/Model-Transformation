@@ -21,14 +21,16 @@ public class JaamSimSmokeTest {
    if(model.getNumWarnings()!=0) throw new AssertionError("Configuration warnings");
    CountDownLatch done = new CountDownLatch(1);
    AtomicReference<Throwable> error = new AtomicReference<>();
+   FirstBpsimObserver observer=arg.endsWith("first-bpsim-test.cfg")?new FirstBpsimObserver(model):null;
    model.start(new RunListener() {
     public void runEnded() { done.countDown(); }
     public void handleRuntimeError(JaamSimModel sm, Throwable t) { error.set(t); done.countDown(); }
-   }, null);
+   }, observer==null?null:observer.listener());
    if (!done.await(10, TimeUnit.SECONDS)) { model.pause(); throw new AssertionError("Timed out: "+arg); }
    if(error.get()!=null) throw new AssertionError("Runtime error: "+arg,error.get());
    if(model.getSimTime()!=60.0) throw new AssertionError("Unexpected stop time: "+model.getSimTime());
    System.out.println("PASS JaamSim: "+arg+" at "+model.getSimTime()+" s, warnings="+model.getNumWarnings());
+   if(observer!=null) observer.verify();
    model.closeLogFile();
   }
   System.exit(0); // JaamSim event-manager worker threads remain alive after the last run.
