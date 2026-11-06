@@ -1,287 +1,223 @@
 package com.your.m2t;
 
-import com.google.common.collect.Iterables;
-import jaamsim.Branch;
-import jaamsim.Component;
-import jaamsim.EntityConveyor;
-import jaamsim.EntityGenerator;
-import jaamsim.EntitySink;
-import jaamsim.Queue;
-import jaamsim.Server;
-import jaamsim.SimEntity;
-import java.io.File;
-import java.io.FileWriter;
+import java.io.OutputStream;
+import java.nio.charset.StandardCharsets;
+import java.util.Collections;
 import java.util.LinkedHashMap;
+import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Objects;
-import java.util.Set;
 import java.util.function.Consumer;
 import org.eclipse.emf.common.util.URI;
 import org.eclipse.emf.ecore.EObject;
 import org.eclipse.emf.ecore.EStructuralFeature;
 import org.eclipse.emf.ecore.resource.Resource;
-import org.eclipse.xtend2.lib.StringConcatenation;
+import org.eclipse.xtext.xbase.lib.CollectionLiterals;
 import org.eclipse.xtext.xbase.lib.Exceptions;
 import org.eclipse.xtext.xbase.lib.Functions.Function1;
 import org.eclipse.xtext.xbase.lib.IterableExtensions;
 import org.eclipse.xtext.xbase.lib.IteratorExtensions;
+import org.eclipse.xtext.xbase.lib.ListExtensions;
 
+/**
+ * Reflective exporter: accepts both generated and dynamic EMF objects.
+ */
 @SuppressWarnings("all")
 public class M2T {
   private final LinkedHashMap<EObject, String> nameMap = new LinkedHashMap<EObject, String>();
 
-  private final LinkedHashMap<String, Integer> counters = new LinkedHashMap<String, Integer>();
+  private final LinkedHashSet<String> usedNames = new LinkedHashSet<String>();
+
+  private final List<String> types = Collections.<String>unmodifiableList(CollectionLiterals.<String>newArrayList("SimEntity", "EntityGenerator", "EntityConveyor", "Branch", "Queue", "Server", "EntitySink"));
 
   public void exportToConfig(final Resource model, final URI outputUri) {
     try {
-      String _fileString = outputUri.toFileString();
-      File _file = new File(_fileString);
-      final FileWriter out = new FileWriter(_file);
+      this.nameMap.clear();
+      this.usedNames.clear();
+      this.usedNames.addAll(Collections.<String>unmodifiableList(CollectionLiterals.<String>newArrayList("Simulation", "Axis", "Grid100x100", "XY-Grid", "XYZ-Axis", "Clock", "Title", "View1")));
+      final List<EObject> all = IterableExtensions.<EObject>toList(IteratorExtensions.<EObject>toIterable(model.getAllContents()));
+      final Function1<EObject, Boolean> _function = (EObject it) -> {
+        String _name = it.eClass().getName();
+        return Boolean.valueOf(Objects.equals(_name, "SimulationModel"));
+      };
+      final List<EObject> roots = IterableExtensions.<EObject>toList(IterableExtensions.<EObject>filter(all, _function));
+      int _size = roots.size();
+      boolean _notEquals = (_size != 1);
+      if (_notEquals) {
+        throw new IllegalArgumentException("Expected one SimulationModel");
+      }
+      for (final EObject e : all) {
+        if (((!this.types.contains(e.eClass().getName())) && (!Collections.<String>unmodifiableList(CollectionLiterals.<String>newArrayList("SimulationModel", "Simulation", "Point3D")).contains(e.eClass().getName())))) {
+          String _name = e.eClass().getName();
+          String _plus = ("No CFG handler for " + _name);
+          throw new IllegalArgumentException(_plus);
+        }
+      }
+      final Function1<EObject, Boolean> _function_1 = (EObject it) -> {
+        return Boolean.valueOf(this.types.contains(it.eClass().getName()));
+      };
+      final List<EObject> entities = IterableExtensions.<EObject>toList(IterableExtensions.<EObject>filter(all, _function_1));
+      for (final EObject e_1 : entities) {
+        this.nameMap.put(e_1, this.exportName(e_1));
+      }
+      for (final EObject e_2 : entities) {
+        this.validate(e_2);
+      }
+      final StringBuilder text = new StringBuilder("RecordEdits\n\n");
+      for (final String type : this.types) {
+        {
+          final Function1<EObject, Boolean> _function_2 = (EObject it) -> {
+            String _name_1 = it.eClass().getName();
+            return Boolean.valueOf(Objects.equals(_name_1, type));
+          };
+          final List<EObject> elements = IterableExtensions.<EObject>toList(IterableExtensions.<EObject>filter(entities, _function_2));
+          boolean _isEmpty = elements.isEmpty();
+          boolean _not = (!_isEmpty);
+          if (_not) {
+            final Function1<EObject, String> _function_3 = (EObject it) -> {
+              return this.nameMap.get(it);
+            };
+            String _join = IterableExtensions.join(ListExtensions.<EObject, String>map(elements, _function_3), "  ");
+            String _plus_1 = ((("Define " + type) + " { ") + _join);
+            String _plus_2 = (_plus_1 + " }\n");
+            text.append(_plus_2);
+          }
+        }
+      }
+      text.append("Define ColladaModel { Axis Grid100x100 }\n");
+      text.append("Define DisplayEntity { XY-Grid XYZ-Axis }\n");
+      text.append("Define OverlayClock { Clock }\nDefine OverlayText { Title }\nDefine View { View1 }\n\n");
+      final Object simulation = this.value(IterableExtensions.<EObject>head(roots), "simulation");
+      if ((simulation instanceof EObject)) {
+        final EObject s = ((EObject)simulation);
+        this.duration(text, s, "runDuration", "RunDuration", "Simulation");
+        this.duration(text, s, "initializationDuration", "InitializationDuration", "Simulation");
+        this.line(text, "Simulation", "ExitAtStop", this.bool(this.value(s, "exitAtStop")));
+        this.line(text, "Simulation", "GlobalSubstreamSeed", this.value(s, "globalSubstreamSeed"));
+      }
+      int index = 0;
+      for (final EObject e_3 : entities) {
+        {
+          final String name = this.nameMap.get(e_3);
+          String _name_1 = e_3.eClass().getName();
+          String _plus_1 = ("\n# " + _name_1);
+          String _plus_2 = (_plus_1 + "\n");
+          text.append(_plus_2);
+          String _name_2 = e_3.eClass().getName();
+          if (_name_2 != null) {
+            switch (_name_2) {
+              case "EntityGenerator":
+                this.reference(text, e_3, "nextComponent", "NextComponent");
+                this.reference(text, e_3, "prototype", "PrototypeEntity");
+                this.duration(text, e_3, "firstArrivalTime", "FirstArrivalTime", name);
+                this.duration(text, e_3, "interArrivalTime", "InterArrivalTime", name);
+                this.line(text, name, "EntitiesPerArrival", this.value(e_3, "entitiesPerArrival"));
+                double _number = this.number(e_3, "maxNumber");
+                boolean _greaterThan = (_number > 0);
+                if (_greaterThan) {
+                  this.line(text, name, "MaxNumber", this.value(e_3, "maxNumber"));
+                }
+                break;
+              case "EntityConveyor":
+                this.reference(text, e_3, "nextComponent", "NextComponent");
+                this.duration(text, e_3, "travelTime", "TravelTime", name);
+                break;
+              case "Server":
+                this.reference(text, e_3, "nextComponent", "NextComponent");
+                this.reference(text, e_3, "waitQueue", "WaitQueue");
+                this.duration(text, e_3, "serviceTime", "ServiceTime", name);
+                break;
+              case "Branch":
+                Object _value = this.value(e_3, "nextComponentList");
+                final List<?> targets = ((List<?>) _value);
+                final Function1<Object, String> _function_2 = (Object it) -> {
+                  return this.refName(it);
+                };
+                this.line(text, name, "NextComponentList", IterableExtensions.join(ListExtensions.map(targets, _function_2), "  "));
+                this.line(text, name, "Choice", this.quote(this.value(e_3, "choice").toString()));
+                break;
+              case "Queue":
+                this.optional(text, e_3, "priority", "Priority");
+                this.optional(text, e_3, "match", "Match");
+                this.line(text, name, "FIFO", this.bool(this.value(e_3, "fifo")));
+                boolean _isSet = this.isSet(e_3, "renegeTime");
+                if (_isSet) {
+                  this.duration(text, e_3, "renegeTime", "RenegeTime", name);
+                }
+                this.optional(text, e_3, "renegeCondition", "RenegeCondition");
+                Object _value_1 = this.value(e_3, "renegeDestination");
+                boolean _tripleNotEquals = (_value_1 != null);
+                if (_tripleNotEquals) {
+                  this.reference(text, e_3, "renegeDestination", "RenegeDestination");
+                }
+                this.optional(text, e_3, "maxValidLength", "MaxValidLength");
+                double _number_1 = this.number(e_3, "capacity");
+                boolean _notEquals_1 = (_number_1 != 0);
+                if (_notEquals_1) {
+                  throw new IllegalArgumentException("Queue.capacity has no implemented JaamSim CFG equivalent; use maxValidLength explicitly");
+                }
+                break;
+            }
+          }
+          final Object position = this.value(e_3, "position");
+          if ((position instanceof EObject)) {
+            final EObject p = ((EObject)position);
+            double _coordinate = this.coordinate(p, "x");
+            String _plus_3 = (Double.valueOf(_coordinate) + " ");
+            double _coordinate_1 = this.coordinate(p, "y");
+            String _plus_4 = (_plus_3 + Double.valueOf(_coordinate_1));
+            String _plus_5 = (_plus_4 + " ");
+            double _coordinate_2 = this.coordinate(p, "z");
+            String _plus_6 = (_plus_5 + Double.valueOf(_coordinate_2));
+            String _plus_7 = (_plus_6 + " m");
+            this.line(text, name, "Position", _plus_7);
+          } else {
+            String _plus_8 = (Double.valueOf((index * 2.0)) + " 0 0 m");
+            this.line(text, name, "Position", _plus_8);
+          }
+          for (final String feature : Collections.<String>unmodifiableList(CollectionLiterals.<String>newArrayList("size", "orientation"))) {
+            {
+              final Object point = this.value(e_3, feature);
+              if ((point instanceof EObject)) {
+                String _xifexpression = null;
+                boolean _equals = Objects.equals(feature, "size");
+                if (_equals) {
+                  _xifexpression = "Size";
+                } else {
+                  _xifexpression = "Orientation";
+                }
+                double _coordinate_3 = this.coordinate(((EObject)point), "x");
+                String _plus_9 = (Double.valueOf(_coordinate_3) + " ");
+                double _coordinate_4 = this.coordinate(((EObject)point), "y");
+                String _plus_10 = (_plus_9 + Double.valueOf(_coordinate_4));
+                String _plus_11 = (_plus_10 + " ");
+                double _coordinate_5 = this.coordinate(((EObject)point), "z");
+                String _plus_12 = (_plus_11 + Double.valueOf(_coordinate_5));
+                String _xifexpression_1 = null;
+                boolean _equals_1 = Objects.equals(feature, "size");
+                if (_equals_1) {
+                  _xifexpression_1 = " m";
+                } else {
+                  _xifexpression_1 = " deg";
+                }
+                String _plus_13 = (_plus_12 + _xifexpression_1);
+                this.line(text, name, _xifexpression, _plus_13);
+              }
+            }
+          }
+          index = (index + 1);
+        }
+      }
+      text.append("\nAxis ColladaFile { <res>/shapes/axis_text.dae }\n");
+      text.append("Grid100x100 ColladaFile { <res>/shapes/grid100x100.dae }\n");
+      text.append("XY-Grid DisplayModel { Grid100x100 }\nXY-Grid Show { FALSE }\n");
+      text.append("XYZ-Axis DisplayModel { Axis }\nXYZ-Axis Show { FALSE }\n");
+      text.append("Clock ScreenPosition { 15 15 }\nClock DateFormat { \'yyyy-MMM-dd HH:mm:ss.SSS\' }\n");
+      text.append("Title ScreenPosition { 15 40 }\nTitle Format { \'BPMN Simulation\' }\n");
+      text.append("View1 ViewCenter { 5 0 0 m }\nView1 ViewPosition { 5 0 20 m }\nView1 ShowWindow { TRUE }\nView1 Lock2D { TRUE }\n");
+      final OutputStream out = model.getResourceSet().getURIConverter().createOutputStream(outputUri);
       try {
-        final List<EObject> all = IterableExtensions.<EObject>toList(Iterables.<EObject>filter(IteratorExtensions.<EObject>toIterable(model.getAllContents()), EObject.class));
-        final List<EntityConveyor> conveyors = IterableExtensions.<EntityConveyor>toList(Iterables.<EntityConveyor>filter(all, EntityConveyor.class));
-        final List<EntityGenerator> generators = IterableExtensions.<EntityGenerator>toList(Iterables.<EntityGenerator>filter(all, EntityGenerator.class));
-        final List<EntitySink> sinks = IterableExtensions.<EntitySink>toList(Iterables.<EntitySink>filter(all, EntitySink.class));
-        final List<Queue> queues = IterableExtensions.<Queue>toList(Iterables.<Queue>filter(all, Queue.class));
-        final List<Server> servers = IterableExtensions.<Server>toList(Iterables.<Server>filter(all, Server.class));
-        final List<Branch> branches = IterableExtensions.<Branch>toList(Iterables.<Branch>filter(all, Branch.class));
-        final List<SimEntity> simEnts = IterableExtensions.<SimEntity>toList(Iterables.<SimEntity>filter(all, SimEntity.class));
-        final Consumer<SimEntity> _function = (SimEntity e) -> {
-          this.nameMap.put(e, this.exportName(e));
-        };
-        simEnts.forEach(_function);
-        final Consumer<EntityGenerator> _function_1 = (EntityGenerator e) -> {
-          this.nameMap.put(e, this.exportName(e));
-        };
-        generators.forEach(_function_1);
-        final Consumer<EntityConveyor> _function_2 = (EntityConveyor e) -> {
-          this.nameMap.put(e, this.exportName(e));
-        };
-        conveyors.forEach(_function_2);
-        final Consumer<Branch> _function_3 = (Branch e) -> {
-          this.nameMap.put(e, this.exportName(e));
-        };
-        branches.forEach(_function_3);
-        final Consumer<Queue> _function_4 = (Queue e) -> {
-          this.nameMap.put(e, this.exportName(e));
-        };
-        queues.forEach(_function_4);
-        final Consumer<Server> _function_5 = (Server e) -> {
-          this.nameMap.put(e, this.exportName(e));
-        };
-        servers.forEach(_function_5);
-        final Consumer<EntitySink> _function_6 = (EntitySink e) -> {
-          this.nameMap.put(e, this.exportName(e));
-        };
-        sinks.forEach(_function_6);
-        out.write("RecordEdits\n\n");
-        this.writeDefine(out, "Branch", branches);
-        this.writeDefine(out, "EntityConveyor", conveyors);
-        this.writeDefine(out, "EntityGenerator", generators);
-        this.writeDefine(out, "EntitySink", sinks);
-        this.writeDefine(out, "Queue", queues);
-        this.writeDefine(out, "Server", servers);
-        this.writeDefine(out, "SimEntity", simEnts);
-        out.write("Define ColladaModel { Axis  Grid100x100 }\n");
-        out.write("Define DisplayEntity { XY-Grid  XYZ-Axis }\n");
-        out.write("Define OverlayClock { Clock }\n");
-        out.write("Define OverlayText { Title }\n");
-        out.write("Define View { View1 }\n\n");
-        out.write("Simulation Description { \'Simulation run control inputs\' }\n\n");
-        boolean _isEmpty = branches.isEmpty();
-        boolean _not = (!_isEmpty);
-        if (_not) {
-          out.write("# *** Branch ***\n\n");
-          for (final Branch b : branches) {
-            {
-              final String bName = this.nameMap.get(b);
-              final Object ncl = this.getIfSet(b, "nextComponentList");
-              final String refs = this.refList(ncl);
-              if (((refs != null) && (!refs.isEmpty()))) {
-                out.write((((bName + " NextComponentList { ") + refs) + " }\n"));
-              }
-              final Object choice = this.getIfSet(b, "choice");
-              if (((choice != null) && (!choice.toString().trim().isEmpty()))) {
-                String _quote = this.quote(choice.toString());
-                String _plus = ((bName + " Choice { ") + _quote);
-                String _plus_1 = (_plus + " }\n");
-                out.write(_plus_1);
-              }
-              out.write("\n");
-            }
-          }
-        }
-        boolean _isEmpty_1 = conveyors.isEmpty();
-        boolean _not_1 = (!_isEmpty_1);
-        if (_not_1) {
-          out.write("# *** EntityConveyor ***\n\n");
-          for (final EntityConveyor c : conveyors) {
-            {
-              final String cName = this.nameMap.get(c);
-              Component _nextComponent = c.getNextComponent();
-              boolean _tripleNotEquals = (_nextComponent != null);
-              if (_tripleNotEquals) {
-                String _refName = this.refName(c.getNextComponent());
-                String _plus = ((cName + " NextComponent { ") + _refName);
-                String _plus_1 = (_plus + " }\n");
-                out.write(_plus_1);
-              }
-              final String tt = this.timeSec(c, "travelTime");
-              if ((tt != null)) {
-                out.write((((cName + " TravelTime { ") + tt) + " }\n"));
-              }
-              out.write("\n");
-            }
-          }
-        }
-        boolean _isEmpty_2 = generators.isEmpty();
-        boolean _not_2 = (!_isEmpty_2);
-        if (_not_2) {
-          out.write("# *** EntityGenerator ***\n\n");
-          for (final EntityGenerator g : generators) {
-            {
-              final String gName = this.nameMap.get(g);
-              Component _nextComponent = g.getNextComponent();
-              boolean _tripleNotEquals = (_nextComponent != null);
-              if (_tripleNotEquals) {
-                String _refName = this.refName(g.getNextComponent());
-                String _plus = ((gName + " NextComponent { ") + _refName);
-                String _plus_1 = (_plus + " }\n");
-                out.write(_plus_1);
-              }
-              final String iat = this.timeSec(g, "interArrivalTime");
-              if ((iat != null)) {
-                out.write((((gName + " InterArrivalTime { ") + iat) + " }\n"));
-              }
-              int _entitiesPerArrival = g.getEntitiesPerArrival();
-              boolean _greaterThan = (_entitiesPerArrival > 0);
-              if (_greaterThan) {
-                int _entitiesPerArrival_1 = g.getEntitiesPerArrival();
-                String _plus_2 = ((gName + " EntitiesPerArrival { ") + Integer.valueOf(_entitiesPerArrival_1));
-                String _plus_3 = (_plus_2 + " }\n");
-                out.write(_plus_3);
-              }
-              SimEntity _prototype = g.getPrototype();
-              boolean _tripleNotEquals_1 = (_prototype != null);
-              if (_tripleNotEquals_1) {
-                String _refName_1 = this.refName(g.getPrototype());
-                String _plus_4 = ((gName + " PrototypeEntity { ") + _refName_1);
-                String _plus_5 = (_plus_4 + " }\n");
-                out.write(_plus_5);
-              }
-              int _maxNumber = g.getMaxNumber();
-              boolean _greaterThan_1 = (_maxNumber > 0);
-              if (_greaterThan_1) {
-                int _maxNumber_1 = g.getMaxNumber();
-                String _plus_6 = ((gName + " MaxNumber { ") + Integer.valueOf(_maxNumber_1));
-                String _plus_7 = (_plus_6 + " }\n");
-                out.write(_plus_7);
-              }
-              out.write("\n");
-            }
-          }
-        }
-        boolean _isEmpty_3 = queues.isEmpty();
-        boolean _not_3 = (!_isEmpty_3);
-        if (_not_3) {
-          out.write("# *** Queue ***\n\n");
-          for (final Queue q : queues) {
-            {
-              final String qName = this.nameMap.get(q);
-              final Object pr = this.getIfSet(q, "priority");
-              if ((pr != null)) {
-                out.write((((qName + " Priority { ") + pr) + " }\n"));
-              }
-              final Object m = this.getIfSet(q, "match");
-              if (((m != null) && (!m.toString().trim().isEmpty()))) {
-                out.write((((qName + " Match { ") + m) + " }\n"));
-              }
-              final Object fifo = this.getIfSet(q, "fifo");
-              if ((fifo != null)) {
-                String _boolUpper = this.boolUpper(fifo);
-                String _plus = ((qName + " FIFO { ") + _boolUpper);
-                String _plus_1 = (_plus + " }\n");
-                out.write(_plus_1);
-              }
-              final String rt = this.timeSecIfSet(q, "renegeTime");
-              if ((rt != null)) {
-                out.write((((qName + " RenegeTime { ") + rt) + " }\n"));
-              }
-              final Object rc = this.getIfSet(q, "renegeCondition");
-              if ((rc != null)) {
-                out.write((((qName + " RenegeCondition { ") + rc) + " }\n"));
-              }
-              final Object rd = this.getIfSet(q, "renegeDestination");
-              if ((rd instanceof EObject)) {
-                String _refName = this.refName(((EObject) rd));
-                String _plus_2 = ((qName + " RenegeDestination { ") + _refName);
-                String _plus_3 = (_plus_2 + " }\n");
-                out.write(_plus_3);
-              }
-              final Object mvl = this.getIfSet(q, "maxValidLength");
-              if ((mvl != null)) {
-                out.write((((qName + " MaxValidLength { ") + mvl) + " }\n"));
-              }
-              out.write("\n");
-            }
-          }
-        }
-        boolean _isEmpty_4 = servers.isEmpty();
-        boolean _not_4 = (!_isEmpty_4);
-        if (_not_4) {
-          out.write("# *** Server ***\n\n");
-          for (final Server s : servers) {
-            {
-              final String sName = this.nameMap.get(s);
-              Component _nextComponent = s.getNextComponent();
-              boolean _tripleNotEquals = (_nextComponent != null);
-              if (_tripleNotEquals) {
-                String _refName = this.refName(s.getNextComponent());
-                String _plus = ((sName + " NextComponent { ") + _refName);
-                String _plus_1 = (_plus + " }\n");
-                out.write(_plus_1);
-              }
-              Queue _waitQueue = s.getWaitQueue();
-              boolean _tripleNotEquals_1 = (_waitQueue != null);
-              if (_tripleNotEquals_1) {
-                String _refName_1 = this.refName(s.getWaitQueue());
-                String _plus_2 = ((sName + " WaitQueue { ") + _refName_1);
-                String _plus_3 = (_plus_2 + " }\n");
-                out.write(_plus_3);
-              }
-              final String st = this.timeSecIfSet(s, "serviceTime");
-              if ((st != null)) {
-                out.write((((sName + " ServiceTime { ") + st) + " }\n"));
-              }
-              out.write("\n");
-            }
-          }
-        }
-        out.write("# *** GRAPHICS INPUTS ***\n\n");
-        out.write("Simulation RealTime { TRUE }\n");
-        out.write("Simulation SnapToGrid { TRUE }\n");
-        out.write("Simulation ShowLabels { TRUE }\n");
-        out.write("Simulation ShowSubModels { TRUE }\n");
-        out.write("Simulation ShowReferences { FALSE }\n");
-        out.write("Simulation ShowEntityFlow { TRUE }\n");
-        out.write("Simulation ShowModelBuilder { TRUE }\n");
-        out.write("Simulation ShowObjectSelector { TRUE }\n");
-        out.write("Simulation ShowInputEditor { TRUE }\n");
-        out.write("Simulation ShowOutputViewer { TRUE }\n");
-        out.write("Simulation ShowPropertyViewer { FALSE }\n");
-        out.write("Simulation ShowLogViewer { FALSE }\n\n");
-        int idx = 0;
-        final double step = 2.0;
-        Set<EObject> _keySet = this.nameMap.keySet();
-        for (final EObject e : _keySet) {
-          {
-            final String n = this.nameMap.get(e);
-            final double x = (idx * step);
-            out.write((((n + " Position { ") + Double.valueOf(x)) + "  0.0  0.0  m }\n\n"));
-            idx = (idx + 1);
-          }
-        }
-        out.write(this.staticUiBlock());
+        out.write(text.toString().getBytes(StandardCharsets.UTF_8));
       } finally {
         out.close();
       }
@@ -290,301 +226,189 @@ public class M2T {
     }
   }
 
-  private void writeDefine(final FileWriter out, final String typeName, final Iterable<? extends EObject> elements) {
-    try {
-      boolean _isEmpty = IterableExtensions.isEmpty(elements);
-      boolean _not = (!_isEmpty);
-      if (_not) {
-        final Function1<EObject, String> _function = (EObject e) -> {
-          return this.nameMap.get(e);
-        };
-        final String names = IterableExtensions.join(IterableExtensions.map(elements, _function), "  ");
-        out.write((((("Define " + typeName) + " { ") + names) + " }\n"));
-      }
-    } catch (Throwable _e) {
-      throw Exceptions.sneakyThrow(_e);
-    }
-  }
-
-  private String exportName(final EObject e) {
-    final String rawName = this.tryGetName(e);
-    if (((rawName != null) && (!rawName.trim().isEmpty()))) {
-      final String normalized = this.normalizeName(rawName.trim());
-      boolean _isEmpty = normalized.isEmpty();
-      boolean _not = (!_isEmpty);
-      if (_not) {
-        return normalized;
-      }
-    }
-    final String type = e.eClass().getName();
-    Integer _elvis = null;
-    Integer _get = this.counters.get(type);
-    if (_get != null) {
-      _elvis = _get;
-    } else {
-      _elvis = Integer.valueOf(0);
-    }
-    final int next = ((_elvis).intValue() + 1);
-    this.counters.put(type, Integer.valueOf(next));
-    return (type + Integer.valueOf(next));
-  }
-
-  private String normalizeName(final String s) {
-    return s.replaceAll("[^A-Za-z0-9]", "");
-  }
-
-  private String refName(final Object ref) {
-    if ((ref instanceof EObject)) {
-      final EObject eo = ((EObject) ref);
-      String n = this.nameMap.get(eo);
-      if ((n == null)) {
-        n = this.exportName(eo);
-        this.nameMap.put(eo, n);
-      }
-      return n;
-    }
-    return ref.toString();
-  }
-
-  private String tryGetName(final EObject e) {
-    String _xblockexpression = null;
+  private Object value(final EObject e, final String feature) {
+    Object _xblockexpression = null;
     {
-      final Function1<EStructuralFeature, Boolean> _function = (EStructuralFeature it) -> {
-        String _name = it.getName();
-        return Boolean.valueOf(Objects.equals(_name, "name"));
-      };
-      final EStructuralFeature f = IterableExtensions.<EStructuralFeature>findFirst(e.eClass().getEStructuralFeatures(), _function);
+      final EStructuralFeature f = e.eClass().getEStructuralFeature(feature);
+      Object _xifexpression = null;
       if ((f == null)) {
-        return null;
-      }
-      final Object v = e.eGet(f);
-      String _xifexpression = null;
-      if ((v == null)) {
         _xifexpression = null;
       } else {
-        _xifexpression = v.toString();
+        _xifexpression = e.eGet(f);
       }
       _xblockexpression = _xifexpression;
     }
     return _xblockexpression;
   }
 
-  private String timeSec(final EObject e, final String featureName) {
-    String _xblockexpression = null;
+  private boolean isSet(final EObject e, final String feature) {
+    boolean _xblockexpression = false;
     {
-      final Function1<EStructuralFeature, Boolean> _function = (EStructuralFeature it) -> {
-        String _name = it.getName();
-        return Boolean.valueOf(Objects.equals(_name, featureName));
-      };
-      final EStructuralFeature f = IterableExtensions.<EStructuralFeature>findFirst(e.eClass().getEStructuralFeatures(), _function);
-      if ((f == null)) {
-        return null;
-      }
-      final Object v = e.eGet(f);
-      if ((v == null)) {
-        return null;
-      }
-      final String txt = v.toString().trim();
-      boolean _isEmpty = txt.isEmpty();
-      if (_isEmpty) {
-        return null;
-      }
-      _xblockexpression = (txt + "  s");
+      final EStructuralFeature f = e.eClass().getEStructuralFeature(feature);
+      _xblockexpression = ((f != null) && e.eIsSet(f));
     }
     return _xblockexpression;
   }
 
-  private Object getIfSet(final EObject e, final String featureName) {
-    Object _xblockexpression = null;
+  private double number(final EObject e, final String feature) {
+    double _xblockexpression = (double) 0;
     {
-      final Function1<EStructuralFeature, Boolean> _function = (EStructuralFeature it) -> {
-        String _name = it.getName();
-        return Boolean.valueOf(Objects.equals(_name, featureName));
-      };
-      final EStructuralFeature f = IterableExtensions.<EStructuralFeature>findFirst(e.eClass().getEStructuralFeatures(), _function);
-      if ((f == null)) {
-        return null;
+      final double n = this.coordinate(e, feature);
+      if ((n < 0)) {
+        throw new IllegalArgumentException(((("Invalid " + feature) + ": ") + Double.valueOf(n)));
       }
-      boolean _eIsSet = e.eIsSet(f);
-      boolean _not = (!_eIsSet);
+      _xblockexpression = n;
+    }
+    return _xblockexpression;
+  }
+
+  private double coordinate(final EObject e, final String feature) {
+    double _xblockexpression = (double) 0;
+    {
+      final Object v = this.value(e, feature);
+      if ((!(v instanceof Number))) {
+        throw new IllegalArgumentException(("Missing numeric feature " + feature));
+      }
+      final double n = ((Number) v).doubleValue();
+      boolean _isFinite = Double.isFinite(n);
+      boolean _not = (!_isFinite);
       if (_not) {
-        return null;
+        throw new IllegalArgumentException(((("Invalid " + feature) + ": ") + Double.valueOf(n)));
       }
-      _xblockexpression = e.eGet(f);
+      _xblockexpression = n;
     }
     return _xblockexpression;
   }
 
-  private String timeSecIfSet(final EObject e, final String featureName) {
+  private String bool(final Object value) {
+    String _xifexpression = null;
+    boolean _equals = Objects.equals(Boolean.TRUE, value);
+    if (_equals) {
+      _xifexpression = "TRUE";
+    } else {
+      _xifexpression = "FALSE";
+    }
+    return _xifexpression;
+  }
+
+  private void line(final StringBuilder text, final String name, final String keyword, final Object value) {
+    if ((value != null)) {
+      text.append((((((name + " ") + keyword) + " { ") + value) + " }\n"));
+    }
+  }
+
+  private void duration(final StringBuilder text, final EObject e, final String feature, final String keyword, final String name) {
+    double _number = this.number(e, feature);
+    String _plus = (Double.valueOf(_number) + " s");
+    this.line(text, name, keyword, _plus);
+  }
+
+  private void reference(final StringBuilder text, final EObject e, final String feature, final String keyword) {
+    this.line(text, this.nameMap.get(e), keyword, this.refName(this.value(e, feature)));
+  }
+
+  private void optional(final StringBuilder text, final EObject e, final String feature, final String keyword) {
+    boolean _isSet = this.isSet(e, feature);
+    if (_isSet) {
+      this.line(text, this.nameMap.get(e), keyword, this.value(e, feature));
+    }
+  }
+
+  private String refName(final Object ref) {
     String _xblockexpression = null;
     {
-      final Object v = this.getIfSet(e, featureName);
-      if ((v == null)) {
-        return null;
+      final String name = this.nameMap.get(ref);
+      if ((name == null)) {
+        throw new IllegalArgumentException(("Reference has no exported declaration: " + ref));
       }
-      final String txt = v.toString().trim();
-      boolean _isEmpty = txt.isEmpty();
-      if (_isEmpty) {
-        return null;
-      }
-      _xblockexpression = (txt + "  s");
+      _xblockexpression = name;
     }
     return _xblockexpression;
   }
 
-  private String boolUpper(final Object v) {
+  private String exportName(final EObject e) {
     String _xblockexpression = null;
     {
-      if ((v == null)) {
-        return null;
-      }
-      if ((v instanceof Boolean)) {
-        String _xifexpression = null;
-        if ((((Boolean) v)).booleanValue()) {
-          _xifexpression = "TRUE";
-        } else {
-          _xifexpression = "FALSE";
-        }
-        return _xifexpression;
-      }
-      final String t = v.toString().trim().toLowerCase();
-      String _xifexpression_1 = null;
-      boolean _equals = Objects.equals(t, "true");
-      if (_equals) {
-        _xifexpression_1 = "TRUE";
+      final Object raw = this.value(e, "name");
+      String _xifexpression = null;
+      if ((raw == null)) {
+        _xifexpression = e.eClass().getName();
       } else {
-        String _xifexpression_2 = null;
-        boolean _equals_1 = Objects.equals(t, "false");
-        if (_equals_1) {
-          _xifexpression_2 = "FALSE";
-        } else {
-          _xifexpression_2 = v.toString();
-        }
-        _xifexpression_1 = _xifexpression_2;
+        _xifexpression = raw.toString().trim().replaceAll("[^A-Za-z0-9_]", "_");
       }
-      _xblockexpression = _xifexpression_1;
+      String base = _xifexpression;
+      boolean _isEmpty = base.isEmpty();
+      if (_isEmpty) {
+        base = e.eClass().getName();
+      }
+      boolean _matches = base.substring(0, 1).matches("[A-Za-z_]");
+      boolean _not = (!_matches);
+      if (_not) {
+        base = ("E_" + base);
+      }
+      String candidate = base;
+      int suffix = 2;
+      while ((!this.usedNames.add(candidate))) {
+        {
+          candidate = ((base + "_") + Integer.valueOf(suffix));
+          suffix = (suffix + 1);
+        }
+      }
+      _xblockexpression = candidate;
     }
     return _xblockexpression;
   }
 
-  private String refList(final Object v) {
-    Object _xblockexpression = null;
-    {
-      if ((v == null)) {
-        return null;
-      }
-      if ((v instanceof List<?>)) {
-        final List<?> lst = ((List<?>) v);
-        final Function1<EObject, String> _function = (EObject eo) -> {
-          return this.refName(((EObject) eo));
-        };
-        final String names = IterableExtensions.join(IterableExtensions.<EObject, String>map(Iterables.<EObject>filter(lst, EObject.class), _function), "  ");
-        return names;
-      }
-      if ((v instanceof EObject)) {
-        return this.refName(((EObject) v));
-      }
-      _xblockexpression = null;
-    }
-    return ((String)_xblockexpression);
-  }
-
-  private String quote(final String s) {
+  private String quote(final String text) {
     String _xblockexpression = null;
     {
-      final String esc = s.replace("\'", "\\\'");
-      _xblockexpression = (("\'" + esc) + "\'");
+      if (((((text.contains("\'") || text.contains("\n")) || text.contains("\r")) || text.contains("{")) || text.contains("}"))) {
+        throw new IllegalArgumentException(("Expression contains unsupported CFG delimiters: " + text));
+      }
+      _xblockexpression = (("\'" + text) + "\'");
     }
     return _xblockexpression;
   }
 
-  private String staticUiBlock() {
-    StringConcatenation _builder = new StringConcatenation();
-    _builder.append("# *** ColladaModel ***");
-    _builder.newLine();
-    _builder.newLine();
-    _builder.append("Axis ColladaFile { <res>/shapes/axis_text.dae }");
-    _builder.newLine();
-    _builder.newLine();
-    _builder.append("Grid100x100 ColladaFile { <res>/shapes/grid100x100.dae }");
-    _builder.newLine();
-    _builder.newLine();
-    _builder.append("# *** DisplayEntity ***");
-    _builder.newLine();
-    _builder.newLine();
-    _builder.append("XY-Grid Description { \'Grid for the X-Y plane (100 m x 100 m)\' }");
-    _builder.newLine();
-    _builder.append("XY-Grid Size { 100  100  m }");
-    _builder.newLine();
-    _builder.append("XY-Grid DisplayModel { Grid100x100 }");
-    _builder.newLine();
-    _builder.append("XY-Grid Show { FALSE }");
-    _builder.newLine();
-    _builder.append("XY-Grid Movable { FALSE }");
-    _builder.newLine();
-    _builder.newLine();
-    _builder.append("XYZ-Axis Description { \'Unit vectors\' }");
-    _builder.newLine();
-    _builder.append("XYZ-Axis Alignment { -0.4393409  -0.4410096  -0.4394292 }");
-    _builder.newLine();
-    _builder.append("XYZ-Axis Size { 1.125000  1.1568242  1.1266404  m }");
-    _builder.newLine();
-    _builder.append("XYZ-Axis DisplayModel { Axis }");
-    _builder.newLine();
-    _builder.append("XYZ-Axis Show { FALSE }");
-    _builder.newLine();
-    _builder.append("XYZ-Axis Movable { FALSE }");
-    _builder.newLine();
-    _builder.newLine();
-    _builder.append("# *** OverlayClock ***");
-    _builder.newLine();
-    _builder.newLine();
-    _builder.append("Clock Description { \'Simulation date and time\' }");
-    _builder.newLine();
-    _builder.append("Clock ScreenPosition { 15  15 }");
-    _builder.newLine();
-    _builder.append("Clock AlignBottom { TRUE }");
-    _builder.newLine();
-    _builder.append("Clock TextHeight { 10 }");
-    _builder.newLine();
-    _builder.append("Clock FontColour { gray20 }");
-    _builder.newLine();
-    _builder.append("Clock FontStyle { ITALIC }");
-    _builder.newLine();
-    _builder.append("Clock DateFormat { \'yyyy-MMM-dd HH:mm:ss.SSS\' }");
-    _builder.newLine();
-    _builder.newLine();
-    _builder.append("# *** OverlayText ***");
-    _builder.newLine();
-    _builder.newLine();
-    _builder.append("Title Description { \'Title for the simulation model\' }");
-    _builder.newLine();
-    _builder.append("Title ScreenPosition { 15  15 }");
-    _builder.newLine();
-    _builder.append("Title Format { \'Model Title\' }");
-    _builder.newLine();
-    _builder.append("Title TextHeight { 18 }");
-    _builder.newLine();
-    _builder.append("Title FontColour { 150  23  46 }");
-    _builder.newLine();
-    _builder.append("Title FontStyle { BOLD }");
-    _builder.newLine();
-    _builder.newLine();
-    _builder.append("# *** View ***");
-    _builder.newLine();
-    _builder.newLine();
-    _builder.append("View1 Description { \'Default view window\' }");
-    _builder.newLine();
-    _builder.append("View1 ViewCenter { 1.3  -0.7  0.0  m }");
-    _builder.newLine();
-    _builder.append("View1 ViewPosition { 1.3  -0.7  17.320508  m }");
-    _builder.newLine();
-    _builder.append("View1 ShowWindow { TRUE }");
-    _builder.newLine();
-    _builder.append("View1 Lock2D { TRUE }");
-    _builder.newLine();
-    _builder.append("View1 SkyboxImage { <res>/images/sky_map_2048x1024.jpg }");
-    _builder.newLine();
-    return _builder.toString();
+  private void validate(final EObject e) {
+    String _name = e.eClass().getName();
+    if (_name != null) {
+      switch (_name) {
+        case "EntityGenerator":
+          this.refName(this.value(e, "prototype"));
+          this.refName(this.value(e, "nextComponent"));
+          if (((this.number(e, "interArrivalTime") <= 0) || (this.number(e, "entitiesPerArrival") <= 0))) {
+            throw new IllegalArgumentException("Generator requires positive interArrivalTime and entitiesPerArrival");
+          }
+          break;
+        case "Server":
+          final Object queue = this.value(e, "waitQueue");
+          this.refName(queue);
+          if (((!(queue instanceof EObject)) || (!Objects.equals(((EObject) queue).eClass().getName(), "Queue")))) {
+            throw new IllegalArgumentException("Server.waitQueue must reference a Queue");
+          }
+          this.refName(this.value(e, "nextComponent"));
+          break;
+        case "EntityConveyor":
+          this.refName(this.value(e, "nextComponent"));
+          break;
+        case "Branch":
+          Object _value = this.value(e, "nextComponentList");
+          final List<?> targets = ((List<?>) _value);
+          if (((targets == null) || targets.isEmpty())) {
+            throw new IllegalArgumentException("Branch requires destinations");
+          }
+          final Consumer<Object> _function = (Object it) -> {
+            this.refName(it);
+          };
+          targets.forEach(_function);
+          final Object choice = this.value(e, "choice");
+          if (((choice == null) || choice.toString().trim().isEmpty())) {
+            throw new IllegalArgumentException("Branch requires Choice");
+          }
+          this.quote(choice.toString());
+          break;
+      }
+    }
   }
 }

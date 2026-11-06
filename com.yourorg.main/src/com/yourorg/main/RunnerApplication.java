@@ -9,7 +9,8 @@ public class RunnerApplication implements IApplication {
   @Override
   public Object start(IApplicationContext context) throws Exception {
     System.err.println(">>> RunnerApplication.start()");
-    Main.main(new String[0]);   //Main.java
+    Object arguments = context.getArguments().get(IApplicationContext.APPLICATION_ARGS);
+    Main.main(arguments instanceof String[] ? (String[]) arguments : new String[0]);
     System.err.println(">>> RunnerApplication.end()");
     return IApplication.EXIT_OK;
   }

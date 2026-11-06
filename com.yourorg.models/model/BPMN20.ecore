@@ -325,6 +325,7 @@
         upperBound="-1" eType="#//Lane" transient="true" derived="true" eOpposite="#//Lane/flowNodeRefs"/>
   </eClassifiers>
   <eClassifiers xsi:type="ecore:EClass" name="SequenceFlow" eSuperTypes="#//FlowElement">
+    <eStructuralFeatures xsi:type="ecore:EAttribute" name="TravelTime" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EDouble"/>
     <eStructuralFeatures xsi:type="ecore:EAttribute" name="isImmediate" ordered="false"
         eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EBoolean"/>
     <eStructuralFeatures xsi:type="ecore:EReference" name="conditionExpression" ordered="false"
@@ -464,6 +465,7 @@
         lowerBound="1" eType="#//Message"/>
   </eClassifiers>
   <eClassifiers xsi:type="ecore:EClass" name="FormalExpression" eSuperTypes="#//Expression">
+    <eStructuralFeatures xsi:type="ecore:EAttribute" name="JaamSimExpression" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EString"/>
     <eStructuralFeatures xsi:type="ecore:EAttribute" name="language" ordered="false"
         lowerBound="1" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EString"/>
     <eStructuralFeatures xsi:type="ecore:EReference" name="body" ordered="false" lowerBound="1"
@@ -656,6 +658,7 @@
   </eClassifiers>
   <eClassifiers xsi:type="ecore:EClass" name="EndEvent" eSuperTypes="#//ThrowEvent"/>
   <eClassifiers xsi:type="ecore:EClass" name="StartEvent" eSuperTypes="#//CatchEvent">
+    <eStructuralFeatures xsi:type="ecore:EAttribute" name="FirstArrivalTime" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EDouble"/>
     <eStructuralFeatures xsi:type="ecore:EAttribute" name="isInterrupting" ordered="false"
         lowerBound="1" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EBoolean"
         defaultValueLiteral="true"/>
