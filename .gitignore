@@ -1,2 +1,5 @@
 .build/
 com.yourorg.atl/Rules/*.emftvm
+**/bin/
+**/xtend-gen/
+*.class

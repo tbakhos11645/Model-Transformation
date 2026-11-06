@@ -1,13 +1,14 @@
 # Transformation fixes — GitHub patch list
 
-**Patch version:** `2026.11.06-154042-CET`
-**Recorded:** 2026-11-06 at 15:40:42, Europe/Paris (CET, UTC+01:00)
+**Patch version:** `2026.11.06-161447-CET`
+**Recorded:** 2026-11-06 at 16:14:47, Europe/Paris (CET, UTC+01:00)
 **Status:** Local working-tree patch; not committed or published.
 
 ## Change history
 
 | Version | Recorded (Europe/Paris) | Changes |
 | --- | --- | --- |
+| `2026.11.06-161447-CET` | 2026-11-06 16:14:47 CET | Locked offline Windows toolchain, source-only compilation/Equinox packaging and verified byte-identical dual builds. |
 | `2026.11.06-154042-CET` | 2026-11-06 15:40:42 CET | Scenario seeds, explicit replication outputs/run list, range validation and third BPSim regression/native tests. |
 | `2026.11.06-141654-CET` | 2026-11-06 14:16:54 CET | Second BPSim congestion/FIFO test, constant scenario Duration/Warmup execution, native verification through standalone and Eclipse launch paths. |
 | `2026.11.06-134211-CET` | 2026-11-06 13:42:11 CET | Verify corrected queue/server/sink display and full run in installed JaamSim 2025-04; documentation only. |
@@ -60,6 +61,7 @@ Eclipse also regenerated the already tracked `com.your.m2t/xtend-gen/com/your/m2
 
 | EClass | Attribute | Type/default | Meaning |
 | --- | --- | --- |
+| `2026.11.06-161447-CET` | 2026-11-06 16:14:47 CET | Locked offline Windows toolchain, source-only compilation/Equinox packaging and verified byte-identical dual builds. |
 | `2026.11.06-154042-CET` | 2026-11-06 15:40:42 CET | Scenario seeds, explicit replication outputs/run list, range validation and third BPSim regression/native tests. |
 | `2026.11.06-111201-CET` | 2026-11-06 11:12:01 CET | Permanent first BPSim example, native timeline assertions, actual Equinox application launch and separate test breakdown. |
 | `2026.11.06-095128-CET` | 2026-11-06 09:51:28 CET | Fix Eclipse application extension ID placement in main plugin.xml. |
@@ -252,3 +254,22 @@ No ATL, Xtend or Ecore changes were required. Native verification used the exist
 Validation: 316 regression assertions passed. All 19 standalone native cases and six Eclipse-output native cases passed without configuration warnings/errors or runtime failures. Four actual Equinox launches passed; all six generated CFGs matched standalone counterparts. Third-example seeds 41/42/43 were confirmed in the native model; every replica retained arrivals [6,12,18] and completions [8,14,20]. Native MRG1999a probes produced identical draws for repeated seed initialization and different sequences for adjacent substreams. Constant process timelines do not establish stochastic BPSim distribution support.
 
 Main generates files, not automatic JaamSim batch execution. Each CFG runs once; the verification scripts execute this example's full set. Consecutive substream allocation and the 1000-replication bound are implementation policies. Prior surplus outputs are retained but excluded from the latest run list. No Ecore/ATL/Xtend changes were needed. Eclipse regenerated the tracked Main.class binary as a build derivative; generated .build artifacts are excluded from authored patch content. No commit or push performed.
+
+## Revision 2026.11.06-161447-CET — Reproducible offline Windows builds
+
+| File | Change |
+| --- | --- |
+| build/toolchain.lock.json | Lock exact SHA-256 contents of 2,131 files, ordered compiler jars, Java runtime, native JaamSim source/resources and the 46-bundle Equinox runtime set. |
+| scripts/toolchain.ps1 | Validate the portable kit before use, fingerprint source/manifest inputs and constrain compiled-directory cleanup to .build. |
+| scripts/prepare-toolchain.ps1 | Assemble a portable offline kit from matching existing installations; reject missing or changed source dependencies. |
+| scripts/verify.ps1 | Replace newest-installed-jar/system-Java selection with locked inputs; clear compiled outputs, compile model Java from source, sort source lists, support -ToolchainDirectory/-Native and stamp successful builds. |
+| scripts/verify-eclipse.ps1 | Stop using installed bundles.info and model bin classes; build a minimal locked Equinox configuration; package fresh classes with fixed jar timestamps; use the locked Java jar module and workspace-local temp files; reject stale builds. |
+| scripts/verify-reproducibility.ps1 | Build two separate source-only copies, run both launch paths/native tests, compare artifact hashes and test corrupted dependency/stale-source rejection. |
+| .gitignore | Ignore new bin, xtend-gen and class outputs; previously tracked binaries are retained but not consumed by these builds. |
+| README.md | Replace machine-dependent verification instructions with preparation, locked-build and reproducibility commands. |
+| BUILD_REPRODUCIBILITY.md | Requested implementation breakdown, setup and distribution instructions, verification evidence, archive checksum and limitations. |
+| PATCH_LIST.md | Timestamp, history and complete authored change list for this revision. |
+
+Validation: two independent source-only copies each passed 316 assertions, 19 standalone native runs, four Equinox launches and six native runs of Eclipse-generated CFGs. 1,487 generated/compiled artifacts were byte-identical, including all four packaged project jars, model/application/native classes, ATL bytecode, generated metamodel and CFG/XMI outputs. Both negative dependency-integrity and stale-source probes passed. Evidence is in .build/repro-check/1abf6f7a024c4f868a056e5db3b3740b/result.json and .build/reproducibility.log.
+
+The portable toolchain archive is .build/reproducible-toolchain-windows-x64-v1.zip (SHA-256 CC7C1FFBB8A44C4FAF3E4F75A405F02FE01AFA65999BF973ADE9A3FA3588BCF8). It is an ignored local artifact, not a committed dependency bundle. Builds require the matching kit and Windows x64/PowerShell 7; Git is needed for the source-copy comparison. No public dependency bootstrap, hosted CI run, cross-machine proof, standalone product packaging, source metamodel Java regeneration, or simulation-semantic change is claimed. Path-bearing logs/run lists are not included in byte comparison. No commit, push or upload was performed.

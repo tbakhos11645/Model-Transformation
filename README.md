@@ -2,7 +2,16 @@
 
 Transforms the supported BPMN XMI subset to JaamSim XMI and a runnable JaamSim CFG using ATL EMFTVM and Xtend.
 
-Run `./scripts/verify.ps1` from the repository root to compile the transformation and execute regression tests. This requires installed Eclipse ATL/EMFTVM and Xtend plugin jars and a compatible Java runtime. The script accepts `-PluginDirectory` and `-JavaExecutable` for another installation.
+Builds use the exact dependencies in `build/toolchain.lock.json` and require 64-bit PowerShell 7 on Windows. Extract the matching portable toolchain into `.build/toolchain`, or prepare it once from the existing dependency installation:
+
+```powershell
+./scripts/prepare-toolchain.ps1 -JaamSimSourceDirectory C:/path/to/jaamsim
+./scripts/verify.ps1 -Native
+./scripts/verify-eclipse.ps1 -Native
+./scripts/verify-reproducibility.ps1 -Native
+```
+
+The preparation script accepts `-PluginDirectory`; it copies only exact hash-matching files. Once prepared, builds do not use the installed Eclipse, `.p2` pool or system Java. Pass `-ToolchainDirectory C:/path/to/toolchain` to use a kit outside the checkout. Omit `-Native` to skip native JaamSim tests. The reproducibility check requires Git and compares outputs from two isolated source-only copies. See [BUILD_REPRODUCIBILITY.md](BUILD_REPRODUCIBILITY.md) for setup, verification evidence and limitations. These commands replace the older verification-script parameters shown in historical test reports.
 
 Launch `com.yourorg.main.Main` or the Eclipse `RunnerApplication` with:
 
