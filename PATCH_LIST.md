@@ -1,13 +1,14 @@
 # Transformation fixes — GitHub patch list
 
-**Patch version:** `2026.11.06-141654-CET`
-**Recorded:** 2026-11-06 at 14:16:54, Europe/Paris (CET, UTC+01:00)
+**Patch version:** `2026.11.06-154042-CET`
+**Recorded:** 2026-11-06 at 15:40:42, Europe/Paris (CET, UTC+01:00)
 **Status:** Local working-tree patch; not committed or published.
 
 ## Change history
 
 | Version | Recorded (Europe/Paris) | Changes |
 | --- | --- | --- |
+| `2026.11.06-154042-CET` | 2026-11-06 15:40:42 CET | Scenario seeds, explicit replication outputs/run list, range validation and third BPSim regression/native tests. |
 | `2026.11.06-141654-CET` | 2026-11-06 14:16:54 CET | Second BPSim congestion/FIFO test, constant scenario Duration/Warmup execution, native verification through standalone and Eclipse launch paths. |
 | `2026.11.06-134211-CET` | 2026-11-06 13:42:11 CET | Verify corrected queue/server/sink display and full run in installed JaamSim 2025-04; documentation only. |
 | `2026.11.06-131926-CET` | 2026-11-06 13:19:26 CET | Flow-based layout, conveyor paths, visible flow arrows, fitted view and native endpoint regression checks. |
@@ -59,6 +60,7 @@ Eclipse also regenerated the already tracked `com.your.m2t/xtend-gen/com/your/m2
 
 | EClass | Attribute | Type/default | Meaning |
 | --- | --- | --- |
+| `2026.11.06-154042-CET` | 2026-11-06 15:40:42 CET | Scenario seeds, explicit replication outputs/run list, range validation and third BPSim regression/native tests. |
 | `2026.11.06-111201-CET` | 2026-11-06 11:12:01 CET | Permanent first BPSim example, native timeline assertions, actual Equinox application launch and separate test breakdown. |
 | `2026.11.06-095128-CET` | 2026-11-06 09:51:28 CET | Fix Eclipse application extension ID placement in main plugin.xml. |
 | `2026.11.06-092452-CET` | 2026-11-06 09:24:52 CET | Schema-derived BPSim model and initial constant timing/count scenario adapter; see revision breakdown below. | --- |
@@ -228,3 +230,25 @@ Documentation-only update to PATCH_LIST.md and first bpsim test.md. Opened the c
 Validation: 294 regression assertions passed. All 16 standalone native cases and three Eclipse-output native cases passed. Actual Equinox launches produced identical standalone/Eclipse CFGs for all three permanent cases. Second-test FIFO identities matched; arrivals [2,4,6,8], service starts [2,7,12,17], waits [0,3,6,9], completions [7,12,17,22], peak queue 2 and final queue 0. Both scenarios stopped at 30 seconds. Measured sink count was 4 without warmup and 3 with nine-second warmup; lifetime completions remained 4.
 
 No ATL, Xtend or Ecore changes were required. Native verification used the existing local JaamSim source checkout; no new installed-2025 GUI claim is made. Scenario seed/replications, Start, routing and distributions remain unsupported. Earlier uncommitted first-test documentation was preserved. Eclipse regenerated the tracked com.yourorg.main/bin/com/yourorg/main/Main.class; it is a build derivative, not a separate authored fix. Generated .build outputs are not patch content. No commit or push performed.
+
+## Revision 2026.11.06-154042-CET — Seeded replication outputs
+
+| File | Change |
+| --- | --- |
+| com.yourorg.main/src/com/yourorg/main/BpsimInput.java | Accept scenario seed/replication; carry typed settings; default both to 1; reject negative/out-of-range seeds, substream overflow and counts outside 1..1000 before export. |
+| com.yourorg.main/src/com/yourorg/main/Main.java | Export independent CFG/XMI pairs with consecutive substreams; preserve the first prefix; suffix later replications; write current .runs.txt list; log count/seed/output for each replica. |
+| com.yourorg.main/sample_in/third-bpsim-test.xmi | Permanent simple process for the replication example. |
+| com.yourorg.main/sample_in/third-bpsim-test.bpsim.xml | Scenario replicated: seed 41, three replications, three six-second arrivals and two-second service. |
+| com.yourorg.main/Third BPSim Test.launch | Eclipse launch for the third example. |
+| tests/TransformationSmokeTest.java | Add 22 assertions for CFG/XMI seeds, deterministic output, run-list cardinality/reduction, seed boundaries/defaults and rejected values preserving output. |
+| tests/JaamSimSmokeTest.java | Verify all third-example timelines, loaded seed values, repeatable native RNG probes and distinct adjacent substreams. |
+| scripts/verify.ps1 | Generate all three replication files and include them in the native suite (19 CFGs). |
+| scripts/verify-eclipse.ps1 | Generate third example through Equinox, compare all replicas, verify run-list size and natively execute all six permanent Eclipse CFGs. |
+| README.md | Document per-replication files, defaults/ranges and execution workflow. |
+| BPSIM_CHANGES.md | Update current support/limits and regression evidence. |
+| third bpsim test.md | Requested per-fix breakdown, design policy, commands, outputs, tests and remaining scope. |
+| PATCH_LIST.md | Update version/time/history and enumerate all changes. |
+
+Validation: 316 regression assertions passed. All 19 standalone native cases and six Eclipse-output native cases passed without configuration warnings/errors or runtime failures. Four actual Equinox launches passed; all six generated CFGs matched standalone counterparts. Third-example seeds 41/42/43 were confirmed in the native model; every replica retained arrivals [6,12,18] and completions [8,14,20]. Native MRG1999a probes produced identical draws for repeated seed initialization and different sequences for adjacent substreams. Constant process timelines do not establish stochastic BPSim distribution support.
+
+Main generates files, not automatic JaamSim batch execution. Each CFG runs once; the verification scripts execute this example's full set. Consecutive substream allocation and the 1000-replication bound are implementation policies. Prior surplus outputs are retained but excluded from the latest run list. No Ecore/ATL/Xtend changes were needed. Eclipse regenerated the tracked Main.class binary as a build derivative; generated .build artifacts are excluded from authored patch content. No commit or push performed.

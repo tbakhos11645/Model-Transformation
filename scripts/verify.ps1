@@ -39,6 +39,7 @@ Invoke-JavaTool 'java' @('-cp', ($build + [IO.Path]::PathSeparator + $classpath)
 foreach ($case in @(@('second-bpsim-test','congested'),@('second-bpsim-warmup','warmed'))) {
     Invoke-JavaTool 'java' @('-cp', ($build + [IO.Path]::PathSeparator + $classpath), 'com.yourorg.main.Main', 'com.yourorg.main/sample_in/second-bpsim-test.xmi', ('.build/' + $case[0]), $repoRoot, '60', 'com.yourorg.main/sample_in/second-bpsim-test.bpsim.xml', $case[1])
 }
+Invoke-JavaTool 'java' @('-cp', ($build + [IO.Path]::PathSeparator + $classpath), 'com.yourorg.main.Main', 'com.yourorg.main/sample_in/third-bpsim-test.xmi', '.build/third-bpsim-test', $repoRoot, '60', 'com.yourorg.main/sample_in/third-bpsim-test.bpsim.xml', 'replicated')
 if ($JaamSimSourceDirectory) {
     $jaamRoot = (Resolve-Path -LiteralPath $JaamSimSourceDirectory).Path
     $jaamClasses = Join-Path $build 'jaamsim'
@@ -49,6 +50,6 @@ if ($JaamSimSourceDirectory) {
     $jaamClasspath = $jaamClasses + [IO.Path]::PathSeparator + $jaamLibraries
     Invoke-JavaTool 'java' @('-cp', $classpath, 'org.eclipse.jdt.internal.compiler.batch.Main', '-17', '-cp', $jaamClasspath, '-d', $build, (Join-Path $repoRoot 'tests/JaamSimSmokeTest.java'), (Join-Path $repoRoot 'tests/FirstBpsimObserver.java'), (Join-Path $repoRoot 'tests/SecondBpsimObserver.java'))
     $jaamClasspath = $build + [IO.Path]::PathSeparator + $jaamClasspath + [IO.Path]::PathSeparator + (Join-Path $jaamRoot 'src/main/resources')
-    $configs = @('first-bpsim-test', 'second-bpsim-test', 'second-bpsim-warmup', 'ex1', 'ex2', 'conditional', 'timer', 'duration', 'collision', 'merge', 'subtype-Task', 'subtype-UserTask', 'subtype-ServiceTask', 'subtype-ManualTask', 'subtype-ScriptTask', 'subtype-BusinessRuleTask') | ForEach-Object { Join-Path $build "${_}.cfg" }
+    $configs = @('third-bpsim-test', 'third-bpsim-test-replication-002', 'third-bpsim-test-replication-003', 'first-bpsim-test', 'second-bpsim-test', 'second-bpsim-warmup', 'ex1', 'ex2', 'conditional', 'timer', 'duration', 'collision', 'merge', 'subtype-Task', 'subtype-UserTask', 'subtype-ServiceTask', 'subtype-ManualTask', 'subtype-ScriptTask', 'subtype-BusinessRuleTask') | ForEach-Object { Join-Path $build "${_}.cfg" }
     Invoke-JavaTool 'java' (@('-Djava.awt.headless=true', '-cp', $jaamClasspath, 'JaamSimSmokeTest') + $configs)
 }

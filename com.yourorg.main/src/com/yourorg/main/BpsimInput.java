@@ -14,7 +14,7 @@ public final class BpsimInput {
  private static final String NS="http://www.bpsim.org/schemas/2.0";
  private BpsimInput() {}
  /** Total BPSim duration includes warmup; JaamSim RunDuration excludes it. */
- public record ScenarioSettings(Double durationSeconds, double warmupSeconds) {
+ public record ScenarioSettings(Double durationSeconds, double warmupSeconds, int seed, int replications) {
   public double runSeconds(double fallbackTotalSeconds) {
    double total=durationSeconds==null?fallbackTotalSeconds:durationSeconds;
    if(!Double.isFinite(total)||total<=0||warmupSeconds>=total)
@@ -70,19 +70,27 @@ public final class BpsimInput {
   String base="min";
   Double duration=null;
   double warmup=0;
+  long seed=1;
+  int replications=1;
   for(Element s:children(selected)) if(s.getLocalName().equals("ScenarioParameters")) {
    allowed(s,"Duration","Warmup");
    for(int i=0;i<s.getAttributes().getLength();i++) {
     String a=s.getAttributes().item(i).getNodeName();
-    if(!a.equals("baseTimeUnit")&&!a.startsWith("xmlns")) throw new IllegalArgumentException("Scenario setting not executable yet: "+a);
+    if(!Set.of("baseTimeUnit","seed","replication").contains(a)&&!a.startsWith("xmlns")) throw new IllegalArgumentException("Scenario setting not executable yet: "+a);
    }
    if(s.hasAttribute("baseTimeUnit")) base=s.getAttribute("baseTimeUnit");
+   if(s.hasAttribute("seed")) seed=Long.parseLong(s.getAttribute("seed").trim());
+   if(s.hasAttribute("replication")) replications=Integer.parseInt(s.getAttribute("replication").trim());
    for(Element p:children(s)) {
     double seconds=value(p,base,false);
     if(p.getLocalName().equals("Duration")) duration=seconds; else warmup=seconds;
    }
   }
-  ScenarioSettings settings=new ScenarioSettings(duration,warmup);
+  // Bound export fan-out and reject lossy long-to-int conversion for the target.
+  if(replications<1||replications>1000) throw new IllegalArgumentException("Supported replication count is 1..1000");
+  if(seed<0||seed>Integer.MAX_VALUE-(long)replications+1)
+   throw new IllegalArgumentException("Seed and replication range must fit JaamSim substreams 0..2147483647");
+  ScenarioSettings settings=new ScenarioSettings(duration,warmup,(int)seed,replications);
   if(duration!=null) settings.runSeconds(duration);
   Map<String,EObject> ids=new HashMap<>();
   bpmn.getAllContents().forEachRemaining(e->{Object id=BpmnPreflight.get(e,"id");if(id instanceof String&&!((String)id).isBlank()){if(ids.put((String)id,e)!=null)throw new IllegalArgumentException("Duplicate BPMN id: "+id);}});

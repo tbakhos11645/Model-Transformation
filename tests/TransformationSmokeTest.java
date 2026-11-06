@@ -228,6 +228,35 @@ public class TransformationSmokeTest {
             try { Main.main(new String[]{bpsim.r.getURI().toFileString(),".build/scenario-settings",root.toString(),"60",scenarioFile.toString(),"baseline"}); throw new AssertionError("Accepted invalid Duration/Warmup"); }
             catch(IllegalArgumentException expected){check(settingsCfg.equals(Files.readString(root.resolve(".build/scenario-settings.cfg"))),"Invalid settings preserve prior CFG");}
         }
+        String replicated=xml.replace("<Scenario id='baseline'>","<Scenario id='baseline'><ScenarioParameters seed='41' replication='3'/>");
+        Files.writeString(scenarioFile,replicated);
+        String[] replicationArgs={bpsim.r.getURI().toFileString(),".build/replication-check",root.toString(),"60",scenarioFile.toString(),"baseline"};
+        Main.main(replicationArgs);
+        List<String> saved=new ArrayList<>();
+        for(int i=0;i<3;i++) {
+            String suffix=i==0?"":String.format(java.util.Locale.ROOT,"-replication-%03d",i+1);
+            String cfg=Files.readString(root.resolve(".build/replication-check"+suffix+".cfg"));
+            check(cfg.contains("GlobalSubstreamSeed { "+(41+i)+" }"),"Distinct replication seeds");
+            Resource runModel=Main.resourceSet(root).getResource(Main.uri(root.resolve(".build/replication-check"+suffix+".jaamsim.xmi")),true);
+            check(((Number)BpmnPreflight.get(objects(runModel,"Simulation").get(0),"globalSubstreamSeed")).intValue()==41+i,"XMI seed matches CFG");
+            saved.add(cfg);
+        }
+        check(Files.readAllLines(root.resolve(".build/replication-check.runs.txt")).size()==4,"Exactly three manifest entries");
+        Main.main(replicationArgs);
+        for(int i=0;i<3;i++)check(saved.get(i).equals(Files.readString(root.resolve(".build/replication-check"+(i==0?"":String.format(java.util.Locale.ROOT,"-replication-%03d",i+1))+".cfg"))),"Repeat export is deterministic");
+        for(String attributes:List.of("seed='-1'","seed='2147483648'","seed='9223372036854775807'","seed='2147483647' replication='2'","replication='0'","replication='-1'","replication='1001'")) {
+            Files.writeString(scenarioFile,xml.replace("<Scenario id='baseline'>","<Scenario id='baseline'><ScenarioParameters "+attributes+"/>"));
+            try { Main.main(replicationArgs); throw new AssertionError("Accepted invalid seed/replication: "+attributes); }
+            catch(IllegalArgumentException expected){check(saved.get(0).equals(Files.readString(root.resolve(".build/replication-check.cfg"))),"Invalid seed/count preserves existing CFG");}
+        }
+        for(String attributes:List.of("seed='0'","seed='2147483647'","")) {
+            Files.writeString(scenarioFile,xml.replace("<Scenario id='baseline'>","<Scenario id='baseline'><ScenarioParameters "+attributes+"/>"));
+            var parsed=com.yourorg.main.BpsimInput.apply(bpsim.r,scenarioFile,root.resolve("com.yourorg.models/model/BPSim-2.0.xsd"),"baseline");
+            check(parsed.seed()==(attributes.isEmpty()?1:attributes.contains("2147483647")?Integer.MAX_VALUE:0) && parsed.replications()==1,"Seed boundaries and default replication");
+        }
+        Main.main(replicationArgs);
+        check(Files.readAllLines(root.resolve(".build/replication-check.runs.txt")).size()==2,"Reducing replications replaces run list; stale outputs excluded");
+        check(Files.exists(root.resolve(".build/replication-check-replication-003.cfg")),"Do not delete old potentially edited outputs");
         Files.writeString(scenarioFile,xml.replace("value='3'","value='0'"));
         try { com.yourorg.main.BpsimInput.apply(bpsim.r,scenarioFile,root.resolve("com.yourorg.models/model/BPSim-2.0.xsd"),"baseline"); throw new AssertionError("Zero count treated as unlimited"); }
         catch(IllegalArgumentException expected) { check(expected.getMessage().contains("zero is not unlimited"),expected.getMessage()); }

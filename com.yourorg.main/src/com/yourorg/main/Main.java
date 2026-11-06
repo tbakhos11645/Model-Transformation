@@ -55,10 +55,13 @@ public class Main {
         Resource inRes = rs.getResource(uri(input), true);
         if (args.length == 5) throw new IllegalArgumentException("BPSim file requires a sixth argument: scenario id");
         double warmupSeconds = 0;
+        int seed = 1, replications = 1;
         if (args.length > 5) {
             var settings = BpsimInput.apply(inRes, root.resolve(args[4]), root.resolve("com.yourorg.models/model/BPSim-2.0.xsd"), args[5]);
             runSeconds = settings.runSeconds(runSeconds);
             warmupSeconds = settings.warmupSeconds();
+            seed = settings.seed();
+            replications = settings.replications();
             System.out.println("BPSim scenario " + args[5] + ": total=" + (runSeconds + warmupSeconds)
                 + " s, warmup=" + warmupSeconds + " s, measurement=" + runSeconds + " s"
                 + (settings.durationSeconds() == null ? " (command-line/default duration)" : " (scenario Duration takes precedence)"));
@@ -90,12 +93,20 @@ public class Main {
         EObject simulation = pkg.getEFactoryInstance().create((org.eclipse.emf.ecore.EClass) pkg.getEClassifier("Simulation"));
         simulation.eSet(simulation.eClass().getEStructuralFeature("runDuration"), runSeconds);
         simulation.eSet(simulation.eClass().getEStructuralFeature("initializationDuration"), warmupSeconds);
-        simulation.eSet(simulation.eClass().getEStructuralFeature("globalSubstreamSeed"), 1);
         simulationModel.eSet(simulationModel.eClass().getEStructuralFeature("simulation"), simulation);
         Files.createDirectories(prefix.getParent());
-        new M2T().exportToConfig(outRes, uri(Path.of(prefix + ".cfg")));
-        outRes.save(Collections.emptyMap());
-        System.out.println("Done.\nJaamSim XMI: " + outRes.getURI() + "\nCFG: " + prefix + ".cfg");
+        StringBuilder runs = new StringBuilder("# Generated replication files; execute each CFG once. Only entries in this list belong to this export.\n");
+        for (int i = 0; i < replications; i++) {
+            String runPrefix = prefix + (i == 0 ? "" : String.format(java.util.Locale.ROOT, "-replication-%03d", i + 1));
+            simulation.eSet(simulation.eClass().getEStructuralFeature("globalSubstreamSeed"), seed + i);
+            outRes.setURI(uri(Path.of(runPrefix + ".jaamsim.xmi")));
+            new M2T().exportToConfig(outRes, uri(Path.of(runPrefix + ".cfg")));
+            outRes.save(Collections.emptyMap());
+            runs.append(i + 1).append('\t').append(seed + i).append('\t').append(runPrefix).append(".cfg\n");
+            System.out.println("Replication " + (i + 1) + "/" + replications + ", seed=" + (seed + i) + "\nCFG: " + runPrefix + ".cfg");
+        }
+        // Always replace the list, even when reducing replication count; never delete user-edited old CFGs.
+        Files.writeString(Path.of(prefix + ".runs.txt"), runs.toString());
     }
 }
 

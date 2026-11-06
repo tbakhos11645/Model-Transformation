@@ -22,7 +22,8 @@ public class JaamSimSmokeTest {
    CountDownLatch done = new CountDownLatch(1);
    AtomicReference<Throwable> error = new AtomicReference<>();
    boolean second=new File(arg).getName().startsWith("second-bpsim-");
-   FirstBpsimObserver observer=new File(arg).getName().startsWith("first-bpsim-")?new FirstBpsimObserver(model):null;
+   boolean third=new File(arg).getName().startsWith("third-bpsim-");
+   FirstBpsimObserver observer=third||new File(arg).getName().startsWith("first-bpsim-")?new FirstBpsimObserver(model):null;
    SecondBpsimObserver secondObserver=second?new SecondBpsimObserver(model,arg.contains("warmup")):null;
    model.start(new RunListener() {
     public void runEnded() { done.countDown(); }
@@ -34,6 +35,18 @@ public class JaamSimSmokeTest {
    System.out.println("PASS JaamSim: "+arg+" at "+model.getSimTime()+" s, warnings="+model.getNumWarnings());
    if(observer!=null) observer.verify();
    if(secondObserver!=null) secondObserver.verify();
+   if(third) {
+    int expected=arg.contains("003")?43:arg.contains("002")?42:41;
+    int seed=model.getSimulation().getSubstreamNumber();
+    if(seed!=expected)throw new AssertionError("Wrong native seed: "+seed);
+    var a=new com.jaamsim.rng.MRG1999a(1,seed);
+    var b=new com.jaamsim.rng.MRG1999a(1,seed);
+    var c=new com.jaamsim.rng.MRG1999a(1,seed+1);
+    boolean distinct=false;
+    for(int n=0;n<32;n++){double sample=a.nextUniform();if(sample!=b.nextUniform())throw new AssertionError("Seed not repeatable");distinct|=sample!=c.nextUniform();}
+    if(!distinct)throw new AssertionError("Substreams are identical");
+    System.out.println("PASS native seed="+seed+": repeatable RNG probe, distinct adjacent substream");
+   }
    model.closeLogFile();
   }
   System.exit(0); // JaamSim event-manager worker threads remain alive after the last run.

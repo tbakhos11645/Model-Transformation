@@ -1,0 +1,10 @@
+<launchConfiguration type="org.eclipse.pde.ui.RuntimeWorkbench">
+<booleanAttribute key="append.args" value="true"/>
+<stringAttribute key="application" value="com.yourorg.main.application"/>
+<booleanAttribute key="useProduct" value="false"/>
+<booleanAttribute key="useDefaultConfig" value="true"/>
+<booleanAttribute key="useDefaultConfigArea" value="true"/>
+<booleanAttribute key="default" value="true"/>
+<stringAttribute key="org.eclipse.jdt.launching.PROGRAM_ARGUMENTS" value="&quot;com.yourorg.main/sample_in/third-bpsim-test.xmi&quot; &quot;.build/third-bpsim-test&quot; &quot;${workspace_loc:com.yourorg.main}/..&quot; &quot;60&quot; &quot;com.yourorg.main/sample_in/third-bpsim-test.bpsim.xml&quot; &quot;replicated&quot;"/>
+</launchConfiguration>
+

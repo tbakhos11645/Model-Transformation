@@ -1,6 +1,6 @@
 # BPSim integration — main changes
 
-Updated: 2026.11.06-141654-CET (6 November 2026, 14:16:54 Europe/Paris). Initial integration: 2026.11.06-092452-CET.
+Updated: 2026.11.06-154042-CET (6 November 2026, 15:40:42 Europe/Paris). Initial integration: 2026.11.06-092452-CET.
 
 ## What is implemented
 
@@ -46,7 +46,7 @@ This yields arrivals every six seconds and two seconds of processing per task.
 
 ## Current execution limits
 
-Schema representation is broader than execution support. XPath conditions, probabilistic routing, distributions, calendars, inheritance, resource/cost/priority/property execution, result requests, vendor extensions and scenario settings other than baseTimeUnit, Duration and Warmup are rejected when selected for execution. Scenario Start, seed and replication remain unsupported; the existing target seed remains 1. XOR gateways are rejected in BPSim mode to avoid accidentally reusing a JaamSim Choice expression as a BPSim condition. Legacy mode still supports the previous XOR behavior.
+Schema representation is broader than execution support. XPath conditions, probabilistic routing, distributions, calendars, inheritance, resource/cost/priority/property execution, result requests, vendor extensions and scenario settings other than baseTimeUnit, Duration, Warmup, seed and replication are rejected when selected for execution. Scenario Start remains unsupported. Seed and replication default to 1 when omitted; each replication exports a separate CFG using seed + index - 1. Seed/substream values must fit 0..2147483647 across the batch and replication count must be 1..1000. These are target/exporter limits, not restrictions of the BPSim XSD. XOR gateways are rejected in BPSim mode to avoid accidentally reusing a JaamSim Choice expression as a BPSim condition. Legacy mode still supports the previous XOR behavior.
 
 Zero arrival intervals, zero trigger counts, counts exceeding the target EInt range, year units and conflicting BPMN event definitions are also rejected explicitly. These are target limitations; they are not declarations that those values/features are invalid BPSim.
 
@@ -54,4 +54,4 @@ The generated Ecore is available for EMF tooling; the current execution adapter 
 
 ## Verification
 
-The verification script regenerates BPSim.ecore and compiles Xtend, Java and ATL. The suite now passes 294 regression assertions. Native tests verify the first example's exact timeline and the second example's entity identities, FIFO order, waiting times, congestion, sink counts and warmup statistics. Both examples and the warmup variant also pass through the isolated Eclipse launcher, with identical CFGs and native behavioral checks. See second bpsim test.md for reproduction and version scope.
+The verification script regenerates BPSim.ecore and compiles Xtend, Java and ATL. The suite now passes 316 regression assertions. Native tests verify the first example's exact timeline and the second example's entity identities, FIFO order, waiting times, congestion, sink counts and warmup statistics. Both examples and the warmup variant also pass through the isolated Eclipse launcher, with identical CFGs and native behavioral checks. See second bpsim test.md and third bpsim test.md for reproduction, per-fix breakdowns and version scope. The third example verifies three distinct configured seeds, repeatable exports and native RNG probes. Main generates the replication CFGs and a .runs.txt list; it does not launch JaamSim automatically.
