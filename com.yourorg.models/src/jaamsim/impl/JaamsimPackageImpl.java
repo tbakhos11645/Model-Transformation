@@ -1126,6 +1126,11 @@ public class JaamsimPackageImpl extends EPackageImpl implements JaamsimPackage {
 	 * @generated
 	 */
 	@Override
+	public EReference getBranch_ChoiceDistribution() {
+		return (EReference)branchEClass.getEStructuralFeatures().get(2);
+	}
+
+	@Override
 	public EAttribute getBranch_Choice() {
 		return (EAttribute)branchEClass.getEStructuralFeatures().get(1);
 	}
@@ -1564,6 +1569,7 @@ public class JaamsimPackageImpl extends EPackageImpl implements JaamsimPackage {
 		branchEClass = createEClass(BRANCH);
 		createEReference(branchEClass, BRANCH__NEXT_COMPONENT_LIST);
 		createEAttribute(branchEClass, BRANCH__CHOICE);
+		createEReference(branchEClass, BRANCH__CHOICE_DISTRIBUTION);
 
 		resourceEClass = createEClass(RESOURCE);
 		createEAttribute(resourceEClass, RESOURCE__CAPACITY);
@@ -1760,6 +1766,7 @@ public class JaamsimPackageImpl extends EPackageImpl implements JaamsimPackage {
 		initEClass(branchEClass, Branch.class, "Branch", !IS_ABSTRACT, !IS_INTERFACE, IS_GENERATED_INSTANCE_CLASS);
 		initEReference(getBranch_NextComponentList(), this.getProcessComponent(), null, "nextComponentList", null, 0, -1, Branch.class, !IS_TRANSIENT, !IS_VOLATILE, IS_CHANGEABLE, !IS_COMPOSITE, IS_RESOLVE_PROXIES, !IS_UNSETTABLE, IS_UNIQUE, !IS_DERIVED, IS_ORDERED);
 		initEAttribute(getBranch_Choice(), ecorePackage.getEString(), "choice", null, 0, 1, Branch.class, !IS_TRANSIENT, !IS_VOLATILE, IS_CHANGEABLE, !IS_UNSETTABLE, !IS_ID, IS_UNIQUE, !IS_DERIVED, IS_ORDERED);
+		initEReference(getBranch_ChoiceDistribution(), this.getDistribution(), null, "choiceDistribution", null, 0, 1, Branch.class, !IS_TRANSIENT, !IS_VOLATILE, IS_CHANGEABLE, !IS_COMPOSITE, IS_RESOLVE_PROXIES, !IS_UNSETTABLE, IS_UNIQUE, !IS_DERIVED, IS_ORDERED);
 
 		initEClass(resourceEClass, Resource.class, "Resource", !IS_ABSTRACT, !IS_INTERFACE, IS_GENERATED_INSTANCE_CLASS);
 		initEAttribute(getResource_Capacity(), ecorePackage.getEInt(), "capacity", null, 0, 1, Resource.class, !IS_TRANSIENT, !IS_VOLATILE, IS_CHANGEABLE, !IS_UNSETTABLE, !IS_ID, IS_UNIQUE, !IS_DERIVED, IS_ORDERED);

@@ -1,0 +1,17 @@
+<?xml version='1.0' encoding='utf-8'?>
+<bpmn:Definitions xmlns:bpmn="http://www.omg.org/spec/BPMN/20100524/MODEL-XMI" xmlns:xmi="http://www.omg.org/XMI" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmi:version="2.0" id="Manufacturing" name="Manufacturing inspection and rework" targetNamespace="urn:manufacturing">
+  <rootElements xsi:type="bpmn:Process" id="Process" name="Manufacturing">
+    <flowElements xsi:type="bpmn:StartEvent" id="Start" name="Source" outgoing="arrival" />
+    <flowElements xsi:type="bpmn:Task" id="Inspect" name="InspectionServer" incoming="arrival retry" outgoing="decision" />
+    <flowElements xsi:type="bpmn:ExclusiveGateway" id="Gate" name="InspectBranch" incoming="decision" outgoing="passed failed" />
+    <flowElements xsi:type="bpmn:Task" id="Pack" name="PackServer" incoming="passed" outgoing="finish" />
+    <flowElements xsi:type="bpmn:Task" id="Rework" name="ReworkServer" incoming="failed" outgoing="retry" />
+    <flowElements xsi:type="bpmn:EndEvent" id="End" name="Sink" incoming="finish" />
+    <flowElements xsi:type="bpmn:SequenceFlow" id="arrival" sourceRef="Start" targetRef="Inspect" />
+    <flowElements xsi:type="bpmn:SequenceFlow" id="decision" sourceRef="Inspect" targetRef="Gate" />
+    <flowElements xsi:type="bpmn:SequenceFlow" id="passed" sourceRef="Gate" targetRef="Pack" />
+    <flowElements xsi:type="bpmn:SequenceFlow" id="failed" sourceRef="Gate" targetRef="Rework" />
+    <flowElements xsi:type="bpmn:SequenceFlow" id="retry" sourceRef="Rework" targetRef="Inspect" />
+    <flowElements xsi:type="bpmn:SequenceFlow" id="finish" sourceRef="Pack" targetRef="End" />
+  </rootElements>
+</bpmn:Definitions>

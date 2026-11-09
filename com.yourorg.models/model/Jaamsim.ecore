@@ -145,6 +145,7 @@
   <eClassifiers xsi:type="ecore:EClass" name="Branch" eSuperTypes="#//ProcessComponent">
     <eStructuralFeatures xsi:type="ecore:EAttribute" name="choice" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EString"/>
     <eStructuralFeatures xsi:type="ecore:EReference" name="nextComponentList" upperBound="-1" eType="#//ProcessComponent"/>
+    <eStructuralFeatures xsi:type="ecore:EReference" name="choiceDistribution" eType="#//Distribution"/>
   </eClassifiers>
   <eClassifiers xsi:type="ecore:EClass" name="BranchCondition">
     <eStructuralFeatures xsi:type="ecore:EReference" name="condition" upperBound="1" containment="true" eType="#//Expression"/>

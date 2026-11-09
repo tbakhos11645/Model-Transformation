@@ -33,8 +33,30 @@ For BPSim, append a separate scenario XML file and scenario ID. For example:
 
 BPSim mode supports constant task processing, arrival intervals/counts, and scenario Duration/Warmup. A supplied scenario Duration takes precedence over the command-line duration; otherwise that argument is the total duration. Warmup is included in that total. The `congested` scenario runs for 30 seconds despite the 60-second fallback. Select `warmed` to exclude the first nine seconds from statistics while keeping the same 30-second total.
 
-XOR support described above applies to legacy mode; BPSim routing, distributions and resources remain unsupported. See [second bpsim test.md](second%20bpsim%20test.md) for measured FIFO/waiting-time results.
+BPSim mode supports constant routing probabilities on all outgoing sequence flows of an exclusive split. Use a dimensionless ControlParameters/Probability for each flow; the weights must lie in [0, 1] and sum to 1. Probability routing cannot be combined with BPMN conditions, a default flow, or a legacy Choice expression on the same split. Export preserves the association with each destination even when the flow order changes. Other distributions and resource behavior remain unsupported.
+
+The first BPSim arrival occurs one InterTriggerTimer interval after simulation time zero. The manufacturing fixture in tests/fixtures/ therefore generates its first arrival at 600 s and its last at 60000 s. See [second bpsim test.md](second%20bpsim%20test.md) for the existing FIFO/waiting-time results.
 
 BPSim ScenarioParameters now accepts `seed` and `replication`. Main generates one CFG/XMI pair per replication: the first keeps the requested prefix, then `-replication-002`, `-replication-003`, etc. Each uses substream `seed + replicationIndex - 1`; omitted seed/count default to 1. The current batch is listed in `<prefix>.runs.txt` (tab-separated index, seed, absolute CFG path). Main generates files; it does not launch JaamSim. Execute each listed CFG once. Opening the first CFG alone does not run the remaining replications.
 
 Supported seed/substream values are 0..2147483647 with no overflow across the batch; replication count is limited to 1..1000. Old surplus outputs are preserved when reducing count but removed from the current run list. See [third bpsim test.md](third%20bpsim%20test.md) for the per-fix breakdown and replication verification.
+
+## Reviewed process text front end
+
+The optional Python 3.10+ front end separates language extraction from model
+construction. To try extraction with a model that supports JSON output, set
+OPENROUTER_API_KEY in your local environment, then run:
+
+    python frontend/process_input.py propose process.txt --model provider/model --out proposal
+
+Review the proposed JSON against the original text and any clarifications.
+Use the reviewed file (or the bundled manually reviewed example) to create
+the two pipeline inputs:
+
+    python frontend/process_input.py export frontend/manufacturing.reviewed.json --out reviewed-process
+
+Run Main with reviewed-process/process.xmi, the chosen output prefix, the
+repository root, the fallback duration, reviewed-process/scenario.bpsim.xml,
+and scenario ID process. The export command refuses clarification and
+unsupported responses; it never invents missing parameters. Provider access
+is only used by the explicit propose command.

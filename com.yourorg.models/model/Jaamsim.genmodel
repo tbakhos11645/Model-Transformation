@@ -150,6 +150,7 @@
     <genClasses ecoreClass="Jaamsim.ecore#//Branch">
       <genFeatures createChild="false" ecoreFeature="ecore:EAttribute Jaamsim.ecore#//Branch/choice"/>
       <genFeatures notify="false" createChild="false" ecoreFeature="ecore:EReference Jaamsim.ecore#//Branch/nextComponentList"/>
+      <genFeatures notify="false" createChild="false" propertySortChoices="true" ecoreFeature="ecore:EReference Jaamsim.ecore#//Branch/choiceDistribution"/>
     </genClasses>
     <genClasses ecoreClass="Jaamsim.ecore#//BranchCondition">
       <genFeatures notify="true" createChild="true" ecoreFeature="ecore:EReference Jaamsim.ecore#//BranchCondition/condition"/>

@@ -26,6 +26,8 @@ helper def: seqFlows(p : OclAny) : Sequence(OclAny) =
   p.flowElements->select(e | e.oclIsKindOf(BPMN!SequenceFlow))->asSequence();
 -- Choice indices follow the persisted outgoing reference order.
 helper def: outFlows(fn : OclAny) : Sequence(OclAny) = fn.outgoing->asSequence();
+helper def: hasProbabilities(gw : OclAny) : Boolean =
+  thisModule.outFlows(gw)->exists(sf | not sf.BpsimProbability.oclIsUndefined());
 helper def: entryComponent(fn : OclAny) : Jaamsim!ProcessComponent =
   if fn.oclIsUndefined() then OclUndefined else
     if fn.oclIsKindOf(BPMN!StartEvent) then thisModule.resolveTemp(fn, 'gen') else
@@ -43,6 +45,9 @@ rule Definitions2SimulationModel {
   to sm : Jaamsim!SimulationModel (
     name <- thisModule.safeStr(d.name, 'SimModel'),
     entities <- Sequence{se},
+    distributions <- d.processes()->collect(p | thisModule.flowNodes(p)
+      ->select(n | n.oclIsKindOf(BPMN!ExclusiveGateway) and thisModule.hasProbabilities(n))
+      ->collect(gw | thisModule.ProbabilityDistribution(gw)))->flatten()->asSequence(),
     components <- d.processes()->collect(p |
       thisModule.flowNodes(p)->collect(n | thisModule.entryComponent(n)))->flatten()
       ->union(d.processes()->collect(p | thisModule.flowNodes(p)
@@ -95,6 +100,27 @@ rule ExclusiveGateway2Branch {
     name <- thisModule.safeStr(gw.name, 'XOR_' + thisModule.safeId(gw)),
     nextComponentList <- thisModule.outFlows(gw)
       ->collect(sf | thisModule.resolveTemp(sf, 'conv'))->asSequence(),
-    choice <- gw.Choice
+    choice <- if thisModule.hasProbabilities(gw) then OclUndefined else gw.Choice endif,
+    choiceDistribution <- if thisModule.hasProbabilities(gw)
+      then thisModule.ProbabilityDistribution(gw) else OclUndefined endif
+  )
+}
+
+-- Both associations are assembled using the same persisted outgoing-flow order.
+unique lazy rule ProbabilityDistribution {
+  from gw : BPMN!ExclusiveGateway
+  to dist : Jaamsim!Distribution (
+    name <- 'Probability_' + thisModule.safeId(gw),
+    kind <- #DISCRETE,
+    parameters <- thisModule.outFlows(gw)
+      ->collect(sf | thisModule.ProbabilityParameter(sf))->asSequence()
+  )
+}
+lazy rule ProbabilityParameter {
+  from sf : BPMN!SequenceFlow
+  to param : Jaamsim!DistributionParameter (
+    name <- thisModule.safeId(sf),
+    value <- sf.BpsimProbability,
+    unit <- #DIMENSIONLESS
   )
 }
