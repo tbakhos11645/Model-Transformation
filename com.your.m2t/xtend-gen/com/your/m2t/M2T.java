@@ -17,6 +17,8 @@ import org.eclipse.xtext.xbase.lib.CollectionLiterals;
 import org.eclipse.xtext.xbase.lib.DoubleExtensions;
 import org.eclipse.xtext.xbase.lib.Exceptions;
 import org.eclipse.xtext.xbase.lib.Functions.Function1;
+import org.eclipse.xtext.xbase.lib.Functions.Function2;
+import org.eclipse.xtext.xbase.lib.IntegerRange;
 import org.eclipse.xtext.xbase.lib.IterableExtensions;
 import org.eclipse.xtext.xbase.lib.IteratorExtensions;
 import org.eclipse.xtext.xbase.lib.ListExtensions;
@@ -49,7 +51,7 @@ public class M2T {
         throw new IllegalArgumentException("Expected one SimulationModel");
       }
       for (final EObject e : all) {
-        if (((!this.types.contains(e.eClass().getName())) && (!Collections.<String>unmodifiableList(CollectionLiterals.<String>newArrayList("SimulationModel", "Simulation", "Point3D")).contains(e.eClass().getName())))) {
+        if (((!this.types.contains(e.eClass().getName())) && (!Collections.<String>unmodifiableList(CollectionLiterals.<String>newArrayList("SimulationModel", "Simulation", "Point3D", "Distribution", "DistributionParameter")).contains(e.eClass().getName())))) {
           String _name = e.eClass().getName();
           String _plus = ("No CFG handler for " + _name);
           throw new IllegalArgumentException(_plus);
@@ -62,6 +64,24 @@ public class M2T {
       for (final EObject e_1 : entities) {
         this.nameMap.put(e_1, this.exportName(e_1));
       }
+      final Function1<EObject, Boolean> _function_2 = (EObject it) -> {
+        String _name_1 = it.eClass().getName();
+        return Boolean.valueOf(Objects.equals(_name_1, "Distribution"));
+      };
+      final List<EObject> distributions = IterableExtensions.<EObject>toList(IterableExtensions.<EObject>filter(all, _function_2));
+      for (final EObject d : distributions) {
+        this.nameMap.put(d, this.exportName(d));
+      }
+      for (final EObject d_1 : distributions) {
+        final Function1<EObject, Boolean> _function_3 = (EObject it) -> {
+          return Boolean.valueOf((Objects.equals(it.eClass().getName(), "Branch") && (this.value(it, "choiceDistribution") == d_1)));
+        };
+        int _size_1 = IterableExtensions.size(IterableExtensions.<EObject>filter(entities, _function_3));
+        boolean _notEquals_1 = (_size_1 != 1);
+        if (_notEquals_1) {
+          throw new IllegalArgumentException("Each exported discrete distribution must belong to one branch");
+        }
+      }
       for (final EObject e_2 : entities) {
         this.validate(e_2);
       }
@@ -69,22 +89,36 @@ public class M2T {
       final StringBuilder text = new StringBuilder("RecordEdits\n\n");
       for (final String type : this.types) {
         {
-          final Function1<EObject, Boolean> _function_2 = (EObject it) -> {
+          final Function1<EObject, Boolean> _function_4 = (EObject it) -> {
             String _name_1 = it.eClass().getName();
             return Boolean.valueOf(Objects.equals(_name_1, type));
           };
-          final List<EObject> elements = IterableExtensions.<EObject>toList(IterableExtensions.<EObject>filter(entities, _function_2));
+          final List<EObject> elements = IterableExtensions.<EObject>toList(IterableExtensions.<EObject>filter(entities, _function_4));
           boolean _isEmpty = elements.isEmpty();
           boolean _not = (!_isEmpty);
           if (_not) {
-            final Function1<EObject, String> _function_3 = (EObject it) -> {
+            final Function1<EObject, String> _function_5 = (EObject it) -> {
               return this.nameMap.get(it);
             };
-            String _join = IterableExtensions.join(ListExtensions.<EObject, String>map(elements, _function_3), "  ");
+            String _join = IterableExtensions.join(ListExtensions.<EObject, String>map(elements, _function_5), "  ");
             String _plus_1 = ((("Define " + type) + " { ") + _join);
             String _plus_2 = (_plus_1 + " }\n");
             text.append(_plus_2);
           }
+        }
+      }
+      for (final EObject d_2 : distributions) {
+        {
+          final String name = this.refName(d_2);
+          final List<Double> weights = this.probabilities(d_2);
+          text.append((("Define DiscreteDistribution { " + name) + " }\n"));
+          this.line(text, name, "UnitType", "DimensionlessUnit");
+          int _indexOf = distributions.indexOf(d_2);
+          int _plus_1 = (_indexOf + 1);
+          this.line(text, name, "RandomSeed", Integer.valueOf(_plus_1));
+          int _size_2 = weights.size();
+          this.line(text, name, "ValueList", IterableExtensions.join(new IntegerRange(1, _size_2), " "));
+          this.line(text, name, "ProbabilityList", IterableExtensions.join(weights, " "));
         }
       }
       text.append("Define ColladaModel { Axis Grid100x100 }\n");
@@ -133,11 +167,18 @@ public class M2T {
               case "Branch":
                 Object _value = this.value(e_3, "nextComponentList");
                 final List<?> targets = ((List<?>) _value);
-                final Function1<Object, String> _function_2 = (Object it) -> {
+                final Function1<Object, String> _function_4 = (Object it) -> {
                   return this.refName(it);
                 };
-                this.line(text, name, "NextComponentList", IterableExtensions.join(ListExtensions.map(targets, _function_2), "  "));
-                this.line(text, name, "Choice", this.quote(this.value(e_3, "choice").toString()));
+                this.line(text, name, "NextComponentList", IterableExtensions.join(ListExtensions.map(targets, _function_4), "  "));
+                final Object dist = this.value(e_3, "choiceDistribution");
+                String _xifexpression = null;
+                if ((dist == null)) {
+                  _xifexpression = this.quote(this.value(e_3, "choice").toString());
+                } else {
+                  _xifexpression = this.refName(dist);
+                }
+                this.line(text, name, "Choice", _xifexpression);
                 break;
               case "Queue":
                 this.optional(text, e_3, "priority", "Priority");
@@ -155,8 +196,8 @@ public class M2T {
                 }
                 this.optional(text, e_3, "maxValidLength", "MaxValidLength");
                 double _number_1 = this.number(e_3, "capacity");
-                boolean _notEquals_1 = (_number_1 != 0);
-                if (_notEquals_1) {
+                boolean _notEquals_2 = (_number_1 != 0);
+                if (_notEquals_2) {
                   throw new IllegalArgumentException("Queue.capacity has no implemented JaamSim CFG equivalent; use maxValidLength explicitly");
                 }
                 break;
@@ -165,19 +206,19 @@ public class M2T {
           String _name_3 = e_3.eClass().getName();
           boolean _equals = Objects.equals(_name_3, "EntityConveyor");
           if (_equals) {
-            final Function1<EObject, Boolean> _function_3 = (EObject it) -> {
+            final Function1<EObject, Boolean> _function_5 = (EObject it) -> {
               return Boolean.valueOf(this.successors(it, entities).contains(e_3));
             };
-            final EObject source = IterableExtensions.<EObject>findFirst(entities, _function_3);
+            final EObject source = IterableExtensions.<EObject>findFirst(entities, _function_5);
             Object _value_2 = this.value(e_3, "nextComponent");
             final EObject target = ((EObject) _value_2);
-            List<Double> _xifexpression = null;
+            List<Double> _xifexpression_1 = null;
             if ((source == null)) {
-              _xifexpression = positions.get(e_3);
+              _xifexpression_1 = positions.get(e_3);
             } else {
-              _xifexpression = positions.get(source);
+              _xifexpression_1 = positions.get(source);
             }
-            final List<Double> start = _xifexpression;
+            final List<Double> start = _xifexpression_1;
             final List<Double> end = positions.get(target);
             String _xyz = this.xyz(start);
             String _plus_3 = ("{ " + _xyz);
@@ -196,12 +237,12 @@ public class M2T {
             {
               final Object point = this.value(e_3, feature);
               if ((point instanceof EObject)) {
-                String _xifexpression_1 = null;
+                String _xifexpression_2 = null;
                 boolean _equals_1 = Objects.equals(feature, "size");
                 if (_equals_1) {
-                  _xifexpression_1 = "Size";
+                  _xifexpression_2 = "Size";
                 } else {
-                  _xifexpression_1 = "Orientation";
+                  _xifexpression_2 = "Orientation";
                 }
                 double _coordinate = this.coordinate(((EObject)point), "x");
                 String _plus_9 = (Double.valueOf(_coordinate) + " ");
@@ -210,15 +251,15 @@ public class M2T {
                 String _plus_11 = (_plus_10 + " ");
                 double _coordinate_2 = this.coordinate(((EObject)point), "z");
                 String _plus_12 = (_plus_11 + Double.valueOf(_coordinate_2));
-                String _xifexpression_2 = null;
+                String _xifexpression_3 = null;
                 boolean _equals_2 = Objects.equals(feature, "size");
                 if (_equals_2) {
-                  _xifexpression_2 = " m";
+                  _xifexpression_3 = " m";
                 } else {
-                  _xifexpression_2 = " deg";
+                  _xifexpression_3 = " deg";
                 }
-                String _plus_13 = (_plus_12 + _xifexpression_2);
-                this.line(text, name, _xifexpression_1, _plus_13);
+                String _plus_13 = (_plus_12 + _xifexpression_3);
+                this.line(text, name, _xifexpression_2, _plus_13);
               }
             }
           }
@@ -235,10 +276,10 @@ public class M2T {
       if (_isEmpty) {
         _xifexpression = Double.valueOf(0.0);
       } else {
-        final Function1<List<Double>, Double> _function_2 = (List<Double> it) -> {
+        final Function1<List<Double>, Double> _function_4 = (List<Double> it) -> {
           return it.get(0);
         };
-        _xifexpression = IterableExtensions.<Double>min(IterableExtensions.<List<Double>, Double>map(positions.values(), _function_2));
+        _xifexpression = IterableExtensions.<Double>min(IterableExtensions.<List<Double>, Double>map(positions.values(), _function_4));
       }
       final Double minX = _xifexpression;
       Double _xifexpression_1 = null;
@@ -246,10 +287,10 @@ public class M2T {
       if (_isEmpty_1) {
         _xifexpression_1 = Double.valueOf(0.0);
       } else {
-        final Function1<List<Double>, Double> _function_3 = (List<Double> it) -> {
+        final Function1<List<Double>, Double> _function_5 = (List<Double> it) -> {
           return it.get(0);
         };
-        _xifexpression_1 = IterableExtensions.<Double>max(IterableExtensions.<List<Double>, Double>map(positions.values(), _function_3));
+        _xifexpression_1 = IterableExtensions.<Double>max(IterableExtensions.<List<Double>, Double>map(positions.values(), _function_5));
       }
       final Double maxX = _xifexpression_1;
       Double _xifexpression_2 = null;
@@ -257,10 +298,10 @@ public class M2T {
       if (_isEmpty_2) {
         _xifexpression_2 = Double.valueOf(0.0);
       } else {
-        final Function1<List<Double>, Double> _function_4 = (List<Double> it) -> {
+        final Function1<List<Double>, Double> _function_6 = (List<Double> it) -> {
           return it.get(1);
         };
-        _xifexpression_2 = IterableExtensions.<Double>min(IterableExtensions.<List<Double>, Double>map(positions.values(), _function_4));
+        _xifexpression_2 = IterableExtensions.<Double>min(IterableExtensions.<List<Double>, Double>map(positions.values(), _function_6));
       }
       final Double minY = _xifexpression_2;
       Double _xifexpression_3 = null;
@@ -268,10 +309,10 @@ public class M2T {
       if (_isEmpty_3) {
         _xifexpression_3 = Double.valueOf(0.0);
       } else {
-        final Function1<List<Double>, Double> _function_5 = (List<Double> it) -> {
+        final Function1<List<Double>, Double> _function_7 = (List<Double> it) -> {
           return it.get(1);
         };
-        _xifexpression_3 = IterableExtensions.<Double>max(IterableExtensions.<List<Double>, Double>map(positions.values(), _function_5));
+        _xifexpression_3 = IterableExtensions.<Double>max(IterableExtensions.<List<Double>, Double>map(positions.values(), _function_7));
       }
       final Double maxY = _xifexpression_3;
       double _plus_1 = DoubleExtensions.operator_plus(minX, maxX);
@@ -574,6 +615,41 @@ public class M2T {
     return _xblockexpression;
   }
 
+  private List<Double> probabilities(final EObject d) {
+    List<Double> _xblockexpression = null;
+    {
+      if (((!Objects.equals(d.eClass().getName(), "Distribution")) || (!Objects.equals(this.value(d, "kind").toString(), "DISCRETE")))) {
+        throw new IllegalArgumentException("Branch requires a DISCRETE distribution");
+      }
+      Object _value = this.value(d, "parameters");
+      final List<EObject> parameters = ((List<EObject>) _value);
+      final Function1<EObject, Double> _function = (EObject it) -> {
+        double _xblockexpression_1 = (double) 0;
+        {
+          String _string = this.value(it, "unit").toString();
+          boolean _notEquals = (!Objects.equals(_string, "DIMENSIONLESS"));
+          if (_notEquals) {
+            throw new IllegalArgumentException("Branch probability must be dimensionless");
+          }
+          final double n = this.number(it, "value");
+          if ((n > 1)) {
+            throw new IllegalArgumentException("Branch probability exceeds 1");
+          }
+          _xblockexpression_1 = n;
+        }
+        return Double.valueOf(_xblockexpression_1);
+      };
+      final List<Double> weights = IterableExtensions.<Double>toList(ListExtensions.<EObject, Double>map(parameters, _function));
+      if (((weights.size() < 2) || (Math.abs(((IterableExtensions.<Double, Double>fold(weights, Double.valueOf(0.0), ((Function2<Double, Double, Double>) (Double a, Double b) -> {
+        return Double.valueOf(DoubleExtensions.operator_plus(a, b));
+      }))).doubleValue() - 1)) > 1e-9))) {
+        throw new IllegalArgumentException("Branch probabilities must sum to 1");
+      }
+      _xblockexpression = weights;
+    }
+    return _xblockexpression;
+  }
+
   private void validate(final EObject e) {
     String _name = e.eClass().getName();
     if (_name != null) {
@@ -607,10 +683,21 @@ public class M2T {
           };
           targets.forEach(_function);
           final Object choice = this.value(e, "choice");
-          if (((choice == null) || choice.toString().trim().isEmpty())) {
-            throw new IllegalArgumentException("Branch requires Choice");
+          final Object dist = this.value(e, "choiceDistribution");
+          if ((dist == null)) {
+            if (((choice == null) || choice.toString().trim().isEmpty())) {
+              throw new IllegalArgumentException("Branch requires Choice");
+            }
+            this.quote(choice.toString());
+          } else {
+            if (((choice != null) && (!choice.toString().trim().isEmpty()))) {
+              throw new IllegalArgumentException("Branch cannot specify both an expression and a distribution");
+            }
+            this.refName(dist);
+            if (((!(dist instanceof EObject)) || (this.probabilities(((EObject) dist)).size() != targets.size()))) {
+              throw new IllegalArgumentException("Branch probabilities must match the destinations");
+            }
           }
-          this.quote(choice.toString());
           break;
       }
     }

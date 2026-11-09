@@ -56,4 +56,9 @@ public interface Branch extends ProcessComponent {
 	 */
 	void setChoice(String value);
 
+	/** Distribution backing this branch's indexed choice, or null for an expression. */
+	Distribution getChoiceDistribution();
+
+	void setChoiceDistribution(Distribution value);
+
 } // Branch

@@ -1,0 +1,13 @@
+{
+  "status":"ready",
+  "nodes":[{"id":"Source","kind":"start"},{"id":"InspectionServer","kind":"task","seconds":120},
+    {"id":"InspectBranch","kind":"xor"},{"id":"PackServer","kind":"task","seconds":60},
+    {"id":"ReworkServer","kind":"task","seconds":240},{"id":"Sink","kind":"end"}],
+  "flows":[{"id":"arrival","from":"Source","to":"InspectionServer"},
+    {"id":"decision","from":"InspectionServer","to":"InspectBranch"},
+    {"id":"passed","from":"InspectBranch","to":"PackServer","probability":0.8},
+    {"id":"failed","from":"InspectBranch","to":"ReworkServer","probability":0.2},
+    {"id":"retry","from":"ReworkServer","to":"InspectionServer"},
+    {"id":"finish","from":"PackServer","to":"Sink"}],
+  "scenario":{"interval_seconds":600,"count":100,"duration_seconds":72000}
+}

@@ -2297,7 +2297,9 @@ public interface JaamsimPackage extends EPackage {
 	 * @generated
 	 * @ordered
 	 */
-	int BRANCH_FEATURE_COUNT = PROCESS_COMPONENT_FEATURE_COUNT + 2;
+	int BRANCH__CHOICE_DISTRIBUTION = PROCESS_COMPONENT_FEATURE_COUNT + 2;
+
+	int BRANCH_FEATURE_COUNT = PROCESS_COMPONENT_FEATURE_COUNT + 3;
 
 	/**
 	 * The number of operations of the '<em>Branch</em>' class.
@@ -4854,6 +4856,8 @@ public interface JaamsimPackage extends EPackage {
 	 */
 	EAttribute getBranch_Choice();
 
+	EReference getBranch_ChoiceDistribution();
+
 	/**
 	 * Returns the meta object for class '{@link jaamsim.Resource <em>Resource</em>}'.
 	 * <!-- begin-user-doc -->
@@ -5855,6 +5859,8 @@ public interface JaamsimPackage extends EPackage {
 		 * @generated
 		 */
 		EAttribute BRANCH__CHOICE = eINSTANCE.getBranch_Choice();
+
+		EReference BRANCH__CHOICE_DISTRIBUTION = eINSTANCE.getBranch_ChoiceDistribution();
 
 		/**
 		 * The meta object literal for the '{@link jaamsim.impl.ResourceImpl <em>Resource</em>}' class.

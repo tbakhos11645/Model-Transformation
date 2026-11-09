@@ -24,17 +24,32 @@ class M2T {
     if (roots.size != 1) throw new IllegalArgumentException("Expected one SimulationModel")
     // Reject unsupported semantic objects before opening/truncating the destination.
     for (e : all) {
-      if (!types.contains(e.eClass.name) && !#["SimulationModel", "Simulation", "Point3D"].contains(e.eClass.name))
+      if (!types.contains(e.eClass.name) && !#["SimulationModel", "Simulation", "Point3D", "Distribution", "DistributionParameter"].contains(e.eClass.name))
         throw new IllegalArgumentException("No CFG handler for " + e.eClass.name)
     }
     val entities = all.filter[types.contains(eClass.name)].toList
     for (e : entities) nameMap.put(e, exportName(e))
+    val distributions = all.filter[eClass.name == "Distribution"].toList
+    for (d : distributions) nameMap.put(d, exportName(d))
+    for (d : distributions) {
+      if (entities.filter[eClass.name == "Branch" && value(it, "choiceDistribution") === d].size != 1)
+        throw new IllegalArgumentException("Each exported discrete distribution must belong to one branch")
+    }
     for (e : entities) validate(e)
     val positions = layout(entities)
     val text = new StringBuilder("RecordEdits\n\n")
     for (type : types) {
       val elements = entities.filter[eClass.name == type].toList
       if (!elements.empty) text.append("Define " + type + " { " + elements.map[nameMap.get(it)].join("  ") + " }\n")
+    }
+    for (d : distributions) {
+      val name = refName(d)
+      val weights = probabilities(d)
+      text.append("Define DiscreteDistribution { " + name + " }\n")
+      line(text, name, "UnitType", "DimensionlessUnit")
+      line(text, name, "RandomSeed", distributions.indexOf(d) + 1)
+      line(text, name, "ValueList", (1..weights.size).join(" "))
+      line(text, name, "ProbabilityList", weights.join(" "))
     }
     text.append("Define ColladaModel { Axis Grid100x100 }\n")
     text.append("Define DisplayEntity { XY-Grid XYZ-Axis }\n")
@@ -73,7 +88,8 @@ class M2T {
         case "Branch": {
           val targets = value(e, "nextComponentList") as List<?>
           line(text, name, "NextComponentList", targets.map[refName(it)].join("  "))
-          line(text, name, "Choice", quote(value(e, "choice").toString))
+          val dist = value(e, "choiceDistribution")
+          line(text, name, "Choice", if (dist === null) quote(value(e, "choice").toString) else refName(dist))
         }
         case "Queue": {
           optional(text, e, "priority", "Priority")
@@ -222,6 +238,21 @@ class M2T {
       throw new IllegalArgumentException("Expression contains unsupported CFG delimiters: " + text)
     "'" + text + "'"
   }
+  private def List<Double> probabilities(EObject d) {
+    if (d.eClass.name != "Distribution" || value(d, "kind").toString != "DISCRETE")
+      throw new IllegalArgumentException("Branch requires a DISCRETE distribution")
+    val parameters = value(d, "parameters") as List<EObject>
+    val weights = parameters.map [
+      if (value(it, "unit").toString != "DIMENSIONLESS")
+        throw new IllegalArgumentException("Branch probability must be dimensionless")
+      val n = number(it, "value")
+      if (n > 1) throw new IllegalArgumentException("Branch probability exceeds 1")
+      n
+    ].toList
+    if (weights.size < 2 || Math.abs(weights.fold(0.0, [a,b | a + b]) - 1) > 1e-9)
+      throw new IllegalArgumentException("Branch probabilities must sum to 1")
+    weights
+  }
   private def void validate(EObject e) {
     switch e.eClass.name {
       case "EntityGenerator": {
@@ -243,8 +274,17 @@ class M2T {
         if (targets === null || targets.empty) throw new IllegalArgumentException("Branch requires destinations")
         targets.forEach[refName(it)]
         val choice = value(e, "choice")
-        if (choice === null || choice.toString.trim.empty) throw new IllegalArgumentException("Branch requires Choice")
-        quote(choice.toString)
+        val dist = value(e, "choiceDistribution")
+        if (dist === null) {
+          if (choice === null || choice.toString.trim.empty) throw new IllegalArgumentException("Branch requires Choice")
+          quote(choice.toString)
+        } else {
+          if (choice !== null && !choice.toString.trim.empty)
+            throw new IllegalArgumentException("Branch cannot specify both an expression and a distribution")
+          refName(dist)
+          if (!(dist instanceof EObject) || probabilities(dist as EObject).size != targets.size)
+            throw new IllegalArgumentException("Branch probabilities must match the destinations")
+        }
       }
     }
   }

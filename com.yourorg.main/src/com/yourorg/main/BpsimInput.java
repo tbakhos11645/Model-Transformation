@@ -50,6 +50,16 @@ public final class BpsimInput {
   if(!Double.isFinite(x)||x<0) throw new IllegalArgumentException("Parameter must be finite and nonnegative");
   return x;
  }
+ static double probability(Element parameter) {
+  var values=children(parameter);
+  if(values.size()!=1) throw new IllegalArgumentException("Probability requires exactly one constant");
+  Element v=values.get(0);
+  if(v.hasAttribute("timeUnit") || !Set.of("NumericParameter","FloatingParameter").contains(v.getLocalName()))
+   throw new IllegalArgumentException("Probability requires a dimensionless numeric or floating constant");
+  double p=value(parameter,"s",false);
+  if(p>1) throw new IllegalArgumentException("Probability must be between 0 and 1");
+  return p;
+ }
  public static ScenarioSettings apply(Resource bpmn,Path xml,Path schema,String scenarioId) throws Exception {
   var sf=SchemaFactory.newInstance(XMLConstants.W3C_XML_SCHEMA_NS_URI);
   sf.setProperty(XMLConstants.ACCESS_EXTERNAL_DTD,""); sf.setProperty(XMLConstants.ACCESS_EXTERNAL_SCHEMA,"");
@@ -109,6 +119,15 @@ public final class BpsimInput {
      if(!BpmnPreflight.kind(target,"Task"))throw new IllegalArgumentException("Time inputs currently require a Task");
      allowed(group,"ProcessingTime");
      for(Element p:children(group))fields.put("Time",value(p,base,false));
+    } else if(BpmnPreflight.kind(target,"SequenceFlow")) {
+     allowed(group,"Probability");
+     for(Element p:children(group)) {
+      EObject source=(EObject)BpmnPreflight.get(target,"sourceRef");
+      if(!BpmnPreflight.kind(source,"ExclusiveGateway") || BpmnPreflight.list(source,"outgoing").size()<2)
+       throw new IllegalArgumentException("Probability requires an outgoing SequenceFlow of an exclusive split: "+ref);
+      if(fields.putIfAbsent("BpsimProbability",probability(p))!=null)
+       throw new IllegalArgumentException("Duplicate BPSim Probability for "+ref);
+     }
     } else {
      if(!BpmnPreflight.kind(target,"StartEvent"))throw new IllegalArgumentException("Trigger inputs currently require a StartEvent");
      allowed(group,"InterTriggerTimer","TriggerCount");
@@ -128,7 +147,16 @@ public final class BpsimInput {
     if(!((List<?>)BpmnPreflight.get(e,"eventDefinitions")).isEmpty())throw new IllegalArgumentException("BPSim and BPMN timer definitions require an explicit precedence policy");
     var f=updates.get(e);f.putIfAbsent("MaxNumber",0);f.put("EntitiesPerArrival",1);
    }
-   if(BpmnPreflight.kind(e,"ExclusiveGateway"))throw new IllegalArgumentException("BPSim routing is not executable yet; legacy Choice cannot be reused as a BPSim condition");
+   if(BpmnPreflight.kind(e,"ExclusiveGateway")) {
+    var outgoing=BpmnPreflight.list(e,"outgoing");
+    if(outgoing.size()>1) {
+     for(EObject flow:outgoing) if(!updates.getOrDefault(flow,Map.of()).containsKey("BpsimProbability"))
+      throw new IllegalArgumentException("BPSim Probability is required on every outgoing flow of exclusive split "
+          +BpmnPreflight.get(e,"id")+"; missing "+BpmnPreflight.get(flow,"id"));
+    }
+   }
+   if(BpmnPreflight.kind(e,"SequenceFlow") && BpmnPreflight.get(e,"BpsimProbability")!=null)
+    throw new IllegalArgumentException("BPSim routing probabilities must come from the selected scenario");
    if(BpmnPreflight.kind(e,"SequenceFlow"))updates.computeIfAbsent(e,k->new LinkedHashMap<>()).put("TravelTime",0.0);
   }
   updates.forEach((e,fields)->fields.forEach((f,v)->e.eSet(e.eClass().getEStructuralFeature(f),v)));

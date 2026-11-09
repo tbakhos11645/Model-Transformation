@@ -26,7 +26,7 @@ public final class BpmnPreflight {
             || e.eClass().getEAllSuperTypes().stream().anyMatch(c -> c.getName().equals(name)));
     }
     @SuppressWarnings("unchecked")
-    private static List<EObject> list(EObject e, String feature) {
+    static List<EObject> list(EObject e, String feature) {
         Object v = get(e, feature);
         return v instanceof List<?> ? (List<EObject>) v : List.of();
     }
@@ -143,6 +143,9 @@ public final class BpmnPreflight {
                 nonnegative(e, "TravelTime", errors);
                 EObject source = (EObject) get(e, "sourceRef"), target = (EObject) get(e, "targetRef");
                 require(source != null && target != null && !source.eIsProxy() && !target.eIsProxy(), e, "Missing/unresolved source or target", errors);
+                if (present(e, "BpsimProbability"))
+                    require(kind(source, "ExclusiveGateway") && list(source, "outgoing").size() > 1, e,
+                        "A routing probability requires an outgoing flow of an exclusive split", errors);
                 if (source != null && target != null) {
                     require(source.eContainer() == e.eContainer() && target.eContainer() == e.eContainer(), e, "Cross-process sequence flow", errors);
                     require(list(source, "outgoing").contains(e) && list(target, "incoming").contains(e), e, "Sequence flow and node incoming/outgoing references disagree", errors);
@@ -159,6 +162,22 @@ public final class BpmnPreflight {
                     e, "Expected zero outputs for end, one for ordinary nodes, or one/more for XOR", errors);
                 if (kind(e, "ExclusiveGateway") && !out.isEmpty()) {
                     String choice = text(e, "Choice");
+                    if (out.stream().anyMatch(f -> present(f, "BpsimProbability"))) {
+                        require(out.size() > 1 && choice.isEmpty() && get(e, "default") == null, e,
+                            "Probability routing cannot be combined with Choice or a default flow", errors);
+                        double sum = 0;
+                        for (EObject f : out) {
+                            Object raw = get(f, "BpsimProbability");
+                            double p = raw instanceof Number ? ((Number) raw).doubleValue() : Double.NaN;
+                            require(Double.isFinite(p) && p >= 0 && p <= 1, f,
+                                "Every outgoing flow needs a probability between 0 and 1", errors);
+                            require(get(f, "conditionExpression") == null, f,
+                                "A probability cannot be combined with a condition expression", errors);
+                            sum += p;
+                        }
+                        require(Math.abs(sum - 1) <= 1e-9, e, "Outgoing probabilities must sum to 1", errors);
+                        continue;
+                    }
                     EObject fallback = (EObject) get(e, "default");
                     if (out.size() == 1) choice = "1"; // Merge/pass-through: no routing condition.
                     else if (choice.isEmpty()) {

@@ -1,0 +1,55 @@
+<?xml version='1.0' encoding='utf-8'?>
+<BPSimData xmlns="http://www.bpsim.org/schemas/2.0">
+  <Scenario id="manufacturing">
+    <ScenarioParameters baseTimeUnit="s" seed="1" replication="1">
+      <Duration>
+        <NumericParameter value="72000" />
+      </Duration>
+    </ScenarioParameters>
+    <ElementParameters elementRef="Start">
+      <ControlParameters>
+        <InterTriggerTimer>
+          <NumericParameter value="600" />
+        </InterTriggerTimer>
+        <TriggerCount>
+          <NumericParameter value="100" />
+        </TriggerCount>
+      </ControlParameters>
+    </ElementParameters>
+    <ElementParameters elementRef="Inspect">
+      <TimeParameters>
+        <ProcessingTime>
+          <NumericParameter value="120" />
+        </ProcessingTime>
+      </TimeParameters>
+    </ElementParameters>
+    <ElementParameters elementRef="Pack">
+      <TimeParameters>
+        <ProcessingTime>
+          <NumericParameter value="60" />
+        </ProcessingTime>
+      </TimeParameters>
+    </ElementParameters>
+    <ElementParameters elementRef="Rework">
+      <TimeParameters>
+        <ProcessingTime>
+          <NumericParameter value="240" />
+        </ProcessingTime>
+      </TimeParameters>
+    </ElementParameters>
+    <ElementParameters elementRef="passed">
+      <ControlParameters>
+        <Probability>
+          <FloatingParameter value="0.80" />
+        </Probability>
+      </ControlParameters>
+    </ElementParameters>
+    <ElementParameters elementRef="failed">
+      <ControlParameters>
+        <Probability>
+          <FloatingParameter value="0.20" />
+        </Probability>
+      </ControlParameters>
+    </ElementParameters>
+  </Scenario>
+</BPSimData>

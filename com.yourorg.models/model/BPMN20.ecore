@@ -334,6 +334,7 @@
         eType="#//FlowNode" eOpposite="#//FlowNode/incoming"/>
     <eStructuralFeatures xsi:type="ecore:EReference" name="sourceRef" ordered="false"
         eType="#//FlowNode" eOpposite="#//FlowNode/outgoing"/>
+    <eStructuralFeatures xsi:type="ecore:EAttribute" name="BpsimProbability" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EDoubleObject"/>
   </eClassifiers>
   <eClassifiers xsi:type="ecore:EEnum" name="ProcessType">
     <eLiterals name="None"/>

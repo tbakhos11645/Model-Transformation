@@ -107,6 +107,59 @@ public class TransformationSmokeTest {
         while (references.find()) for (String n : references.group(1).trim().split("\\s+"))
             check(declared.contains(n), "Missing CFG declaration " + n);
     }
+    static void bpsimRouting(Path root) throws Exception {
+        Path fixture = root.resolve("tests/fixtures/manufacturing.xmi");
+        Path scenario = root.resolve("tests/fixtures/manufacturing.bpsim.xml");
+        Path work = Files.createTempDirectory(root.resolve(".build"), "routing-");
+        String probabilities = Files.readString(scenario);
+        String xmi = Files.readString(fixture);
+        for (boolean reverse : new boolean[]{false,true}) {
+            Path input = work.resolve(reverse ? "reversed.xmi" : "normal.xmi");
+            Files.writeString(input, reverse ? xmi.replace("outgoing=\"passed failed\"", "outgoing=\"failed passed\"") : xmi);
+            Path prefix = work.resolve(reverse ? "reversed" : "normal");
+            Main.main(new String[]{input.toString(),prefix.toString(),root.toString(),"60",scenario.toString(),"manufacturing"});
+            String cfg = Files.readString(Path.of(prefix+".cfg"));
+            check(cfg.contains("Source FirstArrivalTime { 600.0 s }"), "First BPSim release uses the interval");
+            check(cfg.contains("Source MaxNumber { 100 }") && cfg.contains("Simulation RunDuration { 72000.0 s }"), "Arrival count and horizon survive BPSim export");
+            check(cfg.contains("InspectBranch Choice { Probability_Gate }"), "Branch choice must bind to the distribution");
+            check(cfg.contains("Probability_Gate UnitType { DimensionlessUnit }"), "Probability must ignore scenario time units");
+            check(cfg.contains("Probability_Gate ValueList { 1 2 }"), "Distribution indices");
+            check(cfg.contains(reverse ? "Probability_Gate ProbabilityList { 0.2 0.8 }" : "Probability_Gate ProbabilityList { 0.8 0.2 }"), "Probability must follow the flow, not XML entry order");
+            check(cfg.contains(reverse ? "InspectBranch NextComponentList { Conveyor_failed  Conveyor_passed }"
+                : "InspectBranch NextComponentList { Conveyor_passed  Conveyor_failed }"), "Ordered branch destinations");
+            check(cfg.contains("Conveyor_retry NextComponent { Queue_Inspect }"), "Retry returns to inspection");
+            Path saved = Path.of(prefix+".jaamsim.xmi"), exported = work.resolve("roundtrip.cfg");
+            var rs = Main.resourceSet(root);
+            new M2T().exportToConfig(rs.getResource(Main.uri(saved),true), Main.uri(exported));
+            check(Files.readString(exported).equals(cfg), "Reloaded distribution must export identically");
+        }
+        String missing = probabilities.replaceFirst("(?s)<ElementParameters elementRef=\"failed\">.*?</ElementParameters>", "");
+        String duplicate = probabilities.replace("</Scenario>", "<ElementParameters elementRef='passed'><ControlParameters><Probability><FloatingParameter value='0.8'/></Probability></ControlParameters></ElementParameters></Scenario>");
+        List<String[]> invalid = List.of(
+            new String[]{missing, "required on every outgoing flow"},
+            new String[]{probabilities.replace("0.20", "0.15"), "sum to 1"},
+            new String[]{probabilities.replace("0.20", "1.1"), "between 0 and 1"},
+            new String[]{probabilities.replace("0.20", "-0.2"), "finite and nonnegative"},
+            new String[]{probabilities.replace("value=\"0.20\"", "value=\"0.20\" timeUnit=\"s\""), "dimensionless"},
+            new String[]{probabilities.replace("<FloatingParameter value=\"0.20\"", "<DurationParameter value=\"PT0.2S\""), "dimensionless"},
+            new String[]{probabilities.replace("elementRef=\"failed\"", "elementRef=\"retry\""), "outgoing SequenceFlow of an exclusive split"},
+            new String[]{duplicate, "Duplicate BPSim Probability"}
+        );
+        for (int i=0;i<invalid.size();i++) {
+            Path input=work.resolve("invalid-"+i+".xml");
+            Path prefix=work.resolve("invalid-"+i);
+            Files.writeString(input,invalid.get(i)[0]);
+            boolean rejected=false;
+            try {
+                Main.main(new String[]{fixture.toString(),prefix.toString(),root.toString(),"60",input.toString(),"manufacturing"});
+            } catch (IllegalArgumentException e) {
+                check(e.getMessage().contains(invalid.get(i)[1]), "Wrong rejection: "+e.getMessage());
+                rejected=true;
+            }
+            check(rejected && !Files.exists(Path.of(prefix+".cfg")) && !Files.exists(Path.of(prefix+".jaamsim.xmi")), "Invalid probability configuration must fail before export");
+        }
+    }
+
     public static void main(String[] args) throws Exception {
         root = Path.of(args[0]);
         try (InputStream in = Files.newInputStream(root.resolve("com.yourorg.atl/Rules/Rules.atl"))) {
@@ -260,6 +313,7 @@ public class TransformationSmokeTest {
         Files.writeString(scenarioFile,xml.replace("value='3'","value='0'"));
         try { com.yourorg.main.BpsimInput.apply(bpsim.r,scenarioFile,root.resolve("com.yourorg.models/model/BPSim-2.0.xsd"),"baseline"); throw new AssertionError("Zero count treated as unlimited"); }
         catch(IllegalArgumentException expected) { check(expected.getMessage().contains("zero is not unlimited"),expected.getMessage()); }
+        bpsimRouting(root);
         System.out.println("PASS: " + checks + " assertions; Xtend/Java/EMFTVM compilation, both examples, subtypes, XOR, timers, names and rejection checks");
     }
 }

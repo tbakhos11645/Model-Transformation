@@ -3,6 +3,8 @@
 package jaamsim.impl;
 
 import jaamsim.Branch;
+import jaamsim.Distribution;
+import org.eclipse.emf.ecore.InternalEObject;
 import jaamsim.JaamsimPackage;
 
 import jaamsim.ProcessComponent;
@@ -57,6 +59,28 @@ public class BranchImpl extends ProcessComponentImpl implements Branch {
 	 * @ordered
 	 */
 	protected String choice = CHOICE_EDEFAULT;
+	protected Distribution choiceDistribution;
+
+	@Override
+	public Distribution getChoiceDistribution() {
+		if (choiceDistribution != null && choiceDistribution.eIsProxy()) {
+			InternalEObject old = (InternalEObject)choiceDistribution;
+			choiceDistribution = (Distribution)eResolveProxy(old);
+			if (choiceDistribution != old && eNotificationRequired())
+				eNotify(new ENotificationImpl(this, Notification.RESOLVE,
+					JaamsimPackage.BRANCH__CHOICE_DISTRIBUTION, old, choiceDistribution));
+		}
+		return choiceDistribution;
+	}
+
+	@Override
+	public void setChoiceDistribution(Distribution value) {
+		Distribution old = choiceDistribution;
+		choiceDistribution = value;
+		if (eNotificationRequired())
+			eNotify(new ENotificationImpl(this, Notification.SET,
+				JaamsimPackage.BRANCH__CHOICE_DISTRIBUTION, old, value));
+	}
 	/**
 	 * <!-- begin-user-doc -->
 	 * <!-- end-user-doc -->
@@ -124,6 +148,8 @@ public class BranchImpl extends ProcessComponentImpl implements Branch {
 				return getNextComponentList();
 			case JaamsimPackage.BRANCH__CHOICE:
 				return getChoice();
+			case JaamsimPackage.BRANCH__CHOICE_DISTRIBUTION:
+				return resolve ? getChoiceDistribution() : choiceDistribution;
 		}
 		return super.eGet(featureID, resolve, coreType);
 	}
@@ -144,6 +170,9 @@ public class BranchImpl extends ProcessComponentImpl implements Branch {
 			case JaamsimPackage.BRANCH__CHOICE:
 				setChoice((String)newValue);
 				return;
+			case JaamsimPackage.BRANCH__CHOICE_DISTRIBUTION:
+				setChoiceDistribution((Distribution)newValue);
+				return;
 		}
 		super.eSet(featureID, newValue);
 	}
@@ -162,6 +191,9 @@ public class BranchImpl extends ProcessComponentImpl implements Branch {
 			case JaamsimPackage.BRANCH__CHOICE:
 				setChoice(CHOICE_EDEFAULT);
 				return;
+			case JaamsimPackage.BRANCH__CHOICE_DISTRIBUTION:
+				setChoiceDistribution(null);
+				return;
 		}
 		super.eUnset(featureID);
 	}
@@ -178,6 +210,8 @@ public class BranchImpl extends ProcessComponentImpl implements Branch {
 				return nextComponentList != null && !nextComponentList.isEmpty();
 			case JaamsimPackage.BRANCH__CHOICE:
 				return CHOICE_EDEFAULT == null ? choice != null : !CHOICE_EDEFAULT.equals(choice);
+			case JaamsimPackage.BRANCH__CHOICE_DISTRIBUTION:
+				return choiceDistribution != null;
 		}
 		return super.eIsSet(featureID);
 	}
