@@ -128,7 +128,14 @@ public final class BpsimInput {
     if(!((List<?>)BpmnPreflight.get(e,"eventDefinitions")).isEmpty())throw new IllegalArgumentException("BPSim and BPMN timer definitions require an explicit precedence policy");
     var f=updates.get(e);f.putIfAbsent("MaxNumber",0);f.put("EntitiesPerArrival",1);
    }
-   if(BpmnPreflight.kind(e,"ExclusiveGateway"))throw new IllegalArgumentException("BPSim routing is not executable yet; legacy Choice cannot be reused as a BPSim condition");
+   if(BpmnPreflight.kind(e,"ExclusiveGateway")) {
+    var outgoing=(List<?>)BpmnPreflight.get(e,"outgoing");
+    if(outgoing.size()!=1)throw new IllegalArgumentException("BPSim XOR splits are not executable yet; only single-output merges/pass-throughs are supported");
+    EObject flow=(EObject)outgoing.get(0);
+    if(BpmnPreflight.get(flow,"conditionExpression")!=null)
+     throw new IllegalArgumentException("BPSim single-output XOR must not have a condition that would be ignored");
+    updates.computeIfAbsent(e,k->new LinkedHashMap<>()).put("Choice","1");
+   }
    if(BpmnPreflight.kind(e,"SequenceFlow"))updates.computeIfAbsent(e,k->new LinkedHashMap<>()).put("TravelTime",0.0);
   }
   updates.forEach((e,fields)->fields.forEach((f,v)->e.eSet(e.eClass().getEStructuralFeature(f),v)));

@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<BPSimData xmlns="http://www.bpsim.org/schemas/2.0">
+  <Scenario id="merge">
+    <ScenarioParameters baseTimeUnit="s"/>
+    <ElementParameters elementRef="StartA"><ControlParameters>
+      <InterTriggerTimer><NumericParameter value="10"/></InterTriggerTimer>
+      <TriggerCount><NumericParameter value="2"/></TriggerCount>
+    </ControlParameters></ElementParameters>
+    <ElementParameters elementRef="StartB"><ControlParameters>
+      <InterTriggerTimer><NumericParameter value="15"/></InterTriggerTimer>
+      <TriggerCount><NumericParameter value="2"/></TriggerCount>
+    </ControlParameters></ElementParameters>
+    <ElementParameters elementRef="Work"><TimeParameters>
+      <ProcessingTime><NumericParameter value="2"/></ProcessingTime>
+    </TimeParameters></ElementParameters>
+  </Scenario>
+</BPSimData>

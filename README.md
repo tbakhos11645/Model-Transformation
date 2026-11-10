@@ -33,7 +33,7 @@ For BPSim, append a separate scenario XML file and scenario ID. For example:
 
 BPSim mode supports constant task processing, arrival intervals/counts, and scenario Duration/Warmup. A supplied scenario Duration takes precedence over the command-line duration; otherwise that argument is the total duration. Warmup is included in that total. The `congested` scenario runs for 30 seconds despite the 60-second fallback. Select `warmed` to exclude the first nine seconds from statistics while keeping the same 30-second total.
 
-XOR support described above applies to legacy mode; BPSim routing, distributions and resources remain unsupported. See [second bpsim test.md](second%20bpsim%20test.md) for measured FIFO/waiting-time results.
+BPSim mode also supports unconditional XOR merges/pass-throughs with exactly one outgoing flow. Each incoming entity proceeds independently. BPSim splits, conditional/probabilistic routing, distributions and resources remain unsupported. See [fourth bpsim test.md](fourth%20bpsim%20test.md) for the ATL contract and topology checks, and [second bpsim test.md](second%20bpsim%20test.md) for measured FIFO/waiting-time results.
 
 BPSim ScenarioParameters now accepts `seed` and `replication`. Main generates one CFG/XMI pair per replication: the first keeps the requested prefix, then `-replication-002`, `-replication-003`, etc. Each uses substream `seed + replicationIndex - 1`; omitted seed/count default to 1. The current batch is listed in `<prefix>.runs.txt` (tab-separated index, seed, absolute CFG path). Main generates files; it does not launch JaamSim. Execute each listed CFG once. Opening the first CFG alone does not run the remaining replications.
 

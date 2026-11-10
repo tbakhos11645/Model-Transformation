@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<bpmn:Definitions xmi:version="2.0" xmlns:xmi="http://www.omg.org/XMI" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:bpmn="http://www.omg.org/spec/BPMN/20100524/MODEL-XMI" id="FourthBpsimTest" name="Two starts and an XOR merge" targetNamespace="urn:fourth-bpsim-test">
+  <rootElements xsi:type="bpmn:Process" id="Process">
+    <flowElements xsi:type="bpmn:StartEvent" id="StartA" name="StartA" outgoing="FromA"/>
+    <flowElements xsi:type="bpmn:StartEvent" id="StartB" name="StartB" outgoing="FromB"/>
+    <flowElements xsi:type="bpmn:ExclusiveGateway" id="Merge" name="Merge" incoming="FromA FromB" outgoing="ToWork"/>
+    <flowElements xsi:type="bpmn:Task" id="Work" name="Work" incoming="ToWork" outgoing="ToEnd"/>
+    <flowElements xsi:type="bpmn:EndEvent" id="End" name="End" incoming="ToEnd"/>
+    <flowElements xsi:type="bpmn:SequenceFlow" id="FromA" sourceRef="StartA" targetRef="Merge"/>
+    <flowElements xsi:type="bpmn:SequenceFlow" id="FromB" sourceRef="StartB" targetRef="Merge"/>
+    <flowElements xsi:type="bpmn:SequenceFlow" id="ToWork" sourceRef="Merge" targetRef="Work"/>
+    <flowElements xsi:type="bpmn:SequenceFlow" id="ToEnd" sourceRef="Work" targetRef="End"/>
+  </rootElements>
+</bpmn:Definitions>

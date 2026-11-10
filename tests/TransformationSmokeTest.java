@@ -117,6 +117,55 @@ public class TransformationSmokeTest {
                 check(!"error".equalsIgnoreCase(p.getSeverity()), "ATL compilation failed");
             }
         }
+        Fixture defaults=linear("legacy-defaults","Task");
+        EObject defaultStart=objects(defaults.r,"StartEvent").get(0);
+        BpmnPreflight.validateAndNormalize(defaults.r);
+        check(BpmnPreflight.get(defaultStart,"InterArrivalTime").equals(1.0) && BpmnPreflight.get(defaultStart,"EntitiesPerArrival").equals(1),"Legacy defaults normalized before ATL");
+        BpmnPreflight.validateAndNormalize(defaults.r);
+        check(BpmnPreflight.get(defaultStart,"InterArrivalTime").equals(1.0),"Normalization is idempotent for none starts");
+        Fixture explicitZero=linear("legacy-zero","Task");
+        EObject zeroStart=objects(explicitZero.r,"StartEvent").get(0);
+        set(zeroStart,"InterArrivalTime",0.0); set(zeroStart,"EntitiesPerArrival",0);
+        BpmnPreflight.validateAndNormalize(explicitZero.r);
+        check(BpmnPreflight.get(zeroStart,"InterArrivalTime").equals(1.0) && BpmnPreflight.get(zeroStart,"EntitiesPerArrival").equals(1),"Documented zero/unset legacy policy");
+        Fixture badStart=linear("bad-start","Task");
+        EObject bad=objects(badStart.r,"StartEvent").get(0); set(bad,"EntitiesPerArrival",-1);
+        rejects(badStart,"EntitiesPerArrival must be finite and nonnegative");
+        check(BpmnPreflight.get(bad,"InterArrivalTime").equals(0.0),"Failed preflight does not apply staged defaults");
+        Fixture chain=new Fixture("topology-consecutive");
+        EObject cStart=chain.node("StartEvent","Start"), work1=chain.node("Task","Work1"), work2=chain.node("Task","Work2"), cEnd=chain.node("EndEvent","End");
+        set(cStart,"FirstArrivalTime",10.0);set(cStart,"InterArrivalTime",10.0);set(work1,"Time",2.0);set(work2,"Time",3.0);
+        chain.flow(cStart,work1,"First");chain.flow(work1,work2,"Between");chain.flow(work2,cEnd,"Last");
+        String chainCfg=chain.run("topology-consecutive"); cfgReferences(chainCfg);
+        check(chainCfg.contains("Work1 NextComponent { Conveyor_Between }") && chainCfg.contains("Conveyor_Between NextComponent { Queue_Work2 }") && chainCfg.contains("Work2 WaitQueue { Queue_Work2 }"),"Consecutive tasks route through the second queue");
+        Fixture processes=new Fixture("topology-processes");
+        for(String suffix:List.of("A","B")) {
+            if(suffix.equals("B")){processes.process=create(processes.p,"Process");list(processes.r.getContents().get(0),"rootElements").add(processes.process);}
+            EObject s=processes.node("StartEvent","Start"+suffix), w=processes.node("Task","Work"+suffix), e=processes.node("EndEvent","End"+suffix);
+            set(w,"Time",suffix.equals("A")?1.0:2.0);
+            processes.flow(s,w,"In"+suffix);processes.flow(w,e,"Out"+suffix);
+        }
+        String processCfg=processes.run("topology-processes"); cfgReferences(processCfg);
+        Resource processOut=Main.resourceSet(root).getResource(Main.uri(root.resolve(".build/topology-processes.jaamsim.xmi")),true);
+        check(objects(processOut,"SimulationModel").size()==1 && objects(processOut,"Server").size()==2 && objects(processOut,"EntityGenerator").size()==2,"Multiple processes are contained in one simulation");
+        check(processCfg.contains("Conveyor_OutA NextComponent { EndA }") && processCfg.contains("Conveyor_OutB NextComponent { EndB }"),"Independent process destinations preserved");
+        Path fourth=root.resolve("com.yourorg.main/sample_in/fourth-bpsim-test.xmi");
+        Path fourthScenario=root.resolve("com.yourorg.main/sample_in/fourth-bpsim-test.bpsim.xml");
+        Resource mergeInput=Main.resourceSet(root).getResource(Main.uri(fourth),true);
+        EObject mergeGateway=objects(mergeInput,"ExclusiveGateway").get(0);
+        check(list(mergeGateway,"incoming").size()==2,"Merge fixture has two inputs");
+        set(mergeGateway,"Choice","999");
+        com.yourorg.main.BpsimInput.apply(mergeInput,fourthScenario,root.resolve("com.yourorg.models/model/BPSim-2.0.xsd"),"merge");
+        check(BpmnPreflight.get(mergeGateway,"Choice").equals("1"),"BPSim merge overrides stale legacy Choice");
+        Main.main(new String[]{fourth.toString(),".build/fourth-bpsim-test",root.toString(),"60",fourthScenario.toString(),"merge"});
+        String fourthCfg=Files.readString(root.resolve(".build/fourth-bpsim-test.cfg"));cfgReferences(fourthCfg);
+        check(fourthCfg.contains("Merge Choice { '1' }") && fourthCfg.contains("Conveyor_ToWork NextComponent { Queue_Work }"),"BPSim merge routes to task queue");
+        Resource conditionalMerge=Main.resourceSet(root).getResource(Main.uri(fourth),true);
+        EObject conditionalGateway=objects(conditionalMerge,"ExclusiveGateway").get(0);
+        set(list(conditionalGateway,"outgoing").get(0),"conditionExpression",create(conditionalGateway.eClass().getEPackage(),"FormalExpression"));
+        try {com.yourorg.main.BpsimInput.apply(conditionalMerge,fourthScenario,root.resolve("com.yourorg.models/model/BPSim-2.0.xsd"),"merge");throw new AssertionError("Accepted conditional BPSim merge");}
+        catch(IllegalArgumentException expected){check(expected.getMessage().contains("must not have a condition"),expected.getMessage());}
+        check(BpmnPreflight.get(objects(conditionalMerge,"StartEvent").get(0),"InterArrivalTime").equals(0.0),"Rejected BPSim merge does not apply staged arrivals");
         for (int i = 1; i <= 2; i++) {
             Main.main(new String[]{"com.yourorg.main/sample_in/Ex" + i + "_BPMN.xmi", ".build/ex" + i, root.toString(), "60"});
             String cfg = Files.readString(root.resolve(".build/ex" + i + ".cfg"));
@@ -173,6 +222,8 @@ public class TransformationSmokeTest {
         list(end, "incoming").remove(oldFlow); set(oldFlow, "targetRef", gw); list(gw, "incoming").add(oldFlow);
         merge.flow(gw, end, "merged");
         check(merge.run("merge").contains("Choice { '1' }"), "XOR merge needs no Choice input");
+        set(objects(merge.r,"SequenceFlow").stream().filter(e->"merged".equals(BpmnPreflight.get(e,"id"))).findFirst().orElseThrow(),"conditionExpression",merge.expression("false"));
+        rejects(merge,"Single-output XOR must not have a condition");
         Fixture timer = linear("timer", "Task");
         EObject start = objects(timer.r, "StartEvent").get(0);
         EObject timerDef = create(timer.p, "TimerEventDefinition");
@@ -260,6 +311,14 @@ public class TransformationSmokeTest {
         Files.writeString(scenarioFile,xml.replace("value='3'","value='0'"));
         try { com.yourorg.main.BpsimInput.apply(bpsim.r,scenarioFile,root.resolve("com.yourorg.models/model/BPSim-2.0.xsd"),"baseline"); throw new AssertionError("Zero count treated as unlimited"); }
         catch(IllegalArgumentException expected) { check(expected.getMessage().contains("zero is not unlimited"),expected.getMessage()); }
-        System.out.println("PASS: " + checks + " assertions; Xtend/Java/EMFTVM compilation, both examples, subtypes, XOR, timers, names and rejection checks");
+        Files.writeString(scenarioFile,xml.replace("value='0.1'","value='0'"));
+        try {com.yourorg.main.BpsimInput.apply(bpsim.r,scenarioFile,root.resolve("com.yourorg.models/model/BPSim-2.0.xsd"),"baseline");throw new AssertionError("Zero BPSim interval defaulted to one");}
+        catch(IllegalArgumentException expected){check(expected.getMessage().contains("Instantaneous BPSim arrivals"),expected.getMessage());}
+        Fixture split=xor("bpsim-split");
+        Files.writeString(scenarioFile,xml.replace("<ElementParameters elementRef='Work'><TimeParameters><ProcessingTime><FloatingParameter value='2' timeUnit='s'/></ProcessingTime></TimeParameters></ElementParameters>",""));
+        try {com.yourorg.main.BpsimInput.apply(split.r,scenarioFile,root.resolve("com.yourorg.models/model/BPSim-2.0.xsd"),"baseline");throw new AssertionError("Accepted BPSim split");}
+        catch(IllegalArgumentException expected){check(expected.getMessage().contains("XOR splits are not executable"),expected.getMessage());}
+        check(BpmnPreflight.get(objects(split.r,"StartEvent").get(0),"InterArrivalTime").equals(0.0),"Rejected split preserves source arrivals");
+        System.out.println("PASS: " + checks + " assertions; Xtend/Java/EMFTVM compilation, examples, topology, subtypes, XOR, timers, names and rejection checks");
     }
 }

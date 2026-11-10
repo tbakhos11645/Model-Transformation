@@ -1,13 +1,14 @@
 # Transformation fixes — GitHub patch list
 
-**Patch version:** `2026.11.06-161447-CET`
-**Recorded:** 2026-11-06 at 16:14:47, Europe/Paris (CET, UTC+01:00)
+**Patch version:** `2026.11.10-150323-CET`
+**Recorded:** 2026-11-10 at 15:03:23, Europe/Paris (CET, UTC+01:00)
 **Status:** Local working-tree patch; not committed or published.
 
 ## Change history
 
 | Version | Recorded (Europe/Paris) | Changes |
 | --- | --- | --- |
+| `2026.11.10-150323-CET` | 2026-11-10 15:03:23 CET | Explicit ATL input contract; preflight-owned legacy arrival defaults; unconditional BPSim XOR merges; consecutive-task/multiple-process/native topology checks and fourth BPSim example. |
 | `2026.11.06-161447-CET` | 2026-11-06 16:14:47 CET | Locked offline Windows toolchain, source-only compilation/Equinox packaging and verified byte-identical dual builds. |
 | `2026.11.06-154042-CET` | 2026-11-06 15:40:42 CET | Scenario seeds, explicit replication outputs/run list, range validation and third BPSim regression/native tests. |
 | `2026.11.06-141654-CET` | 2026-11-06 14:16:54 CET | Second BPSim congestion/FIFO test, constant scenario Duration/Warmup execution, native verification through standalone and Eclipse launch paths. |
@@ -21,6 +22,28 @@
 For each future update, assign a new version using `YYYY.MM.DD-HHmmss-ZONE` from the current Europe/Paris time (`CET` or `CEST`). Update the version and recorded time above, then prepend a history row describing that update. Preserve earlier rows so changes remain traceable. These timestamps identify patch revisions; Git commit hashes and tags can additionally identify committed releases.
 
 This patch makes the supported BPMN execution subset transform through **BPMN XMI → dynamic JaamSim XMI → JaamSim CFG**. It also rejects unsupported execution semantics before producing output. It does not implement every potential equivalence in the Excel catalog.
+
+## Revision 2026.11.10-150323-CET
+
+| File | Change in this revision |
+| --- | --- |
+| `com.yourorg.atl/Rules/Rules.atl` | Document normalized input contract; directly copy generator interval and batch size. |
+| `com.yourorg.main/src/com/yourorg/main/BpmnPreflight.java` | Stage legacy zero/unset defaults before ATL; retain timer values and validation; reject ignored conditions on single-output XOR. |
+| `com.yourorg.main/src/com/yourorg/main/BpsimInput.java` | Permit unconditional single-output XOR merges/pass-throughs, force Choice=1, retain rejection of splits and conditions. |
+| `tests/TransformationSmokeTest.java` | Defaults, failure mutation protection, consecutive tasks, independent processes, two-input BPSim merge, stale Choice and unsupported routing/zero interval checks. |
+| `tests/TopologyObserver.java` | New native sink timeline assertions for the three topology fixtures. |
+| `tests/JaamSimSmokeTest.java` | Attach and verify topology observer for standalone and Eclipse outputs. |
+| `com.yourorg.main/sample_in/fourth-bpsim-test.xmi` | Permanent two-start XOR merge → task → end example. |
+| `com.yourorg.main/sample_in/fourth-bpsim-test.bpsim.xml` | Scenario merge: 10/15-second arrivals, two per start, two-second task. |
+| `com.yourorg.main/Fourth BPSim Test.launch` | Eclipse launch for the permanent example. |
+| `scripts/verify.ps1` | Compile new observer and run three additional native CFG cases. |
+| `scripts/verify-eclipse.ps1` | Generate, compare and natively run fourth BPSim Eclipse output. |
+| `README.md`, `BPSIM_CHANGES.md` | Update current supported XOR subset and link test breakdown. |
+| `fourth bpsim test.md` | Per-fix explanation, expected timelines, output locations, checks and remaining scope. |
+| `PATCH_LIST.md` | New dated revision; preserve all prior change history. |
+| `com.yourorg.atl/Rules/Rules.asm` | Eclipse-generated derivative of changed ATL source; runtime continues to use rebuilt Rules.emftvm. |
+
+Validation: 420 transformation assertions, 22 standalone native runs, five Eclipse launches producing seven matching CFGs, and seven Eclipse-output native runs passed. Details are recorded in [fourth bpsim test.md](fourth%20bpsim%20test.md). Legacy zero/unset defaults remain compatible; BPSim zero arrival intervals remain unsupported. Merges pass entities independently without synchronization. Source-to-target trace records, distributions and BPSim split routing remain follow-up work.
 
 ## Files to include
 

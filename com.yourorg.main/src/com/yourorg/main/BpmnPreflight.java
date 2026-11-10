@@ -136,6 +136,17 @@ public final class BpmnPreflight {
                         }
                     }
                 }
+                // Legacy compatibility policy: zero/unset interval and batch size
+                // mean 1 second and 1 entity. Non-unsettable Ecore numeric fields
+                // cannot reliably distinguish an explicit zero from an omitted value.
+                // BpsimInput rejects unsupported zero arrivals before reaching here.
+                // Preserve staged timer values; validate first, mutate only on success.
+                Map<String,Object> startValues = updates.computeIfAbsent(e, k -> new LinkedHashMap<>());
+                Object interval = startValues.getOrDefault("InterArrivalTime", get(e, "InterArrivalTime"));
+                if (interval instanceof Number && ((Number) interval).doubleValue() == 0)
+                    startValues.put("InterArrivalTime", 1.0);
+                if (get(e, "EntitiesPerArrival") instanceof Number && ((Number) get(e, "EntitiesPerArrival")).intValue() == 0)
+                    startValues.put("EntitiesPerArrival", 1);
             } else if (kind(e, "EndEvent")) {
                 require(list(e, "eventDefinitions").isEmpty(), e, "Only none end events are supported", errors);
             }
@@ -160,7 +171,11 @@ public final class BpmnPreflight {
                 if (kind(e, "ExclusiveGateway") && !out.isEmpty()) {
                     String choice = text(e, "Choice");
                     EObject fallback = (EObject) get(e, "default");
-                    if (out.size() == 1) choice = "1"; // Merge/pass-through: no routing condition.
+                    if (out.size() == 1) {
+                        require(get(out.get(0), "conditionExpression") == null, e,
+                            "Single-output XOR must not have a condition that would be ignored", errors);
+                        choice = "1"; // Merge/pass-through: no synchronization or routing decision.
+                    }
                     else if (choice.isEmpty()) {
                         require(fallback != null && out.contains(fallback), e, "Conditional XOR needs a default outgoing flow or explicit Choice", errors);
                         if (fallback != null && out.contains(fallback)) {

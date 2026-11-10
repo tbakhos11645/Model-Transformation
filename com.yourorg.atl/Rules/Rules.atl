@@ -1,4 +1,12 @@
--- Run BpmnPreflight before this module (see Main.java).
+-- Input contract: invoke through Main, not directly on unvalidated BPMN.
+-- BpsimInput (when selected) resolves scenario parameters into compatibility
+-- attributes in seconds. BpmnPreflight then validates topology and normalizes
+-- legacy generator defaults, timer starts and gateway Choice expressions.
+-- InterArrivalTime and EntitiesPerArrival must be positive on entry.
+-- This module maps process structure only: Main supplies Simulation settings
+-- (duration, warmup, replication seeds); M2T supplies CFG names and layout.
+-- Task entry is its Queue; the Server pulls through waitQueue. An XOR merge
+-- forwards each arriving entity independently; it does not synchronize tokens.
 module Rules;
 create OUT : Jaamsim from IN : BPMN;
 
@@ -67,8 +75,8 @@ rule StartEvent2EntityGenerator {
     name <- thisModule.safeStr(s.name, 'Start_' + thisModule.safeId(s)),
     prototype <- thisModule.resolveTemp(thisModule.owningDefinitions(s), 'se'),
     firstArrivalTime <- s.FirstArrivalTime,
-    interArrivalTime <- if s.InterArrivalTime > 0 then s.InterArrivalTime else 1.0 endif,
-    entitiesPerArrival <- if s.EntitiesPerArrival > 0 then s.EntitiesPerArrival else 1 endif,
+    interArrivalTime <- s.InterArrivalTime,
+    entitiesPerArrival <- s.EntitiesPerArrival,
     maxNumber <- s.MaxNumber,
     nextComponent <- thisModule.nextConveyor(s)
   )

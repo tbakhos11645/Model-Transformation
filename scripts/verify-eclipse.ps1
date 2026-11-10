@@ -35,7 +35,7 @@ $osgi=Join-Path $kit.Root ($kit.Lock.bundles | Where-Object id -eq 'org.eclipse.
 $simple=Join-Path $kit.Root ($kit.Lock.bundles | Where-Object id -eq 'org.eclipse.equinox.simpleconfigurator').path
 $launcher=Join-Path $kit.Root ($kit.Lock.bundles | Where-Object id -eq 'org.eclipse.equinox.launcher').path
 @("osgi.framework=$(([uri]$osgi).AbsoluteUri)","osgi.bundles=reference:$(([uri]$simple).AbsoluteUri)@1:start",'osgi.bundles.defaultStartLevel=4','org.eclipse.equinox.simpleconfigurator.configUrl=file:org.eclipse.equinox.simpleconfigurator/bundles.info') | Set-Content "$runtime/configuration/config.ini"
-foreach($case in @(@('third-bpsim-test','third-bpsim-eclipse','third-bpsim-test','replicated'),@('first-bpsim-test','first-bpsim-eclipse','first-bpsim-test','baseline'),@('second-bpsim-test','second-bpsim-eclipse','second-bpsim-test','congested'),@('second-bpsim-test','second-bpsim-warmup-eclipse','second-bpsim-warmup','warmed'))) {
+foreach($case in @(@('fourth-bpsim-test','fourth-bpsim-eclipse','fourth-bpsim-test','merge'),@('third-bpsim-test','third-bpsim-eclipse','third-bpsim-test','replicated'),@('first-bpsim-test','first-bpsim-eclipse','first-bpsim-test','baseline'),@('second-bpsim-test','second-bpsim-eclipse','second-bpsim-test','congested'),@('second-bpsim-test','second-bpsim-warmup-eclipse','second-bpsim-warmup','warmed'))) {
  & $java '-Djava.awt.headless=true' -jar $launcher -nosplash -consoleLog -configuration "$runtime/configuration" -data "$runtime/workspace" -application com.yourorg.main.application "com.yourorg.main/sample_in/$($case[0]).xmi" ".build/$($case[1])" $repo '60' "com.yourorg.main/sample_in/$($case[0]).bpsim.xml" $case[3]
  if($LASTEXITCODE -ne 0){throw "Eclipse application failed ($LASTEXITCODE)"}
  if(!(Test-Path "$repo/.build/$($case[1]).cfg")){throw 'Eclipse output missing'}
@@ -52,6 +52,6 @@ if ($JaamSimSourceDirectory) {
  $jaamRoot=(Resolve-Path -LiteralPath $JaamSimSourceDirectory).Path
  if(!(Test-Path "$repo/.build/SecondBpsimObserver.class")){throw 'Run verify.ps1 with -JaamSimSourceDirectory first'}
  $nativeClasspath=@("$repo/.build","$repo/.build/jaamsim","$jaamRoot/jar/jogl-all.jar","$jaamRoot/jar/gluegen-rt.jar","$jaamRoot/src/main/resources") -join [IO.Path]::PathSeparator
- & $java '-Djava.awt.headless=true' -cp $nativeClasspath JaamSimSmokeTest "$repo/.build/third-bpsim-eclipse.cfg" "$repo/.build/third-bpsim-eclipse-replication-002.cfg" "$repo/.build/third-bpsim-eclipse-replication-003.cfg" "$repo/.build/first-bpsim-eclipse.cfg" "$repo/.build/second-bpsim-eclipse.cfg" "$repo/.build/second-bpsim-warmup-eclipse.cfg"
+ & $java '-Djava.awt.headless=true' -cp $nativeClasspath JaamSimSmokeTest "$repo/.build/fourth-bpsim-eclipse.cfg" "$repo/.build/third-bpsim-eclipse.cfg" "$repo/.build/third-bpsim-eclipse-replication-002.cfg" "$repo/.build/third-bpsim-eclipse-replication-003.cfg" "$repo/.build/first-bpsim-eclipse.cfg" "$repo/.build/second-bpsim-eclipse.cfg" "$repo/.build/second-bpsim-warmup-eclipse.cfg"
  if($LASTEXITCODE -ne 0){throw 'Native Eclipse-output verification failed'}
 }

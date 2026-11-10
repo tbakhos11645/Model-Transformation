@@ -25,16 +25,18 @@ public class JaamSimSmokeTest {
    boolean third=new File(arg).getName().startsWith("third-bpsim-");
    FirstBpsimObserver observer=third||new File(arg).getName().startsWith("first-bpsim-")?new FirstBpsimObserver(model):null;
    SecondBpsimObserver secondObserver=second?new SecondBpsimObserver(model,arg.contains("warmup")):null;
+   TopologyObserver topology=arg.contains("topology-")||arg.contains("fourth-bpsim-")?new TopologyObserver(model,arg):null;
    model.start(new RunListener() {
     public void runEnded() { done.countDown(); }
     public void handleRuntimeError(JaamSimModel sm, Throwable t) { error.set(t); done.countDown(); }
-   }, secondObserver!=null?secondObserver.listener():observer==null?null:observer.listener());
+   }, topology!=null?topology.listener():secondObserver!=null?secondObserver.listener():observer==null?null:observer.listener());
    if (!done.await(10, TimeUnit.SECONDS)) { model.pause(); throw new AssertionError("Timed out: "+arg); }
    if(error.get()!=null) throw new AssertionError("Runtime error: "+arg,error.get());
    if(model.getSimTime()!=(second?30.0:60.0)) throw new AssertionError("Unexpected stop time: "+model.getSimTime());
    System.out.println("PASS JaamSim: "+arg+" at "+model.getSimTime()+" s, warnings="+model.getNumWarnings());
    if(observer!=null) observer.verify();
    if(secondObserver!=null) secondObserver.verify();
+   if(topology!=null) topology.verify();
    if(third) {
     int expected=arg.contains("003")?43:arg.contains("002")?42:41;
     int seed=model.getSimulation().getSubstreamNumber();
